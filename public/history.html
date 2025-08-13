@@ -127,7 +127,6 @@
             border-color: #cbd5e1;
         }
 
-        /* Hamburger Menu Styles */
         .hamburger {
             display: none;
             flex-direction: column;
@@ -305,7 +304,6 @@
             border-color: #cbd5e1;
         }
 
-        /* Prevent body scroll when mobile menu is open */
         body.menu-open {
             overflow: hidden;
         }
@@ -1077,7 +1075,6 @@
                 </button>
             </div>
 
-            <!-- Hamburger Menu Button -->
             <button class="hamburger" id="hamburger">
                 <span></span>
                 <span></span>
@@ -1086,10 +1083,8 @@
         </div>
     </nav>
 
-    <!-- Mobile Menu Overlay -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
-    <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-header">
             <div class="nav-brand">
@@ -1239,7 +1234,6 @@
         let filteredWorkouts = [];
         let workoutToDelete = null;
 
-        // Mobile menu functionality
         function initializeMobileMenu() {
             const hamburger = document.getElementById('hamburger');
             const mobileMenu = document.getElementById('mobileMenu');
@@ -1267,12 +1261,10 @@
                 }, 300);
             }
 
-            // Event listeners
             hamburger.addEventListener('click', openMobileMenu);
             mobileMenuClose.addEventListener('click', closeMobileMenu);
             mobileMenuOverlay.addEventListener('click', closeMobileMenu);
 
-            // Close menu when clicking on mobile nav links
             const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
             mobileNavLinks.forEach(link => {
                 link.addEventListener('click', () => {
@@ -1280,14 +1272,12 @@
                 });
             });
 
-            // Close menu on window resize if screen becomes larger
             window.addEventListener('resize', () => {
                 if (window.innerWidth > 768) {
                     closeMobileMenu();
                 }
             });
 
-            // Handle escape key
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
                     closeMobileMenu();
@@ -1317,12 +1307,9 @@
                     return;
                 }
                 
-                // Initialize user display
                 displayUserInfo(user);
                 
-                // Mock API for demonstration - replace with actual API call
-                // allWorkouts = await API.getAllWorkouts();
-                allWorkouts = getMockWorkouts(); // Using mock data
+                allWorkouts = getMockWorkouts();
                 filteredWorkouts = [...allWorkouts];
                 
                 console.log(`Loaded ${allWorkouts.length} workouts`);
@@ -1336,7 +1323,6 @@
             }
         }
 
-        // Mock data for demonstration
         function getMockWorkouts() {
             return [
                 {
@@ -1362,7 +1348,6 @@
         function displayUserInfo(user) {
             const userName = user.name || user.email || 'User';
             
-            // Update desktop navigation
             const userNameElement = document.getElementById('userName');
             const userAvatarElement = document.getElementById('userAvatar');
             
@@ -1370,7 +1355,6 @@
                 userNameElement.textContent = userName;
             }
             
-            // Update mobile navigation
             const mobileUserNameElement = document.getElementById('mobileUserName');
             const mobileUserAvatarElement = document.getElementById('mobileUserAvatar');
             
@@ -1652,9 +1636,6 @@
             try {
                 console.log('Deleting workout:', workoutToDelete);
                 
-                // Mock delete - replace with actual API call
-                // await API.deleteWorkout(workoutToDelete);
-                
                 allWorkouts = allWorkouts.filter(w => w._id !== workoutToDelete);
                 filteredWorkouts = filteredWorkouts.filter(w => w._id !== workoutToDelete);
                 
@@ -1695,9 +1676,7 @@
             }, 3000);
         }
 
-        // Initialize page on load
         document.addEventListener('DOMContentLoaded', () => {
-            // Set default user if none exists (for demo)
             if (!localStorage.getItem('user')) {
                 localStorage.setItem('user', JSON.stringify({
                     name: 'Demo User',
@@ -1709,7 +1688,6 @@
             initializePage();
         });
 
-        // Close delete modal when clicking outside
         document.addEventListener('click', (e) => {
             const deleteModal = document.getElementById('deleteModal');
             if (e.target === deleteModal) {
@@ -1717,14 +1695,12 @@
             }
         });
 
-        // Handle escape key to close modal
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeDeleteModal();
             }
         });
 
-        // Listen for storage changes from other tabs
         window.addEventListener('storage', (e) => {
             if (e.key === 'workoutUpdated') {
                 console.log('Workout updated in another tab, refreshing data...');

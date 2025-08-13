@@ -961,7 +961,6 @@
                 </button>
             </div>
 
-            <!-- Hamburger Menu Button -->
             <button class="hamburger" id="hamburger">
                 <span></span>
                 <span></span>
@@ -970,10 +969,8 @@
         </div>
     </nav>
 
-    <!-- Mobile Menu Overlay -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
-    <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-header">
             <div class="nav-brand">
@@ -1543,7 +1540,6 @@
         let selectedCategory = null;
         let selectedIntensity = 'moderate';
 
-        // Mobile menu functionality
         function initializeMobileMenu() {
             const hamburger = document.getElementById('hamburger');
             const mobileMenu = document.getElementById('mobileMenu');
@@ -1571,12 +1567,10 @@
                 }, 300);
             }
 
-            // Event listeners
             hamburger.addEventListener('click', openMobileMenu);
             mobileMenuClose.addEventListener('click', closeMobileMenu);
             mobileMenuOverlay.addEventListener('click', closeMobileMenu);
 
-            // Close menu when clicking on mobile nav links
             const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
             mobileNavLinks.forEach(link => {
                 link.addEventListener('click', () => {
@@ -1584,14 +1578,12 @@
                 });
             });
 
-            // Close menu on window resize if screen becomes larger
             window.addEventListener('resize', () => {
                 if (window.innerWidth > 768) {
                     closeMobileMenu();
                 }
             });
 
-            // Handle escape key
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
                     closeMobileMenu();
@@ -1599,7 +1591,6 @@
             });
         }
 
-        // Check authentication
         function checkAuth() {
             const user = localStorage.getItem('user');
             if (!user) {
@@ -1615,14 +1606,11 @@
             }
         }
 
-        // Initialize user display
         function initializeUser(user) {
             const userName = user.name || user.email || 'User';
             
-            // Update desktop navigation
             document.getElementById('userName').textContent = userName;
             
-            // Update mobile navigation
             document.getElementById('mobileUserName').textContent = userName;
             
             const userAvatar = document.getElementById('userAvatar');
@@ -1639,7 +1627,6 @@
             }
         }
 
-        // Logout function
         function logout() {
             localStorage.clear();
             window.location.href = '/login.html';
@@ -1651,7 +1638,6 @@
                 
                 if (!currentWorkoutId) {
                     console.log('Starting new workout session...');
-                    // Create a mock workout for now
                     currentWorkoutId = 'workout_' + Date.now();
                     localStorage.setItem('currentWorkoutId', currentWorkoutId);
                     localStorage.setItem('newWorkoutExercises', JSON.stringify([]));
@@ -1960,14 +1946,12 @@
                 
                 console.log('Completing workout:', currentWorkoutId);
                 
-                // Clear session data
                 localStorage.removeItem('currentWorkoutId');
                 localStorage.removeItem('newWorkoutExercises');
                 localStorage.removeItem('workoutStartTime');
                 
                 showToast('Workout completed successfully!', 'success');
                 
-                // Notify other pages
                 localStorage.setItem('workoutUpdated', Date.now().toString());
                 
                 setTimeout(() => {

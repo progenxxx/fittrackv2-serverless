@@ -125,7 +125,6 @@
             border-color: #cbd5e1;
         }
 
-        /* Hamburger Menu Styles */
         .hamburger {
             display: none;
             flex-direction: column;
@@ -679,7 +678,6 @@
             }
         }
 
-        /* Prevent body scroll when mobile menu is open */
         body.menu-open {
             overflow: hidden;
         }
@@ -718,7 +716,6 @@
                 </button>
             </div>
 
-            <!-- Hamburger Menu Button -->
             <button class="hamburger" id="hamburger">
                 <span></span>
                 <span></span>
@@ -727,10 +724,8 @@
         </div>
     </nav>
 
-    <!-- Mobile Menu Overlay -->
     <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
-    <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-header">
             <div class="nav-brand">
@@ -851,12 +846,10 @@
                     <h2 class="section-title">Current Session</h2>
                 </div>
                 
-                <!-- Session Status Indicator -->
                 <div id="sessionStatus" class="session-status session-inactive">
                     No active session
                 </div>
                 
-                <!-- Session Timer -->
                 <div id="sessionTimer" class="session-timer" style="display: none;">
                     00:00:00
                 </div>
@@ -880,7 +873,6 @@
         let sessionTimer = null;
         let sessionStartTime = null;
 
-        // Mobile menu functionality
         function initializeMobileMenu() {
             const hamburger = document.getElementById('hamburger');
             const mobileMenu = document.getElementById('mobileMenu');
@@ -908,12 +900,10 @@
                 }, 300);
             }
 
-            // Event listeners
             hamburger.addEventListener('click', openMobileMenu);
             mobileMenuClose.addEventListener('click', closeMobileMenu);
             mobileMenuOverlay.addEventListener('click', closeMobileMenu);
 
-            // Close menu when clicking on mobile nav links
             const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
             mobileNavLinks.forEach(link => {
                 link.addEventListener('click', () => {
@@ -921,14 +911,12 @@
                 });
             });
 
-            // Close menu on window resize if screen becomes larger
             window.addEventListener('resize', () => {
                 if (window.innerWidth > 768) {
                     closeMobileMenu();
                 }
             });
 
-            // Handle escape key
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
                     closeMobileMenu();
@@ -936,7 +924,6 @@
             });
         }
 
-        // Check authentication
         function checkAuth() {
             const user = localStorage.getItem('user');
             if (!user) {
@@ -952,15 +939,12 @@
             }
         }
 
-        // Initialize user display
         function initializeUser(user) {
             const userName = user.name || user.email || 'User';
             
-            // Update desktop navigation
             document.getElementById('userName').textContent = userName;
             document.getElementById('userNameWelcome').textContent = userName;
             
-            // Update mobile navigation
             document.getElementById('mobileUserName').textContent = userName;
             
             const userAvatar = document.getElementById('userAvatar');
@@ -977,13 +961,11 @@
             }
         }
 
-        // Logout function
         function logout() {
             localStorage.clear();
             window.location.href = '/login.html';
         }
 
-        // Update welcome message based on time
         function updateWelcomeMessage() {
             const hour = new Date().getHours();
             const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -997,7 +979,6 @@
             document.getElementById('welcomeTitle').innerHTML = `${greeting}, <span id="userNameWelcome">${userName}</span>!`;
         }
 
-        // Load workout statistics
         async function loadWorkoutStats() {
             try {
                 console.log('Loading workout stats...');
@@ -1010,26 +991,21 @@
                 const workouts = await response.json();
                 console.log(`Loaded ${workouts.length} workouts`);
                 
-                // Update stats
                 document.getElementById('totalWorkouts').textContent = workouts.length;
                 
-                // Calculate this week's workouts
                 const thisWeekStart = new Date();
                 thisWeekStart.setDate(thisWeekStart.getDate() - 7);
                 const thisWeekWorkouts = workouts.filter(w => new Date(w.day) > thisWeekStart);
                 document.getElementById('thisWeek').textContent = thisWeekWorkouts.length;
                 
-                // Calculate total training time
                 const totalMinutes = workouts.reduce((total, workout) => {
                     return total + (workout.exercises || []).reduce((sum, ex) => sum + (ex.duration || 0), 0);
                 }, 0);
                 document.getElementById('totalTime').textContent = totalMinutes;
                 
-                // Calculate average workout duration
                 const avgTime = workouts.length > 0 ? Math.round(totalMinutes / workouts.length) : 0;
                 document.getElementById('avgWorkout').textContent = avgTime;
                 
-                // Load last workout
                 if (workouts.length > 0) {
                     loadLastWorkout(workouts[0]);
                 } else {
@@ -1042,7 +1018,6 @@
             }
         }
 
-        // Display last workout information
         function loadLastWorkout(workout) {
             const container = document.getElementById('lastWorkoutInfo');
             
@@ -1075,7 +1050,6 @@
             `;
         }
 
-        // Show empty state for last workout
         function showEmptyLastWorkout() {
             const container = document.getElementById('lastWorkoutInfo');
             container.innerHTML = `
@@ -1086,18 +1060,16 @@
             `;
         }
 
-        // Show error state
         function showErrorState() {
             const container = document.getElementById('lastWorkoutInfo');
             container.innerHTML = `
                 <div class="empty-state">
                     <div class="empty-icon">⚠️</div>
-                    <p>Error loading workout data. Check your connection.</p>
+                    <p>You are on a free-tier server, so you may experience a slow connection, but you can still explore by clicking ‘Add Exercise</p>
                 </div>
             `;
         }
 
-        // Load current workout session
         function loadCurrentWorkout() {
             console.log('Loading current workout session...');
             
@@ -1113,21 +1085,17 @@
             const completeButton = document.getElementById('completeWorkout');
             
             if (workoutId && exercises.length > 0) {
-                // Active session
                 statusElement.textContent = 'Active Session';
                 statusElement.className = 'session-status session-active';
                 
-                // Show timer
                 if (startTime) {
                     sessionStartTime = parseInt(startTime);
                     timerElement.style.display = 'block';
                     startSessionTimer();
                 }
                 
-                // Enable complete button
                 completeButton.disabled = false;
                 
-                // Display exercises
                 container.innerHTML = exercises.map(ex => {
                     let details = '';
                     if (ex.type === 'resistance' || ex.category === 'resistance') {
@@ -1146,7 +1114,6 @@
                     `;
                 }).join('');
             } else {
-                // No active session
                 statusElement.textContent = 'No active session';
                 statusElement.className = 'session-status session-inactive';
                 timerElement.style.display = 'none';
@@ -1162,7 +1129,6 @@
             }
         }
 
-        // Session timer functions
         function startSessionTimer() {
             if (sessionTimer) clearInterval(sessionTimer);
             
@@ -1186,7 +1152,6 @@
             }
         }
 
-        // Complete workout function
         async function completeWorkout() {
             const workoutId = localStorage.getItem('currentWorkoutId');
             const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
@@ -1199,18 +1164,15 @@
             try {
                 console.log('Completing workout:', workoutId);
                 
-                // Clear session data
                 localStorage.removeItem('currentWorkoutId');
                 localStorage.removeItem('newWorkoutExercises');
                 localStorage.removeItem('workoutStartTime');
                 
-                // Update displays
                 await loadWorkoutStats();
                 loadCurrentWorkout();
                 
                 showToast('Workout completed successfully!');
                 
-                // Notify other pages
                 localStorage.setItem('workoutUpdated', Date.now().toString());
                 
             } catch (error) {
@@ -1219,7 +1181,6 @@
             }
         }
 
-        // Show toast notification
         function showToast(message) {
             const toast = document.createElement('div');
             toast.style.cssText = `
@@ -1246,7 +1207,6 @@
             }, 3000);
         }
 
-        // Listen for storage changes from other tabs/pages
         window.addEventListener('storage', (e) => {
             console.log('Storage change detected:', e.key);
             
@@ -1260,7 +1220,6 @@
             }
         });
 
-        // Auto-refresh current session every 30 seconds
         setInterval(() => {
             const workoutId = localStorage.getItem('currentWorkoutId');
             if (workoutId) {
@@ -1269,7 +1228,6 @@
             }
         }, 30000);
 
-        // Initialize page on load
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('Initializing FitTrack home page...');
             
@@ -1280,14 +1238,12 @@
             initializeMobileMenu();
             updateWelcomeMessage();
             
-            // Load data
             await loadWorkoutStats();
             loadCurrentWorkout();
             
             console.log('Page initialization complete');
         });
 
-        // Handle page visibility changes
         document.addEventListener('visibilitychange', async () => {
             if (!document.hidden) {
                 console.log('Page became visible, refreshing data...');
@@ -1299,7 +1255,6 @@
             }
         });
 
-        // Handle beforeunload to stop timer
         window.addEventListener('beforeunload', () => {
             stopSessionTimer();
         });
