@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout App Debugging</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .debug-button:hover {
+            background: #45a049;
+        }
+        .debug-button.danger {
+            background: #f44336;
+        }
+        .debug-button.danger:hover {
+            background: #da190b;
+        }
+        .debug-output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status-good { color: #28a745; }
+        .status-bad { color: #dc3545; }
+        .status-warning { color: #ffc107; }
+        h2 { color: #343a40; border-bottom: 2px solid #4CAF50; padding-bottom: 10px; }
+        .test-form {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .form-group {
+            margin: 10px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Workout App Debugging Tool</h1>
+    
+    <div class="debug-section">
+        <h2>1. API Connection Test</h2>
+        <p>First, let's check if your API is working:</p>
+        <button class="debug-button" onclick="testAPIConnection()">Test API Connection</button>
+        <div id="api-output" class="debug-output">Click the button above to test API connection...</div>
+    </div>
+
+    <div class="debug-section">
+        <h2>2. Create Test Workout</h2>
+        <p>Test creating a new workout in MongoDB:</p>
+        <button class="debug-button" onclick="testCreateWorkout()">Create Test Workout</button>
+        <div id="workout-output" class="debug-output">Click the button above to create a test workout...</div>
+    </div>
+
+    <div class="debug-section">
+        <h2>3. Add Test Exercise</h2>
+        <p>Test adding an exercise to the workout:</p>
+        
+        <div class="test-form">
+            <div class="form-group">
+                <label>Exercise Type:</label>
+                <select id="test-exercise-type">
+                    <option value="resistance">Resistance</option>
+                    <option value="cardio">Cardio</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Exercise Name:</label>
+                <input type="text" id="test-exercise-name" value="Test Push-ups" placeholder="Exercise name">
+            </div>
+            <div class="form-group">
+                <label>Duration (minutes):</label>
+                <input type="number" id="test-duration" value="5" min="1">
+            </div>
+            <div class="form-group" id="resistance-fields">
+                <label>Weight (kg):</label>
+                <input type="number" id="test-weight" value="0" min="0">
+                <label>Reps:</label>
+                <input type="number" id="test-reps" value="10" min="1">
+                <label>Sets:</label>
+                <input type="number" id="test-sets" value="2" min="1">
+            </div>
+            <div class="form-group" id="cardio-fields" style="display:none;">
+                <label>Distance (km):</label>
+                <input type="number" id="test-distance" value="1" min="0" step="0.1">
+            </div>
+        </div>
+        
+        <button class="debug-button" onclick="testAddExercise()">Add Test Exercise</button>
+        <div id="exercise-output" class="debug-output">Create a workout first, then click to add an exercise...</div>
+    </div>
+
+    <div class="debug-section">
+        <h2>4. Check All Workouts</h2>
+        <p>See what's actually saved in MongoDB:</p>
+        <button class="debug-button" onclick="checkAllWorkouts()">Get All Workouts</button>
+        <div id="workouts-output" class="debug-output">Click the button above to see all workouts...</div>
+    </div>
+
+    <div class="debug-section">
+        <h2>5. Check Current State</h2>
+        <p>Check localStorage and current workout status:</p>
+        <button class="debug-button" onclick="checkCurrentState()">Check Current State</button>
+        <div id="state-output" class="debug-output">Click the button above to check current state...</div>
+    </div>
+
+    <div class="debug-section">
+        <h2>6. Reset Everything</h2>
+        <p>Clear all data and start fresh:</p>
+        <button class="debug-button danger" onclick="resetEverything()">⚠️ Reset All Data</button>
+        <div id="reset-output" class="debug-output">This will clear localStorage and current workout...</div>
+    </div>
+
+    <script>
+        let currentWorkoutId = null;
+
+        document.getElementById('test-exercise-type').addEventListener('change', function() {
+            const type = this.value;
+            const resistanceFields = document.getElementById('resistance-fields');
+            const cardioFields = document.getElementById('cardio-fields');
+            
+            if (type === 'resistance') {
+                resistanceFields.style.display = 'block';
+                cardioFields.style.display = 'none';
+                document.getElementById('test-exercise-name').value = 'Test Push-ups';
+            } else {
+                resistanceFields.style.display = 'none';
+                cardioFields.style.display = 'block';
+                document.getElementById('test-exercise-name').value = 'Test Running';
+            }
+        });
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'status-good' : type === 'error' ? 'status-bad' : type === 'warning' ? 'status-warning' : '';
+            element.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function clearLog(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        async function testAPIConnection() {
+            clearLog('api-output');
+            log('api-output', 'Testing API connection...', 'info');
+            
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    log('api-output', 'API Health Check Success!', 'success');
+                    log('api-output', `Status: ${data.status}`, 'info');
+                    log('api-output', `MongoDB: ${data.mongodb}`, 'info');
+                    log('api-output', `Workout Count: ${data.workoutCount}`, 'info');
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            } catch (error) {
+                log('api-output', ` API Connection Failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateWorkout() {
+            clearLog('workout-output');
+            log('workout-output', ' Creating test workout...', 'info');
+            
+            try {
+                const workoutData = {
+                    day: new Date().toISOString(),
+                    exercises: []
+                };
+                
+                const response = await fetch('/api/workouts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(workoutData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                
+                const workout = await response.json();
+                currentWorkoutId = workout._id;
+                localStorage.setItem('currentWorkoutId', currentWorkoutId);
+                
+                log('workout-output', ' Workout created successfully!', 'success');
+                log('workout-output', `Workout ID: ${workout._id}`, 'info');
+                log('workout-output', `Date: ${new Date(workout.day).toLocaleString()}`, 'info');
+                log('workout-output', `Exercises: ${workout.exercises.length}`, 'info');
+                
+            } catch (error) {
+                log('workout-output', ` Workout creation failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAddExercise() {
+            clearLog('exercise-output');
+            
+            const workoutId = currentWorkoutId || localStorage.getItem('currentWorkoutId');
+            if (!workoutId) {
+                log('exercise-output', ' No workout ID found. Create a workout first!', 'error');
+                return;
+            }
+            
+            log('exercise-output', ` Adding exercise to workout ${workoutId}...`, 'info');
+            
+            try {
+                const exerciseType = document.getElementById('test-exercise-type').value;
+                const exerciseName = document.getElementById('test-exercise-name').value.trim();
+                const duration = parseInt(document.getElementById('test-duration').value);
+                
+                if (!exerciseName || !duration || duration <= 0) {
+                    throw new Error('Please fill in all required fields (name and duration)');
+                }
+                
+                const exerciseData = {
+                    type: exerciseType,
+                    name: exerciseName,
+                    duration: duration
+                };
+                
+                if (exerciseType === 'resistance') {
+                    const weight = parseInt(document.getElementById('test-weight').value) || 0;
+                    const reps = parseInt(document.getElementById('test-reps').value);
+                    const sets = parseInt(document.getElementById('test-sets').value);
+                    
+                    if (!reps || reps <= 0 || !sets || sets <= 0) {
+                        throw new Error('Reps and sets must be greater than 0 for resistance exercises');
+                    }
+                    
+                    exerciseData.weight = weight;
+                    exerciseData.reps = reps;
+                    exerciseData.sets = sets;
+                } else {
+                    const distance = parseFloat(document.getElementById('test-distance').value) || 0;
+                    exerciseData.distance = distance;
+                }
+                
+                log('exercise-output', `Exercise data: ${JSON.stringify(exerciseData, null, 2)}`, 'info');
+                
+                const response = await fetch(`/api/workouts/${workoutId}/exercises`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(exerciseData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+                
+                const updatedWorkout = await response.json();
+                
+                log('exercise-output', ' Exercise added successfully!', 'success');
+                log('exercise-output', `Total exercises: ${updatedWorkout.exercises.length}`, 'info');
+                log('exercise-output', `Last exercise: ${exerciseData.name} (${exerciseData.type})`, 'info');
+                
+            } catch (error) {
+                log('exercise-output', ` Exercise addition failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkAllWorkouts() {
+            clearLog('workouts-output');
+            log('workouts-output', ' Fetching all workouts...', 'info');
+            
+            try {
+                const response = await fetch('/api/workouts');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const workouts = await response.json();
+                
+                log('workouts-output', ` Found ${workouts.length} workouts`, 'success');
+                
+                if (workouts.length === 0) {
+                    log('workouts-output', ' No workouts found in database', 'warning');
+                    log('workouts-output', 'This explains why your app shows no data!', 'warning');
+                } else {
+                    workouts.forEach((workout, index) => {
+                        log('workouts-output', `\n--- Workout ${index + 1} ---`, 'info');
+                        log('workouts-output', `ID: ${workout._id}`, 'info');
+                        log('workouts-output', `Date: ${new Date(workout.day).toLocaleString()}`, 'info');
+                        log('workouts-output', `Exercises: ${workout.exercises.length}`, 'info');
+                        
+                        if (workout.exercises.length > 0) {
+                            workout.exercises.forEach((ex, exIndex) => {
+                                log('workouts-output', `  Exercise ${exIndex + 1}: ${ex.name} (${ex.type}) - ${ex.duration}min`, 'info');
+                            });
+                        }
+                    });
+                }
+                
+            } catch (error) {
+                log('workouts-output', ` Failed to fetch workouts: ${error.message}`, 'error');
+            }
+        }
+
+        function checkCurrentState() {
+            clearLog('state-output');
+            log('state-output', ' Checking current state...', 'info');
+            
+            const currentId = localStorage.getItem('currentWorkoutId');
+            const exercises = localStorage.getItem('newWorkoutExercises');
+            const startTime = localStorage.getItem('workoutStartTime');
+            
+            log('state-output', '--- localStorage Data ---', 'info');
+            log('state-output', `Current Workout ID: ${currentId || 'Not set'}`, currentId ? 'success' : 'warning');
+            log('state-output', `New Workout Exercises: ${exercises || 'Not set'}`, 'info');
+            log('state-output', `Workout Start Time: ${startTime || 'Not set'}`, 'info');
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlId = urlParams.get('id');
+            log('state-output', `URL Workout ID: ${urlId || 'Not set'}`, 'info');
+            
+            log('state-output', `Current Page: ${window.location.pathname}`, 'info');
+            
+            if (exercises) {
+                try {
+                    const exerciseArray = JSON.parse(exercises);
+                    log('state-output', `Parsed Exercises Count: ${exerciseArray.length}`, 'info');
+                } catch (e) {
+                    log('state-output', `Error parsing exercises: ${e.message}`, 'error');
+                }
+            }
+        }
+
+        function resetEverything() {
+            clearLog('reset-output');
+            log('reset-output', ' Resetting all data...', 'warning');
+            
+            localStorage.removeItem('currentWorkoutId');
+            localStorage.removeItem('newWorkoutExercises');
+            localStorage.removeItem('workoutStartTime');
+            localStorage.removeItem('workoutUpdated');
+            
+            currentWorkoutId = null;
+            
+            log('reset-output', ' localStorage cleared', 'success');
+            log('reset-output', ' Current workout ID reset', 'success');
+            log('reset-output', ' You can now start fresh!', 'info');
+            log('reset-output', 'Go to /exercise.html to create a new workout', 'info');
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(testAPIConnection, 1000);
+        });
+    </script>
+</body>
+</html>

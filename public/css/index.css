@@ -1,0 +1,197 @@
+.workout header {
+    height: 80px;
+}
+
+/* LAST WORKOUT STATS */
+.prev-workout h3 {
+    font-size: 25px;
+    width: 100%;
+    margin: 0;
+    margin-bottom: 15px;
+}
+
+.prev-workout p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.workout-stats {
+    border-top: solid 1px rgb(231, 231, 231);
+}
+
+.workout-table {
+    padding: 10px 40px 20px 40px;
+}
+
+.workout-keys {
+    text-align: right;
+    font-weight: 300;
+    color: grey;
+}
+
+.workout-values {
+    text-align: left;
+    padding-left: 30px;
+}
+
+.new-workout {
+    display: none;
+}
+
+.mt {
+    margin-top: 20px;
+}
+
+.workout .ui.card {
+    padding-top: 25px;
+}
+
+.prev-workout {
+    text-align: center;
+}
+
+/* BUTTONS */
+.prev-workout button {
+    margin: 10px;
+}
+
+.prev-workout .buttons {
+    display: flex;
+    height: 75px;
+}
+
+.buttons .ui.button {
+    margin: 0;
+    width: 50%;
+}
+
+#continue-btn, #new-btn {
+    font-size: 16px;
+    font-family: 'Lexend', sans-serif;
+    font-weight: 400;
+    padding: 18px;
+}
+
+#continue-btn {
+    background-color: white;
+    border: solid 2px rgb(86, 187, 255);
+    color: rgb(0, 114, 190);
+    margin: 0 10px 20px 20px;
+}
+
+#continue-btn:hover {
+    background-color: rgb(86, 187, 255);
+    color: white;
+}
+
+#new-btn {
+    background-color: white;
+    border: solid 2px rgb(67, 214, 182);
+    color: rgb(0, 128, 100);
+    margin: 0 20px 20px 10px;
+}
+
+#new-btn:hover {
+    background-color: rgb(67, 214, 182);
+    color: white;
+}
+
+/* NO WORKOUTS MESSAGE */
+.no-workout-div {
+    margin: 30px auto;
+    font-size: 18px;
+}
+
+/* ------- MEDIA QUERIES ------- */
+@media (max-width: 500px) {
+    .workout-table {
+        padding: 20px 5px 20px 20px;
+        font-size: 12px;
+    }
+
+    .workout-values {
+        padding-left: 15px;
+    }
+
+    #continue-btn, #new-btn {
+        font-size: 13px;
+        padding: 20px 10px;
+    }    
+}
+
+/* --- New static container for current workout --- */
+.new-workout-container {
+    border: 2px solid #4CAF50;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.new-workout-container h3 {
+    margin-bottom: 15px;
+}
+
+#exercise-list p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.complete-btn {
+    margin-top: 15px;
+    background-color: #4CAF50;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.complete-btn:hover {
+    background-color: #45a049;
+}
+
+.new-workout-container {
+    border: 2px solid #ddd;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.new-workout-container h3 {
+    margin-bottom: 10px;
+}
+
+.new-workout-container .exercise-card {
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.new-workout-container .exercise-card:last-child {
+    border-bottom: none;
+}
+
+#complete-workout-btn {
+    margin-top: 15px;
+    background-color: #4CAF50;
+    color: white;
+}
+.new-workout-container {
+    border: 2px solid #4CAF50;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.new-workout-container h3 {
+    margin-bottom: 15px;
+}
+
+.new-workout-container .new-workout-exercises {
+    margin-bottom: 15px;
+}
