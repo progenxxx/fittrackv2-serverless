@@ -38,7 +38,18 @@ const userSchema = new mongoose.Schema({
     },
     isVerified: {
         type: Boolean,
-        default: false
+        default: function() {
+            // Google users are automatically verified
+            return this.isGoogleUser;
+        }
+    },
+    verificationCode: {
+        type: String,
+        default: null
+    },
+    verificationExpires: {
+        type: Date,
+        default: null
     },
     loginMethod: {
         type: String,
@@ -60,15 +71,42 @@ const userSchema = new mongoose.Schema({
     resetPasswordExpires: {
         type: Date,
         default: null
+    },
+    // Account security fields
+    loginAttempts: {
+        type: Number,
+        default: 0
+    },
+    lockUntil: {
+        type: Date,
+        default: null
+    },
+    // Email verification attempts tracking
+    verificationAttempts: {
+        type: Number,
+        default: 0
+    },
+    lastVerificationAttempt: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true
 });
 
+// Indexes for better performance
 userSchema.index({ email: 1 });
 userSchema.index({ googleId: 1 });
 userSchema.index({ createdAt: -1 });
+userSchema.index({ verificationCode: 1 });
+userSchema.index({ verificationExpires: 1 });
 
+// Virtual for checking if account is locked
+userSchema.virtual('isLocked').get(function() {
+    return !!(this.lockUntil && this.lockUntil > Date.now());
+});
+
+// Hash password before saving
 userSchema.pre("save", async function(next) {
     if (!this.isModified("password")) return next();
     
@@ -84,6 +122,7 @@ userSchema.pre("save", async function(next) {
     next();
 });
 
+// Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
     if (!this.password) {
         throw new Error("Password not set for this user");
@@ -96,20 +135,66 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
     }
 };
 
+// Update last login method
 userSchema.methods.updateLastLogin = function() {
     this.lastLogin = new Date();
+    // Reset login attempts on successful login
+    this.loginAttempts = 0;
+    this.lockUntil = undefined;
     return this.save();
 };
 
+// Increment login attempts
+userSchema.methods.incLoginAttempts = function() {
+    // If we have a previous lock that has expired, restart at 1
+    if (this.lockUntil && this.lockUntil < Date.now()) {
+        return this.update({
+            $set: {
+                loginAttempts: 1
+            },
+            $unset: {
+                lockUntil: 1
+            }
+        });
+    }
+    
+    const updates = { $inc: { loginAttempts: 1 } };
+    
+    // If we have hit max attempts and it's not locked yet, lock the account
+    const maxAttempts = 5;
+    const lockTime = 2 * 60 * 60 * 1000; // 2 hours
+    
+    if (this.loginAttempts + 1 >= maxAttempts && !this.isLocked) {
+        updates.$set = { lockUntil: Date.now() + lockTime };
+    }
+    
+    return this.update(updates);
+};
+
+// Increment verification attempts
+userSchema.methods.incVerificationAttempts = function() {
+    this.verificationAttempts += 1;
+    this.lastVerificationAttempt = new Date();
+    return this.save();
+};
+
+// Clean JSON output (remove sensitive fields)
 userSchema.methods.toJSON = function() {
     const userObject = this.toObject();
     delete userObject.password;
     delete userObject.resetPasswordToken;
     delete userObject.resetPasswordExpires;
+    delete userObject.verificationCode;
+    delete userObject.verificationExpires;
+    delete userObject.loginAttempts;
+    delete userObject.lockUntil;
+    delete userObject.verificationAttempts;
+    delete userObject.lastVerificationAttempt;
     delete userObject.__v;
     return userObject;
 };
 
+// Static methods
 userSchema.statics.findByEmail = function(email) {
     return this.findOne({ email: email.toLowerCase() });
 };
@@ -118,33 +203,37 @@ userSchema.statics.findByGoogleId = function(googleId) {
     return this.findOne({ googleId: googleId });
 };
 
+// Enhanced Google user creation
 userSchema.statics.createGoogleUser = async function(googleProfile) {
     const existingUser = await this.findByEmail(googleProfile.email);
     
     if (existingUser) {
         if (!existingUser.googleId) {
+            // Link Google account to existing email user
             existingUser.googleId = googleProfile.id;
             existingUser.isGoogleUser = true;
             existingUser.picture = googleProfile.picture || existingUser.picture;
-            existingUser.isVerified = true;
+            existingUser.isVerified = true; // Auto-verify when linking Google
             await existingUser.save();
         }
         return existingUser;
     }
     
+    // Create new Google user (auto-verified)
     const newUser = new this({
         email: googleProfile.email,
         name: googleProfile.name,
         picture: googleProfile.picture,
         googleId: googleProfile.id,
         isGoogleUser: true,
-        isVerified: true,
+        isVerified: true, // Google users are auto-verified
         loginMethod: "google"
     });
     
     return await newUser.save();
 };
 
+// Get user statistics
 userSchema.statics.getUserStats = async function() {
     const stats = await this.aggregate([
         {
@@ -160,6 +249,9 @@ userSchema.statics.getUserStats = async function() {
                 verifiedUsers: { 
                     $sum: { $cond: ["$isVerified", 1, 0] } 
                 },
+                unverifiedUsers: {
+                    $sum: { $cond: ["$isVerified", 0, 1] }
+                },
                 activeToday: {
                     $sum: {
                         $cond: [
@@ -167,6 +259,20 @@ userSchema.statics.getUserStats = async function() {
                                 $gte: [
                                     "$lastLogin",
                                     new Date(new Date().setHours(0, 0, 0, 0))
+                                ]
+                            },
+                            1,
+                            0
+                        ]
+                    }
+                },
+                activeThisWeek: {
+                    $sum: {
+                        $cond: [
+                            {
+                                $gte: [
+                                    "$lastLogin",
+                                    new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
                                 ]
                             },
                             1,
@@ -183,8 +289,44 @@ userSchema.statics.getUserStats = async function() {
         googleUsers: 0,
         emailUsers: 0,
         verifiedUsers: 0,
-        activeToday: 0
+        unverifiedUsers: 0,
+        activeToday: 0,
+        activeThisWeek: 0
     };
+};
+
+// Clean up expired verification codes (can be run as a job)
+userSchema.statics.cleanupExpiredVerifications = async function() {
+    const result = await this.updateMany(
+        { 
+            verificationExpires: { $lt: new Date() },
+            isVerified: false
+        },
+        {
+            $unset: {
+                verificationCode: 1,
+                verificationExpires: 1
+            }
+        }
+    );
+    
+    console.log(`Cleaned up ${result.nModified} expired verification codes`);
+    return result;
+};
+
+// Find users pending verification (for admin purposes)
+userSchema.statics.findPendingVerification = function() {
+    return this.find({
+        isVerified: false,
+        verificationCode: { $exists: true },
+        verificationExpires: { $gt: new Date() }
+    }).select('email name createdAt verificationExpires');
+};
+
+// Validate email format (additional check)
+userSchema.statics.isValidEmail = function(email) {
+    const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+    return emailRegex.test(email);
 };
 
 const User = mongoose.model("User", userSchema);
