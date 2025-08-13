@@ -390,16 +390,6 @@
             margin: 0 auto 16px;
         }
 
-        /* Debug styles for testing */
-        .debug-info {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            font-size: 12px;
-            opacity: 0.8;
-        }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -455,7 +445,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/index.html" class="nav-brand">
-                <div class="brand-logo"></div>
+                <div class="brand-icon">FT</div>
                 FitTrack
             </a>
             
@@ -468,19 +458,26 @@
             
             <div class="nav-user">
                 <div class="user-avatar" id="userAvatar">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
-                <span id="userName">User</span>
+                <span class="user-name" id="userName">User</span>
                 <button class="logout-btn" onclick="logout()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline; margin-right: 4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    Logout
+                    <span>Logout</span>
+                </button>
+                <button class="mobile-menu-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
                 </button>
             </div>
         </div>
@@ -582,15 +579,10 @@
                     <h2 class="section-title">Current Session</h2>
                 </div>
                 
-                <!-- Debug info (remove in production) -->
-                <div class="debug-info" id="debugInfo" style="display: none;">
-                    Debug: Loading current workout data...
-                </div>
-                
                 <div class="exercise-list" id="currentExercises">
                     <div class="exercise-item">
-                        <div class="exercise-name">Loading...</div>
-                        <div class="exercise-details">Checking for active exercises...</div>
+                        <div class="exercise-name">No exercises added yet</div>
+                        <div class="exercise-details">Start adding exercises to track your progress</div>
                     </div>
                 </div>
                 
@@ -602,17 +594,10 @@
         </div>
     </div>
 
+    <script src="/js/api.js"></script>
     <script>
-        // Mock API for testing (replace with your actual API)
-        const API = {
-            getAllWorkouts: async function() {
-                // Return mock data if no API is available
-                return JSON.parse(localStorage.getItem('allWorkouts') || '[]');
-            }
-        };
-
         function checkAuth() {
-            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            const user = JSON.parse(localStorage.getItem('user'));
             if (!user) {
                 window.location.href = '/login.html';
                 return null;
@@ -652,7 +637,7 @@
                 document.getElementById('thisWeek').textContent = thisWeekWorkouts.length;
                 
                 const totalMinutes = workouts.reduce((total, workout) => {
-                    return total + (workout.exercises || []).reduce((sum, ex) => sum + (ex.duration || 0), 0);
+                    return total + workout.exercises.reduce((sum, ex) => sum + (ex.duration || 0), 0);
                 }, 0);
                 document.getElementById('totalTime').textContent = totalMinutes;
                 
@@ -674,7 +659,7 @@
         function loadLastWorkout(workout) {
             const container = document.getElementById('lastWorkoutInfo');
             
-            if (!workout || !workout.exercises || !workout.exercises.length) {
+            if (!workout || !workout.exercises.length) {
                 showEmptyLastWorkout();
                 return;
             }
@@ -730,29 +715,14 @@
                             <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/>
                         </svg>
                     </div>
-                    <p>Error loading workout data. Check your connection.</p>
+                    <p>Error loading workout data. Check your MongoDB connection.</p>
                 </div>
             `;
         }
 
         function loadCurrentWorkout() {
             const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
-            const workoutId = localStorage.getItem('currentWorkoutId');
-            const startTime = localStorage.getItem('workoutStartTime');
             const container = document.getElementById('currentExercises');
-            const debugInfo = document.getElementById('debugInfo');
-            
-            // Debug info (can be removed in production)
-            if (debugInfo) {
-                debugInfo.innerHTML = `
-                    Workout ID: ${workoutId || 'None'}<br>
-                    Exercises: ${exercises.length}<br>
-                    Start Time: ${startTime || 'Not set'}
-                `;
-                debugInfo.style.display = 'block';
-            }
-            
-            console.log('Current workout data:', { workoutId, exercises, startTime });
             
             if (exercises.length === 0) {
                 container.innerHTML = `
@@ -761,123 +731,57 @@
                         <div class="exercise-details">Start adding exercises to track your progress</div>
                     </div>
                 `;
-                
-                // Disable complete button if no exercises
-                const completeBtn = document.getElementById('completeWorkout');
-                if (completeBtn) {
-                    completeBtn.style.opacity = '0.5';
-                    completeBtn.style.cursor = 'not-allowed';
-                }
                 return;
             }
             
-            // Enable complete button if exercises exist
-            const completeBtn = document.getElementById('completeWorkout');
-            if (completeBtn) {
-                completeBtn.style.opacity = '1';
-                completeBtn.style.cursor = 'pointer';
-            }
-            
-            // Calculate total session time if available
-            let sessionInfo = '';
-            if (startTime) {
-                const currentTime = new Date();
-                const start = new Date(parseInt(startTime));
-                const elapsedMinutes = Math.floor((currentTime - start) / 60000);
-                sessionInfo = ` • Session: ${elapsedMinutes} min`;
-            }
-            
-            container.innerHTML = exercises.map((ex, index) => {
-                let details = '';
-                
-                if (ex.type === 'resistance') {
-                    details = `${ex.weight || 0}kg × ${ex.sets || 0} sets × ${ex.reps || 0} reps`;
-                    if (ex.duration) details += ` (${ex.duration} min)`;
-                } else if (ex.type === 'cardio') {
-                    if (ex.distance) {
-                        details = `${ex.distance}km in ${ex.duration || 0} min`;
-                    } else {
-                        details = `${ex.duration || 0} minutes`;
-                    }
-                } else {
-                    // Generic exercise
-                    details = ex.duration ? `${ex.duration} minutes` : 'Duration not set';
-                }
+            container.innerHTML = exercises.map(ex => {
+                const details = ex.type === 'resistance' 
+                    ? `${ex.weight || 0}kg × ${ex.sets || 0} sets × ${ex.reps || 0} reps (${ex.duration || 0} min)`
+                    : `${ex.distance || 0}km in ${ex.duration || 0} min`;
                 
                 return `
                     <div class="exercise-item">
-                        <div class="exercise-name">${ex.name || `Exercise ${index + 1}`}</div>
+                        <div class="exercise-name">${ex.name}</div>
                         <div class="exercise-details">${details}</div>
                     </div>
                 `;
             }).join('');
-            
-            // Add session summary if there are exercises
-            if (exercises.length > 0) {
-                const totalDuration = exercises.reduce((sum, ex) => sum + (ex.duration || 0), 0);
-                const summaryDiv = document.createElement('div');
-                summaryDiv.className = 'debug-info';
-                summaryDiv.innerHTML = `${exercises.length} exercises • ${totalDuration} min total${sessionInfo}`;
-                container.appendChild(summaryDiv);
-            }
         }
 
         async function completeWorkout() {
             const workoutId = localStorage.getItem('currentWorkoutId');
             const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
             
-            if (exercises.length === 0) {
-                showToast('No exercises to complete. Add some exercises first!', 'warning');
+            if (!workoutId || exercises.length === 0) {
+                showToast('No active workout to complete.');
                 return;
             }
 
             try {
-                // Create workout object
-                const workout = {
-                    id: workoutId || Date.now().toString(),
-                    day: new Date().toISOString(),
-                    exercises: exercises,
-                    completed: true
-                };
-                
-                // Get existing workouts and add new one
-                const existingWorkouts = JSON.parse(localStorage.getItem('allWorkouts') || '[]');
-                existingWorkouts.unshift(workout); // Add to beginning
-                localStorage.setItem('allWorkouts', JSON.stringify(existingWorkouts));
-                
-                // Clear current workout data
                 localStorage.removeItem('currentWorkoutId');
                 localStorage.removeItem('newWorkoutExercises');
                 localStorage.removeItem('workoutStartTime');
                 
-                // Refresh the display
                 await loadWorkoutStats();
                 loadCurrentWorkout();
                 
-                showToast('Workout completed successfully! 🎉');
+                showToast('Workout completed successfully!');
                 
-                // Trigger update event for other tabs
                 localStorage.setItem('workoutUpdated', Date.now());
                 
             } catch (error) {
                 console.error('Error completing workout:', error);
-                showToast('Error completing workout. Please try again.', 'error');
+                showToast('Error completing workout. Please try again.');
             }
         }
 
-        function showToast(message, type = 'success') {
+        function showToast(message) {
             const toast = document.createElement('div');
-            const colors = {
-                success: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
-                warning: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
-                error: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'
-            };
-            
             toast.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                background: ${colors[type]};
+                background: linear-gradient(135deg, #059669 0%, #10b981 100%);
                 color: white;
                 padding: 16px 20px;
                 border-radius: 12px;
@@ -886,7 +790,6 @@
                 font-family: 'Inter', sans-serif;
                 font-weight: 500;
                 animation: slideIn 0.3s ease-out;
-                max-width: 300px;
             `;
             toast.textContent = message;
             
@@ -894,17 +797,13 @@
             
             setTimeout(() => {
                 toast.style.animation = 'slideOut 0.3s ease-in forwards';
-                setTimeout(() => {
-                    if (document.body.contains(toast)) {
-                        document.body.removeChild(toast);
-                    }
-                }, 300);
+                setTimeout(() => document.body.removeChild(toast), 300);
             }, 3000);
         }
 
         function updateWelcomeMessage() {
             const hour = new Date().getHours();
-            const userName = JSON.parse(localStorage.getItem('user') || '{}').name || 'User';
+            const userName = JSON.parse(localStorage.getItem('user'))?.name || 'User';
             
             let greeting;
             if (hour < 12) greeting = 'Good morning';
@@ -914,38 +813,7 @@
             document.getElementById('welcomeTitle').innerHTML = `${greeting}, <span id="userNameWelcome">${userName}</span>!`;
         }
 
-        // Function to add test data (for testing purposes)
-        function addTestData() {
-            const testExercises = [
-                { name: 'Push-ups', type: 'resistance', sets: 3, reps: 15, duration: 5 },
-                { name: 'Running', type: 'cardio', distance: 2.5, duration: 15 },
-                { name: 'Squats', type: 'resistance', weight: 60, sets: 4, reps: 12, duration: 8 }
-            ];
-            
-            localStorage.setItem('newWorkoutExercises', JSON.stringify(testExercises));
-            localStorage.setItem('currentWorkoutId', Date.now().toString());
-            localStorage.setItem('workoutStartTime', Date.now().toString());
-            
-            loadCurrentWorkout();
-            showToast('Test exercises added!');
-        }
-
-        // Function to clear test data
-        function clearTestData() {
-            localStorage.removeItem('newWorkoutExercises');
-            localStorage.removeItem('currentWorkoutId');
-            localStorage.removeItem('workoutStartTime');
-            localStorage.removeItem('allWorkouts');
-            
-            loadCurrentWorkout();
-            loadWorkoutStats();
-            showToast('Data cleared!');
-        }
-
-        // Storage event listener for cross-tab updates
         window.addEventListener('storage', (e) => {
-            console.log('Storage event:', e.key, e.newValue);
-            
             if (e.key === 'workoutUpdated') {
                 loadWorkoutStats();
             }
@@ -954,40 +822,13 @@
             }
         });
 
-        // Periodic refresh of current workout display
-        setInterval(() => {
-            const startTime = localStorage.getItem('workoutStartTime');
-            if (startTime) {
-                loadCurrentWorkout(); // Refresh to update session time
-            }
-        }, 60000); // Update every minute
-
-        // Main initialization
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('Page loaded, initializing...');
-            
             const user = checkAuth();
             if (user) {
                 initializeUser(user);
                 updateWelcomeMessage();
                 await loadWorkoutStats();
                 loadCurrentWorkout();
-                
-                // Add test buttons (remove in production)
-                const testButtons = document.createElement('div');
-                testButtons.style.cssText = `
-                    position: fixed;
-                    bottom: 20px;
-                    left: 20px;
-                    display: flex;
-                    gap: 10px;
-                    z-index: 1000;
-                `;
-                testButtons.innerHTML = `
-                    <button onclick="addTestData()" style="padding: 8px 12px; background: #4f46e5; color: white; border: none; border-radius: 6px; font-size: 12px;">Add Test Data</button>
-                    <button onclick="clearTestData()" style="padding: 8px 12px; background: #dc2626; color: white; border: none; border-radius: 6px; font-size: 12px;">Clear Data</button>
-                `;
-                document.body.appendChild(testButtons);
             }
         });
 
