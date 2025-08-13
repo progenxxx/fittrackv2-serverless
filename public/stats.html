@@ -51,12 +51,9 @@
         .brand-logo {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: url('/logo.png') no-repeat center center;
+            background-size: contain;
             border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
         }
 
         .nav-menu {
@@ -792,13 +789,15 @@
         body.menu-open {
             overflow: hidden;
         }
+
+
     </style>
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
             <a href="/index.html" class="nav-brand">
-                <div class="brand-logo">💪</div>
+                <div class="brand-logo"></div>
                 FitTrack
             </a>
             
@@ -839,10 +838,10 @@
 
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-header">
-            <div class="nav-brand">
-                <div class="brand-logo">💪</div>
+            <a href="/index.html" class="nav-brand">
+                <div class="brand-logo"></div>
                 FitTrack
-            </div>
+            </a>
             <button class="mobile-menu-close" id="mobileMenuClose">×</button>
         </div>
 
