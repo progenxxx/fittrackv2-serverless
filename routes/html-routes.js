@@ -209,7 +209,7 @@ module.exports = function(app) {
                                         
                                         // Redirect to main app after 2 seconds
                                         setTimeout(() => {
-                                            window.location.href = '/exercise.html';
+                                            window.location.href = '/excercise.html';
                                         }, 2000);
                                     } catch (e) {
                                         console.error('Error parsing user data:', e);
@@ -227,20 +227,20 @@ module.exports = function(app) {
     // Exercise page
     app.get("/exercise", (req, res) => {
         console.log("🏋️ Exercise route (without .html) accessed");
-        res.sendFile(path.join(__dirname, "..", "public", "exercise.html"), (err) => {
+        res.sendFile(path.join(__dirname, "..", "public", "excercise.html"), (err) => {
             if (err) {
-                console.error("❌ exercise.html not found:", err.message);
-                res.status(404).send("Exercise page not found. Please create exercise.html in the public directory.");
+                console.error("❌ excercise.html not found:", err.message);
+                res.status(404).send("Exercise page not found. Please create excercise.html in the public directory.");
             }
         });
     });
 
-    app.get("/exercise.html", (req, res) => {
-        console.log("🏋️ exercise.html route accessed");
-        res.sendFile(path.join(__dirname, "..", "public", "exercise.html"), (err) => {
+    app.get("/excercise.html", (req, res) => {
+        console.log("🏋️ excercise.html route accessed");
+        res.sendFile(path.join(__dirname, "..", "public", "excercise.html"), (err) => {
             if (err) {
-                console.error("❌ exercise.html not found:", err.message);
-                res.status(404).send("Exercise page not found. Please create exercise.html in the public directory.");
+                console.error("❌ excercise.html not found:", err.message);
+                res.status(404).send("Exercise page not found. Please create excercise.html in the public directory.");
             }
         });
     });
@@ -251,7 +251,7 @@ module.exports = function(app) {
         res.sendFile(path.join(__dirname, "..", "public", "dashboard.html"), (err) => {
             if (err) {
                 console.log("ℹ️ dashboard.html not found, redirecting to exercise page");
-                res.redirect("/exercise.html");
+                res.redirect("/excercise.html");
             }
         });
     });
@@ -262,7 +262,7 @@ module.exports = function(app) {
         res.sendFile(path.join(__dirname, "..", "public", "workouts.html"), (err) => {
             if (err) {
                 console.log("ℹ️ workouts.html not found, redirecting to exercise page");
-                res.redirect("/exercise.html");
+                res.redirect("/excercise.html");
             }
         });
     });
@@ -309,7 +309,7 @@ module.exports = function(app) {
     console.log("   GET  /login         - Login page (without extension)");
     console.log("   GET  /login.html    - Login page (with extension)");
     console.log("   GET  /exercise      - Exercise page (without extension)");
-    console.log("   GET  /exercise.html - Exercise page (with extension)");
+    console.log("   GET  /excercise.html - Exercise page (with extension)");
     console.log("   GET  /dashboard     - Dashboard page");
     console.log("   GET  /workouts      - Workouts page");
     console.log("   GET  /404.html      - 404 error page");

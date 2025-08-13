@@ -372,7 +372,7 @@ try {
                                 const user = JSON.parse(atob(userData));
                                 messagesDiv.innerHTML = '<div class="success">Welcome, ' + (user.name || user.email) + '!</div>';
                                 sessionStorage.setItem('fittrack_user', JSON.stringify(user));
-                                setTimeout(() => window.location.href = '/exercise.html', 2000);
+                                setTimeout(() => window.location.href = '/excercise.html', 2000);
                             } catch (e) {
                                 console.error('Error parsing user data:', e);
                             }
@@ -384,7 +384,7 @@ try {
         `);
     });
 
-    app.get(["/exercise", "/exercise.html"], (req, res) => {
+    app.get(["/exercise", "/excercise.html"], (req, res) => {
         console.log("🏋️ Exercise route (fallback)");
         res.send(`
             <!DOCTYPE html>
@@ -418,7 +418,7 @@ try {
                     <div class="coming-soon">
                         <h2>Exercise Entry Form</h2>
                         <p>
-                            The exercise entry form will be displayed here once you create the exercise.html file 
+                            The exercise entry form will be displayed here once you create the excercise.html file 
                             in your public directory. This is a placeholder to ensure your routing works correctly.
                         </p>
                         <p>
@@ -526,7 +526,7 @@ app.listen(PORT, () => {
     console.log("\n🎉 FitTrack Server is running!");
     console.log(`🚀 Server URL: http://localhost:${PORT}`);
     console.log(`🔐 Login page: http://localhost:${PORT}/login.html`);
-    console.log(`🏋️  Exercise page: http://localhost:${PORT}/exercise.html`);
+    console.log(`🏋️  Exercise page: http://localhost:${PORT}/excercise.html`);
     console.log(`📊 API health: http://localhost:${PORT}/api/health`);
     console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`📅 Started at: ${new Date().toISOString()}`);
@@ -540,7 +540,7 @@ app.listen(PORT, () => {
     console.log("\n📝 Available endpoints:");
     console.log("   GET  /                    - Home page");
     console.log("   GET  /login.html          - Login page");
-    console.log("   GET  /exercise.html       - Add exercise page");
+    console.log("   GET  /excercise.html       - Add exercise page");
     console.log("   GET  /api/workouts        - Get all workouts");
     console.log("   POST /api/workouts        - Create new workout");
     console.log("   GET  /api/health          - API health check");

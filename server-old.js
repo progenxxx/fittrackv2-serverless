@@ -360,7 +360,7 @@ app.listen(PORT, () => {
     console.log("\n🎉 FitTrack Server is running!");
     console.log(`🚀 Server URL: http://localhost:${PORT}`);
     console.log(`🔐 Login page: http://localhost:${PORT}/login.html`);
-    console.log(`🏋️  Exercise page: http://localhost:${PORT}/exercise.html`);
+    console.log(`🏋️  Exercise page: http://localhost:${PORT}/excercise.html`);
     console.log(`📊 API health: http://localhost:${PORT}/api/health`);
     console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`📅 Started at: ${new Date().toISOString()}`);
@@ -374,7 +374,7 @@ app.listen(PORT, () => {
     console.log("\n📝 Available endpoints:");
     console.log("   GET  /                    - Home page");
     console.log("   GET  /login.html          - Login page");
-    console.log("   GET  /exercise.html       - Add exercise page");
+    console.log("   GET  /excercise.html       - Add exercise page");
     console.log("   GET  /api/workouts        - Get all workouts");
     console.log("   POST /api/workouts        - Create new workout");
     console.log("   GET  /api/workouts/:id    - Get specific workout");
