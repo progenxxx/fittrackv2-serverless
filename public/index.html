@@ -59,14 +59,6 @@
             color: white;
         }
 
-        .brand-logo {
-            width: 36px;
-            height: 36px;
-            background: url('/logo.png') no-repeat center center;
-            background-size: contain;
-            border-radius: 12px;
-        }
-
         .nav-menu {
             display: flex;
             align-items: center;
@@ -687,7 +679,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/index.html" class="nav-brand">
-                <div class="brand-logo"></div>
+                <div class="brand-icon">F</div>
                 FitTrack
             </a>
             
@@ -695,25 +687,13 @@
                 <a href="#" class="nav-link active">Home</a>
                 <a href="/stats.html" class="nav-link">Analytics</a>
                 <a href="/history.html" class="nav-link">History</a>
-                <a href="/excercise.html" class="nav-link">Exercise</a>
+                <a href="/exercise.html" class="nav-link">Exercise</a>
             </div>
             
             <div class="nav-user">
-                <div class="user-avatar" id="userAvatar">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
+                <div class="user-avatar" id="userAvatar">U</div>
                 <span id="userName">User</span>
-                <button class="logout-btn" onclick="logout()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline; margin-right: 4px;">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Logout
-                </button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
 
             <button class="hamburger" id="hamburger">
@@ -729,7 +709,7 @@
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-header">
             <div class="nav-brand">
-                <div class="brand-logo"></div>
+                <div class="brand-icon">F</div>
                 FitTrack
             </div>
             <button class="mobile-menu-close" id="mobileMenuClose">×</button>
@@ -739,30 +719,18 @@
             <a href="#" class="mobile-nav-link active">Home</a>
             <a href="/stats.html" class="mobile-nav-link">Analytics</a>
             <a href="/history.html" class="mobile-nav-link">History</a>
-            <a href="/excercise.html" class="mobile-nav-link">Exercise</a>
+            <a href="/exercise.html" class="mobile-nav-link">Exercise</a>
         </nav>
 
         <div class="mobile-user-section">
             <div class="mobile-user-info">
-                <div class="mobile-user-avatar" id="mobileUserAvatar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
+                <div class="mobile-user-avatar" id="mobileUserAvatar">U</div>
                 <div class="mobile-user-details">
                     <h3 id="mobileUserName">User</h3>
                     <p>FitTrack Member</p>
                 </div>
             </div>
-            <button class="mobile-logout-btn" onclick="logout()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Logout
-            </button>
+            <button class="mobile-logout-btn" onclick="logout()">Logout</button>
         </div>
     </div>
 
@@ -778,7 +746,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white;">
-                        🏋️
+                        W
                     </div>
                 </div>
                 <div class="stat-value" id="totalWorkouts">0</div>
@@ -788,7 +756,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white;">
-                        ⏱️
+                        T
                     </div>
                 </div>
                 <div class="stat-value" id="totalTime">0</div>
@@ -798,7 +766,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white;">
-                        🔥
+                        W
                     </div>
                 </div>
                 <div class="stat-value" id="thisWeek">0</div>
@@ -808,7 +776,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: white;">
-                        ⭐
+                        A
                     </div>
                 </div>
                 <div class="stat-value" id="avgWorkout">0</div>
@@ -820,20 +788,20 @@
             <div class="section-card">
                 <div class="section-header">
                     <div class="section-icon" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white;">
-                        📊
+                        L
                     </div>
                     <h2 class="section-title">Last Workout</h2>
                 </div>
                 
                 <div class="workout-info" id="lastWorkoutInfo">
-                    <div class="loading-state">
-                        <div class="spinner"></div>
-                        <p>Loading workout data...</p>
+                    <div class="empty-state">
+                        <div class="empty-icon">W</div>
+                        <p>No workouts yet. Start your first workout!</p>
                     </div>
                 </div>
                 
                 <div class="action-buttons">
-                    <a href="/excercise.html" class="btn btn-primary">Start Workout</a>
+                    <a href="/exercise.html" class="btn btn-primary">Start Workout</a>
                     <a href="/history.html" class="btn btn-secondary">View History</a>
                 </div>
             </div>
@@ -841,7 +809,7 @@
             <div class="section-card current-workout">
                 <div class="section-header">
                     <div class="section-icon">
-                        🔥
+                        C
                     </div>
                     <h2 class="section-title">Current Session</h2>
                 </div>
@@ -862,7 +830,7 @@
                 </div>
                 
                 <div class="action-buttons">
-                    <a href="/excercise.html" class="btn btn-primary">Add Exercise</a>
+                    <a href="/exercise.html" class="btn btn-primary">Add Exercise</a>
                     <button class="btn btn-secondary" id="completeWorkout" onclick="completeWorkout()" disabled>Complete</button>
                 </div>
             </div>
@@ -927,15 +895,12 @@
         function checkAuth() {
             const user = localStorage.getItem('user');
             if (!user) {
-                window.location.href = '/login.html';
-                return null;
+                return { name: 'Demo User', email: 'demo@fittrack.com' };
             }
             try {
                 return JSON.parse(user);
             } catch (e) {
-                console.error('Error parsing user data:', e);
-                window.location.href = '/login.html';
-                return null;
+                return { name: 'Demo User', email: 'demo@fittrack.com' };
             }
         }
 
@@ -944,7 +909,6 @@
             
             document.getElementById('userName').textContent = userName;
             document.getElementById('userNameWelcome').textContent = userName;
-            
             document.getElementById('mobileUserName').textContent = userName;
             
             const userAvatar = document.getElementById('userAvatar');
@@ -963,7 +927,7 @@
 
         function logout() {
             localStorage.clear();
-            window.location.href = '/login.html';
+            showToast('Logged out successfully');
         }
 
         function updateWelcomeMessage() {
@@ -979,42 +943,28 @@
             document.getElementById('welcomeTitle').innerHTML = `${greeting}, <span id="userNameWelcome">${userName}</span>!`;
         }
 
-        async function loadWorkoutStats() {
-            try {
-                console.log('Loading workout stats...');
-                const response = await fetch('/api/workouts');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-                
-                const workouts = await response.json();
-                console.log(`Loaded ${workouts.length} workouts`);
-                
-                document.getElementById('totalWorkouts').textContent = workouts.length;
-                
-                const thisWeekStart = new Date();
-                thisWeekStart.setDate(thisWeekStart.getDate() - 7);
-                const thisWeekWorkouts = workouts.filter(w => new Date(w.day) > thisWeekStart);
-                document.getElementById('thisWeek').textContent = thisWeekWorkouts.length;
-                
-                const totalMinutes = workouts.reduce((total, workout) => {
-                    return total + (workout.exercises || []).reduce((sum, ex) => sum + (ex.duration || 0), 0);
-                }, 0);
-                document.getElementById('totalTime').textContent = totalMinutes;
-                
-                const avgTime = workouts.length > 0 ? Math.round(totalMinutes / workouts.length) : 0;
-                document.getElementById('avgWorkout').textContent = avgTime;
-                
-                if (workouts.length > 0) {
-                    loadLastWorkout(workouts[0]);
-                } else {
-                    showEmptyLastWorkout();
-                }
-                
-            } catch (error) {
-                console.error('Error loading workout stats:', error);
-                showErrorState();
+        function loadWorkoutStats() {
+            const workouts = JSON.parse(localStorage.getItem('workouts') || '[]');
+            
+            document.getElementById('totalWorkouts').textContent = workouts.length;
+            
+            const thisWeekStart = new Date();
+            thisWeekStart.setDate(thisWeekStart.getDate() - 7);
+            const thisWeekWorkouts = workouts.filter(w => new Date(w.date || w.day) > thisWeekStart);
+            document.getElementById('thisWeek').textContent = thisWeekWorkouts.length;
+            
+            const totalMinutes = workouts.reduce((total, workout) => {
+                return total + (workout.exercises || []).reduce((sum, ex) => sum + (ex.duration || 0), 0);
+            }, 0);
+            document.getElementById('totalTime').textContent = totalMinutes;
+            
+            const avgTime = workouts.length > 0 ? Math.round(totalMinutes / workouts.length) : 0;
+            document.getElementById('avgWorkout').textContent = avgTime;
+            
+            if (workouts.length > 0) {
+                loadLastWorkout(workouts[workouts.length - 1]);
+            } else {
+                showEmptyLastWorkout();
             }
         }
 
@@ -1028,7 +978,7 @@
 
             const totalDuration = workout.exercises.reduce((sum, ex) => sum + (ex.duration || 0), 0);
             const exerciseCount = workout.exercises.length;
-            const workoutDate = new Date(workout.day).toLocaleDateString();
+            const workoutDate = new Date(workout.date || workout.day).toLocaleDateString();
             
             container.innerHTML = `
                 <div class="info-item">
@@ -1054,29 +1004,16 @@
             const container = document.getElementById('lastWorkoutInfo');
             container.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">🏋️</div>
+                    <div class="empty-icon">W</div>
                     <p>No workouts yet. Start your first workout!</p>
                 </div>
             `;
         }
 
-        function showErrorState() {
-            const container = document.getElementById('lastWorkoutInfo');
-            container.innerHTML = `
-                <div class="empty-state">
-                    <p>You are on a free-tier server, so you may experience a slow connection, but you can still explore even if your server is slow. Consider subscribing to premium soon</p>
-                </div>
-            `;
-        }
-
         function loadCurrentWorkout() {
-            console.log('Loading current workout session...');
-            
             const workoutId = localStorage.getItem('currentWorkoutId');
             const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
             const startTime = localStorage.getItem('workoutStartTime');
-            
-            console.log('Current session data:', { workoutId, exercisesCount: exercises.length, startTime });
             
             const container = document.getElementById('currentExercises');
             const statusElement = document.getElementById('sessionStatus');
@@ -1151,7 +1088,7 @@
             }
         }
 
-        async function completeWorkout() {
+        function completeWorkout() {
             const workoutId = localStorage.getItem('currentWorkoutId');
             const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
             
@@ -1160,24 +1097,24 @@
                 return;
             }
 
-            try {
-                console.log('Completing workout:', workoutId);
-                
-                localStorage.removeItem('currentWorkoutId');
-                localStorage.removeItem('newWorkoutExercises');
-                localStorage.removeItem('workoutStartTime');
-                
-                await loadWorkoutStats();
-                loadCurrentWorkout();
-                
-                showToast('Workout completed successfully!');
-                
-                localStorage.setItem('workoutUpdated', Date.now().toString());
-                
-            } catch (error) {
-                console.error('Error completing workout:', error);
-                showToast('Error completing workout. Please try again.');
-            }
+            const workouts = JSON.parse(localStorage.getItem('workouts') || '[]');
+            const newWorkout = {
+                id: workoutId,
+                date: new Date().toISOString(),
+                exercises: exercises
+            };
+            
+            workouts.push(newWorkout);
+            localStorage.setItem('workouts', JSON.stringify(workouts));
+            
+            localStorage.removeItem('currentWorkoutId');
+            localStorage.removeItem('newWorkoutExercises');
+            localStorage.removeItem('workoutStartTime');
+            
+            loadWorkoutStats();
+            loadCurrentWorkout();
+            
+            showToast('Workout completed successfully!');
         }
 
         function showToast(message) {
@@ -1206,15 +1143,43 @@
             }, 3000);
         }
 
+        function generateSampleData() {
+            if (!localStorage.getItem('workouts')) {
+                const sampleWorkouts = [
+                    {
+                        id: '1',
+                        date: new Date(Date.now() - 86400000).toISOString(),
+                        exercises: [
+                            { name: 'Push-ups', type: 'resistance', sets: 3, reps: 15, duration: 10 },
+                            { name: 'Running', type: 'cardio', distance: 3, duration: 25 }
+                        ]
+                    },
+                    {
+                        id: '2',
+                        date: new Date(Date.now() - 172800000).toISOString(),
+                        exercises: [
+                            { name: 'Squats', type: 'resistance', sets: 4, reps: 12, duration: 15 },
+                            { name: 'Plank', type: 'resistance', duration: 5 }
+                        ]
+                    },
+                    {
+                        id: '3',
+                        date: new Date(Date.now() - 259200000).toISOString(),
+                        exercises: [
+                            { name: 'Cycling', type: 'cardio', distance: 10, duration: 30 },
+                            { name: 'Pull-ups', type: 'resistance', sets: 3, reps: 8, duration: 8 }
+                        ]
+                    }
+                ];
+                localStorage.setItem('workouts', JSON.stringify(sampleWorkouts));
+            }
+        }
+
         window.addEventListener('storage', (e) => {
-            console.log('Storage change detected:', e.key);
-            
-            if (e.key === 'workoutUpdated') {
-                console.log('Workout updated, refreshing stats...');
+            if (e.key === 'workouts') {
                 loadWorkoutStats();
             }
             if (e.key === 'newWorkoutExercises' || e.key === 'currentWorkoutId') {
-                console.log('Current workout changed, refreshing session...');
                 loadCurrentWorkout();
             }
         });
@@ -1222,34 +1187,27 @@
         setInterval(() => {
             const workoutId = localStorage.getItem('currentWorkoutId');
             if (workoutId) {
-                console.log('Auto-refreshing current session...');
                 loadCurrentWorkout();
             }
         }, 30000);
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            console.log('Initializing FitTrack home page...');
-            
+        document.addEventListener('DOMContentLoaded', () => {
             const user = checkAuth();
-            if (!user) return;
             
             initializeUser(user);
             initializeMobileMenu();
             updateWelcomeMessage();
             
-            await loadWorkoutStats();
+            generateSampleData();
+            loadWorkoutStats();
             loadCurrentWorkout();
-            
-            console.log('Page initialization complete');
         });
 
-        document.addEventListener('visibilitychange', async () => {
+        document.addEventListener('visibilitychange', () => {
             if (!document.hidden) {
-                console.log('Page became visible, refreshing data...');
-                await loadWorkoutStats();
+                loadWorkoutStats();
                 loadCurrentWorkout();
             } else {
-                console.log('Page hidden, stopping timer...');
                 stopSessionTimer();
             }
         });
