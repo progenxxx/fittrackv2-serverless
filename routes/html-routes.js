@@ -236,7 +236,7 @@ module.exports = function(app) {
     });
 
     app.get("/exercise.html", (req, res) => {
-        console.log("🏋️ Exercise.html route accessed");
+        console.log("🏋️ exercise.html route accessed");
         res.sendFile(path.join(__dirname, "..", "public", "exercise.html"), (err) => {
             if (err) {
                 console.error("❌ exercise.html not found:", err.message);

@@ -303,7 +303,7 @@ try {
                     <p>Your fitness tracking companion</p>
                     <br>
                     <a href="/login.html">🔐 Login</a>
-                    <a href="/exercise.html">🏃‍♂️ Quick Entry</a>
+                    <a href="/excercise.html">🏃‍♂️ Quick Entry</a>
                     <a href="/api/health">🏥 Status</a>
                 </div>
             </body>
