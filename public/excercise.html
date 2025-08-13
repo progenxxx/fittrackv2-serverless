@@ -1552,9 +1552,37 @@
                 return;
             }
             
+            displayUserInfo(user);
+            
             await initializeWorkout();
             startSessionTimer();
         });
+
+        function displayUserInfo(user) {
+            const userNameElement = document.getElementById('userName');
+            const userAvatarElement = document.getElementById('userAvatar');
+            
+            if (userNameElement && user.name) {
+                userNameElement.textContent = user.name;
+            }
+            
+            // Update avatar with first letter of name if available
+            if (userAvatarElement && user.name) {
+                const firstLetter = user.name.charAt(0).toUpperCase();
+                userAvatarElement.innerHTML = firstLetter;
+            }
+        }
+
+        function logout() {
+            // Clear all stored data
+            localStorage.removeItem('user');
+            localStorage.removeItem('currentWorkoutId');
+            localStorage.removeItem('newWorkoutExercises');
+            localStorage.removeItem('workoutStartTime');
+            
+            // Redirect to login
+            window.location.href = '/login.html';
+        }
 
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
