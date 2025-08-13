@@ -1552,34 +1552,9 @@
                 return;
             }
             
-            displayUserInfo(user);
-            
             await initializeWorkout();
             startSessionTimer();
         });
-
-        function displayUserInfo(user) {
-            document.getElementById('userName').textContent = user.name || 'User';
-            document.getElementById('userNameWelcome').textContent = user.name || 'User';
-            
-            const userAvatar = document.getElementById('userAvatar');
-            if (user.picture) {
-                userAvatar.innerHTML = `<img src="${user.picture}" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-            } else if (user.name) {
-                userAvatar.innerHTML = user.name.charAt(0).toUpperCase();
-            }
-        }
-
-        function logout() {
-            // Clear all stored data
-            localStorage.removeItem('user');
-            localStorage.removeItem('currentWorkoutId');
-            localStorage.removeItem('newWorkoutExercises');
-            localStorage.removeItem('workoutStartTime');
-            
-            // Redirect to login
-            window.location.href = '/login.html';
-        }
 
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
