@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Render error state
   function renderErrorWorkoutContainer() {
       if (!newContainerContent) return;
-      newContainerContent.innerHTML = '<div class="exercise-detail">Error loading workout data. Check MongoDB connection.</div>';
+      newContainerContent.innerHTML = '<div class="exercise-detail">Server Connection is to slow!</div>';
   }
 
   // Load current workout in progress from localStorage
