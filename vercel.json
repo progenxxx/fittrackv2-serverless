@@ -16,8 +16,64 @@
       "dest": "/server.js"
     },
     {
+      "src": "/login\\.html",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/login",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/exercise\\.html",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/exercise",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/dashboard\\.html",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/workouts\\.html",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/workouts",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/health",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/404\\.html",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/(.*\\.(css|js|png|jpg|jpeg|gif|ico|svg))",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/",
+      "dest": "/server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/server.js"
     }
-  ]
+  ],
+  "functions": {
+    "server.js": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "NODE_ENV": "production"
+  }
 }
