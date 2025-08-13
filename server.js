@@ -16,7 +16,7 @@ console.log("🌐 Environment:", process.env.NODE_ENV || "development");
 // Middleware setup
 app.use(logger("dev"));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json({ limit: '10mb' })); // Increased limit for larger payloads
+app.use(express.json({ limit: '10mb' }));
 app.use(express.static("public"));
 
 // Security headers
@@ -33,18 +33,17 @@ app.use((req, res, next) => {
     next();
 });
 
-// MongoDB connection with enhanced error handling
+// MongoDB connection (keeping your existing connection code)
 const MONGO_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/workout";
 
 console.log("🔗 Attempting to connect to MongoDB...");
 console.log("📝 Connection type:", MONGO_URI.includes("localhost") ? "Local MongoDB" : "MongoDB Atlas");
 console.log("🔧 MongoDB URI (masked):", MONGO_URI.replace(/\/\/.*@/, "//***:***@"));
 
-// Enhanced MongoDB connection options
 const mongooseOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 10000, // Increased timeout for Vercel
+    serverSelectionTimeoutMS: 10000,
     socketTimeoutMS: 45000,
     bufferCommands: false,
     maxPoolSize: 10,
@@ -54,14 +53,11 @@ const mongooseOptions = {
     w: 'majority'
 };
 
-// Connect to MongoDB
 mongoose.connect(MONGO_URI, mongooseOptions)
     .then(() => {
         console.log("✅ MongoDB connected successfully!");
         console.log("🗄️  Database:", mongoose.connection.name);
         console.log("🔌 Connection state:", mongoose.connection.readyState === 1 ? "Connected" : "Connecting");
-        
-        // Test the connection with a simple query
         return mongoose.connection.db.admin().ping();
     })
     .then(() => {
@@ -69,22 +65,7 @@ mongoose.connect(MONGO_URI, mongooseOptions)
     })
     .catch(err => {
         console.error("❌ MongoDB connection error:", err.message);
-        console.error("❌ Full error details:", err);
-        console.log("\n🔧 Environment Variables Check:");
-        console.log("   MONGODB_URI exists:", !!process.env.MONGODB_URI);
-        console.log("   MONGODB_URI length:", process.env.MONGODB_URI?.length || 0);
-        
-        console.log("\n🔧 Troubleshooting steps:");
-        console.log("1. For Vercel deployment:");
-        console.log("   - Add MONGODB_URI to Vercel environment variables");
-        console.log("   - Format: mongodb+srv://username:password@cluster.mongodb.net/workout");
-        console.log("   - Ensure IP whitelist includes 0.0.0.0/0 for Vercel");
-        console.log("   - Verify database user has read/write permissions");
-        console.log("\n2. For local development:");
-        console.log("   - Install MongoDB: https://docs.mongodb.com/manual/installation/");
-        console.log("   - Start MongoDB service: mongod");
-        console.log("   - Or use MongoDB Atlas with local .env file");
-        console.log("\n📱 Server will continue running but database features won't work until MongoDB is connected.");
+        console.log("📱 Server will continue running but database features won't work until MongoDB is connected.");
     });
 
 // MongoDB connection event listeners
@@ -98,19 +79,6 @@ mongoose.connection.on('error', (err) => {
 
 mongoose.connection.on('disconnected', () => {
     console.log('🔌 Mongoose disconnected from MongoDB');
-});
-
-// Handle app termination
-process.on('SIGINT', async () => {
-    console.log('\n🛑 Received SIGINT, shutting down gracefully...');
-    try {
-        await mongoose.connection.close();
-        console.log('✅ MongoDB connection closed');
-        process.exit(0);
-    } catch (err) {
-        console.error('❌ Error during shutdown:', err);
-        process.exit(1);
-    }
 });
 
 // Environment variable validation
@@ -129,7 +97,7 @@ const validateOAuthConfig = () => {
     return true;
 };
 
-// Enhanced Google OAuth Routes
+// Enhanced Google OAuth Routes (keeping your existing OAuth code)
 app.get('/auth/google', (req, res) => {
     console.log('🔐 Google OAuth login request received');
     
@@ -138,12 +106,10 @@ app.get('/auth/google', (req, res) => {
         return res.redirect('/login.html?error=oauth_config_missing');
     }
     
-    // Determine the correct redirect URI based on environment
     let redirectUri;
     if (process.env.NODE_ENV === 'production' && process.env.GOOGLE_OAUTH_REDIRECT_URI) {
         redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI;
     } else {
-        // For development, use localhost
         redirectUri = `http://localhost:${PORT}/auth/callback`;
     }
     
@@ -156,7 +122,7 @@ app.get('/auth/google', (req, res) => {
         `scope=openid%20email%20profile&` +
         `access_type=offline&` +
         `prompt=consent&` +
-        `state=fittrack_login`; // Add state parameter for security
+        `state=fittrack_login`;
     
     console.log('🔄 Redirecting to Google OAuth...');
     res.redirect(googleAuthUrl);
@@ -190,7 +156,6 @@ app.get('/auth/callback', async (req, res) => {
         return res.redirect('/login.html?error=oauth_no_code');
     }
     
-    // Verify state parameter (basic CSRF protection)
     if (state !== 'fittrack_login') {
         console.error('❌ Invalid state parameter');
         return res.redirect('/login.html?error=oauth_invalid_state');
@@ -199,7 +164,6 @@ app.get('/auth/callback', async (req, res) => {
     try {
         console.log('🔄 Exchanging authorization code for access token...');
         
-        // Determine redirect URI (same logic as the initial request)
         let redirectUri;
         if (process.env.NODE_ENV === 'production' && process.env.GOOGLE_OAUTH_REDIRECT_URI) {
             redirectUri = process.env.GOOGLE_OAUTH_REDIRECT_URI;
@@ -209,7 +173,6 @@ app.get('/auth/callback', async (req, res) => {
         
         console.log('🔄 Using redirect URI for token exchange:', redirectUri);
         
-        // Exchange authorization code for access token
         const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
             method: 'POST',
             headers: {
@@ -244,7 +207,6 @@ app.get('/auth/callback', async (req, res) => {
             throw new Error('No access token received');
         }
         
-        // Get user information from Google
         console.log('🔄 Fetching user information from Google...');
         const userResponse = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
             headers: {
@@ -261,13 +223,11 @@ app.get('/auth/callback', async (req, res) => {
         const userInfo = await userResponse.json();
         console.log('✅ User info retrieved for:', userInfo.email);
         
-        // Validate user info
         if (!userInfo.email || !userInfo.id) {
             console.error('❌ Incomplete user info from Google');
             throw new Error('Incomplete user information received');
         }
         
-        // Create user data object
         const userData = {
             id: userInfo.id,
             email: userInfo.email,
@@ -278,18 +238,15 @@ app.get('/auth/callback', async (req, res) => {
             verified: userInfo.verified_email || false
         };
         
-        // Encode user data for URL transmission
         const userDataEncoded = Buffer.from(JSON.stringify(userData)).toString('base64');
         console.log('✅ OAuth authentication successful for:', userData.email);
         
-        // Redirect to login page with success data
         res.redirect(`/login.html?success=oauth_complete&user=${userDataEncoded}`);
         
     } catch (error) {
         console.error('❌ OAuth callback error:', error.message);
         console.error('❌ Full error:', error);
         
-        // Provide more specific error messages
         let errorCode = 'oauth_failed';
         if (error.message.includes('ENOTFOUND') || error.message.includes('network')) {
             errorCode = 'network_error';
@@ -308,15 +265,178 @@ app.use('/auth/*', (req, res, next) => {
     res.redirect('/login.html?error=auth_route_not_found');
 });
 
-// API Routes - Load before HTML routes
+// API Routes
 console.log("🔌 Loading API routes...");
 require("./routes/api-routes")(app);
 
-// HTML Routes
+// HTML Routes - Add fallback if html-routes.js doesn't exist
 console.log("🔌 Loading HTML routes...");
-require("./routes/html-routes")(app);
+try {
+    require("./routes/html-routes")(app);
+    console.log("✅ HTML routes loaded from file");
+} catch (err) {
+    console.warn("⚠️ HTML routes file not found, using fallback routes");
+    
+    // Fallback HTML routes
+    app.get("/", (req, res) => {
+        console.log("🏠 Root route (fallback)");
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>FitTrack</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; margin: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+                    .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+                    h1 { color: #333; font-size: 2.5rem; margin-bottom: 20px; }
+                    .logo { font-size: 3rem; margin-bottom: 20px; }
+                    a { background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 50px; display: inline-block; margin: 10px; transition: all 0.3s ease; }
+                    a:hover { background: #0056b3; transform: translateY(-2px); }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="logo">🏋️</div>
+                    <h1>FitTrack</h1>
+                    <p>Your fitness tracking companion</p>
+                    <br>
+                    <a href="/login.html">🔐 Login</a>
+                    <a href="/exercise.html">🏃‍♂️ Quick Entry</a>
+                    <a href="/api/health">🏥 Status</a>
+                </div>
+            </body>
+            </html>
+        `);
+    });
 
-// Health check endpoint (redundant with API health check, but useful)
+    app.get(["/login", "/login.html"], (req, res) => {
+        console.log("🔐 Login route (fallback)");
+        res.send(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>FitTrack - Login</title>
+                <style>
+                    body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+                    .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
+                    .logo { font-size: 3rem; margin-bottom: 20px; }
+                    h1 { color: #333; margin-bottom: 10px; }
+                    .subtitle { color: #666; margin-bottom: 30px; }
+                    .btn { background: #4285f4; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 16px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: all 0.3s ease; margin: 10px 0; }
+                    .btn:hover { background: #3367d6; transform: translateY(-2px); }
+                    .error { background: #fee; color: #c33; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+                    .success { background: #efe; color: #363; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="logo">🏋️</div>
+                    <h1>FitTrack</h1>
+                    <p class="subtitle">Track your fitness journey</p>
+                    <div id="messages"></div>
+                    <a href="/auth/google" class="btn">
+                        🔐 Login with Google
+                    </a>
+                    <br><br>
+                    <a href="/api/health" style="color: #666; font-size: 14px;">Check System Status</a>
+                </div>
+                <script>
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const error = urlParams.get('error');
+                    const success = urlParams.get('success');
+                    const messagesDiv = document.getElementById('messages');
+
+                    if (error) {
+                        const errorMessages = {
+                            'oauth_config_missing': 'OAuth configuration missing.',
+                            'oauth_failed': 'Authentication failed.',
+                            'oauth_denied': 'Authentication denied.',
+                            'oauth_no_code': 'No authorization code received.',
+                            'oauth_expired': 'Authorization expired. Try again.',
+                            'network_error': 'Network error. Check connection.',
+                            'oauth_timeout': 'Authentication timed out.',
+                            'oauth_invalid_state': 'Invalid security token.',
+                            'auth_route_not_found': 'Auth route not found.'
+                        };
+                        messagesDiv.innerHTML = '<div class="error">' + (errorMessages[error] || 'Authentication error.') + '</div>';
+                    }
+
+                    if (success === 'oauth_complete') {
+                        const userData = urlParams.get('user');
+                        if (userData) {
+                            try {
+                                const user = JSON.parse(atob(userData));
+                                messagesDiv.innerHTML = '<div class="success">Welcome, ' + (user.name || user.email) + '!</div>';
+                                sessionStorage.setItem('fittrack_user', JSON.stringify(user));
+                                setTimeout(() => window.location.href = '/exercise.html', 2000);
+                            } catch (e) {
+                                console.error('Error parsing user data:', e);
+                            }
+                        }
+                    }
+                </script>
+            </body>
+            </html>
+        `);
+    });
+
+    app.get(["/exercise", "/exercise.html"], (req, res) => {
+        console.log("🏋️ Exercise route (fallback)");
+        res.send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Exercise Entry - FitTrack</title>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+                    .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                    h1 { color: #333; text-align: center; margin-bottom: 30px; }
+                    .coming-soon { text-align: center; padding: 60px 20px; }
+                    .coming-soon h2 { color: #667eea; margin-bottom: 20px; }
+                    .coming-soon p { color: #666; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px; }
+                    a { color: #667eea; text-decoration: none; }
+                    a:hover { text-decoration: underline; }
+                    .nav { text-align: center; margin-bottom: 30px; }
+                    .nav a { margin: 0 15px; padding: 10px 20px; background: #667eea; color: white; border-radius: 25px; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <h1>🏋️ Exercise Entry</h1>
+                    <div class="nav">
+                        <a href="/">🏠 Home</a>
+                        <a href="/login.html">🔐 Login</a>
+                        <a href="/api/workouts">📊 View Workouts</a>
+                        <a href="/api/health">🏥 Status</a>
+                    </div>
+                    <div class="coming-soon">
+                        <h2>Exercise Entry Form</h2>
+                        <p>
+                            The exercise entry form will be displayed here once you create the exercise.html file 
+                            in your public directory. This is a placeholder to ensure your routing works correctly.
+                        </p>
+                        <p>
+                            For now, you can test your API endpoints directly:
+                            <br><br>
+                            <a href="/api/workouts">View All Workouts (JSON)</a><br>
+                            <a href="/api/health">API Health Check</a><br>
+                            <a href="/api/exercise-types">Exercise Types & Categories</a>
+                        </p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `);
+    });
+}
+
+// Health check endpoint
 app.get('/health', (req, res) => {
     res.json({
         status: 'healthy',
@@ -347,11 +467,57 @@ app.use((req, res) => {
             message: `${req.method} ${req.url} is not a valid API endpoint`
         });
     } else {
-        res.status(404).sendFile(path.join(__dirname, 'public', '404.html'), (err) => {
-            if (err) {
-                res.status(404).send('Page not found');
-            }
-        });
+        res.status(404).send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Page Not Found - FitTrack</title>
+                <style>
+                    body { font-family: Arial, sans-serif; text-align: center; margin: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+                    .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); max-width: 500px; }
+                    .error-code { font-size: 4rem; color: #dc3545; margin: 20px 0; }
+                    h1 { color: #333; margin: 20px 0; }
+                    a { background: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin: 10px; display: inline-block; }
+                    a:hover { background: #0056b3; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="error-code">404</div>
+                    <h1>Page Not Found</h1>
+                    <p>The page you're looking for doesn't exist.</p>
+                    <a href="/">🏠 Go Home</a>
+                    <a href="/login.html">🔐 Login</a>
+                    <a href="/api/health">🏥 Status</a>
+                </div>
+            </body>
+            </html>
+        `);
+    }
+});
+
+// Handle app termination
+process.on('SIGINT', async () => {
+    console.log('\n🛑 Received SIGINT, shutting down gracefully...');
+    try {
+        await mongoose.connection.close();
+        console.log('✅ MongoDB connection closed');
+        process.exit(0);
+    } catch (err) {
+        console.error('❌ Error during shutdown:', err);
+        process.exit(1);
+    }
+});
+
+process.on('SIGTERM', async () => {
+    console.log('\n🛑 Received SIGTERM, shutting down gracefully...');
+    try {
+        await mongoose.connection.close();
+        console.log('✅ MongoDB connection closed');
+        process.exit(0);
+    } catch (err) {
+        console.error('❌ Error during shutdown:', err);
+        process.exit(1);
     }
 });
 
@@ -377,24 +543,9 @@ app.listen(PORT, () => {
     console.log("   GET  /exercise.html       - Add exercise page");
     console.log("   GET  /api/workouts        - Get all workouts");
     console.log("   POST /api/workouts        - Create new workout");
-    console.log("   GET  /api/workouts/:id    - Get specific workout");
-    console.log("   POST /api/workouts/:id/exercises - Add exercise");
     console.log("   GET  /api/health          - API health check");
     console.log("   GET  /auth/google         - Google OAuth login");
     console.log("\n🔧 To stop server: Ctrl+C");
-});
-
-// Graceful shutdown handling
-process.on('SIGTERM', async () => {
-    console.log('\n🛑 Received SIGTERM, shutting down gracefully...');
-    try {
-        await mongoose.connection.close();
-        console.log('✅ MongoDB connection closed');
-        process.exit(0);
-    } catch (err) {
-        console.error('❌ Error during shutdown:', err);
-        process.exit(1);
-    }
 });
 
 module.exports = app;
