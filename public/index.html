@@ -468,261 +468,403 @@
             }
         }
 
-        .mobile-nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            z-index: 1000;
-            transform: translateY(-100%);
-            transition: transform 0.3s ease;
-        }
+        /* Add these mobile fixes to your existing <style> section */
 
-        .mobile-nav.visible {
-            transform: translateY(0);
-        }
-
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 20px;
-            max-width: 420px;
-            margin: 0 auto;
-        }
-
-        .nav-brand {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 600;
-            color: #4f46e5;
-        }
-
-        .brand-icon {
-            font-size: 20px;
-        }
-
-        .brand-text {
-            font-size: 18px;
-        }
-
-        .hamburger {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: background-color 0.2s ease;
-        }
-
-        .hamburger:hover {
-            background: rgba(79, 70, 229, 0.1);
-        }
-
-        .hamburger span {
-            width: 20px;
-            height: 2px;
-            background: #4f46e5;
-            border-radius: 1px;
-            transition: all 0.3s ease;
-        }
-
-        .hamburger.active span:first-child {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-
-        .hamburger.active span:nth-child(2) {
-            opacity: 0;
-        }
-
-        .hamburger.active span:last-child {
-            transform: rotate(-45deg) translate(7px, -6px);
-        }
-
-        .nav-menu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 16px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            transform: translateY(-20px);
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .nav-menu.active {
-            transform: translateY(0);
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .nav-link {
-            padding: 12px 16px;
-            color: #6b7280;
-            text-decoration: none;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-            font-weight: 500;
-        }
-
-        .nav-link:hover {
-            background: rgba(79, 70, 229, 0.1);
-            color: #4f46e5;
-        }
-        .mobile-nav {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    z-index: 1000;
-    transform: translateY(-100%);
-    transition: transform 0.3s ease;
+/* Mobile Menu Improvements */
+@media (max-width: 767px) {
+    .nav-container {
+        position: relative;
+    }
+    
+    .nav-menu {
+        position: absolute;
+        top: calc(100% + 12px);
+        left: 16px;
+        right: 16px;
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        border: 1px solid #e2e8f0;
+        z-index: 1000;
+        flex-direction: column !important;
+        gap: 8px !important;
+        opacity: 0;
+        transform: translateY(-10px);
+        visibility: hidden;
+        transition: all 0.2s ease;
+    }
+    
+    .nav-menu.show {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+    }
+    
+    .nav-link {
+        padding: 12px 16px;
+        border-radius: 8px;
+        text-align: center;
+        width: 100%;
+    }
+    
+    .mobile-menu-btn {
+        padding: 8px;
+        border-radius: 8px;
+        transition: background-color 0.2s ease;
+    }
+    
+    .mobile-menu-btn:hover {
+        background: #f1f5f9;
+    }
+    
+    /* Hamburger Animation */
+    .mobile-menu-btn svg {
+        transition: transform 0.2s ease;
+    }
+    
+    .mobile-menu-btn.active svg {
+        transform: rotate(90deg);
+    }
 }
 
-.mobile-nav.visible {
-    transform: translateY(0);
+/* Enhanced Mobile Responsive Styles */
+@media (max-width: 480px) {
+    .nav-container {
+        padding: 0 12px;
+    }
+    
+    .nav-brand {
+        font-size: 16px;
+    }
+    
+    .brand-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    
+    .main-container {
+        padding: 16px 12px;
+    }
+    
+    /* Welcome section improvements */
+    .welcome-section {
+        padding: 20px 16px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+    }
+    
+    .welcome-content h1 {
+        font-size: 18px;
+        line-height: 1.4;
+    }
+    
+    .welcome-content p {
+        font-size: 13px;
+    }
+    
+    /* Stats grid mobile optimization */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+    
+    .stat-card {
+        padding: 12px 10px;
+        border-radius: 12px;
+        text-align: center;
+    }
+    
+    .stat-icon {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+        margin: 0 auto 8px;
+    }
+    
+    .stat-value {
+        font-size: 18px;
+        margin-bottom: 4px;
+    }
+    
+    .stat-label {
+        font-size: 10px;
+        line-height: 1.2;
+    }
+    
+    /* Workout sections mobile optimization */
+    .workout-sections {
+        gap: 16px;
+    }
+    
+    .section-card {
+        padding: 16px;
+        border-radius: 12px;
+    }
+    
+    .section-header {
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+    
+    .section-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+    
+    .section-title {
+        font-size: 16px;
+    }
+    
+    .workout-info {
+        margin-bottom: 12px;
+    }
+    
+    .info-item {
+        padding: 6px 0;
+        font-size: 12px;
+    }
+    
+    .info-label,
+    .info-value {
+        font-size: 11px;
+    }
+    
+    /* Exercise list improvements */
+    .exercise-list {
+        margin-bottom: 12px;
+        max-height: 160px;
+    }
+    
+    .exercise-item {
+        padding: 10px;
+        margin-bottom: 6px;
+        border-radius: 8px;
+    }
+    
+    .exercise-name {
+        font-size: 12px;
+        margin-bottom: 2px;
+    }
+    
+    .exercise-details {
+        font-size: 10px;
+    }
+    
+    /* Button improvements */
+    .action-buttons {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .btn {
+        padding: 10px 12px;
+        font-size: 12px;
+        border-radius: 10px;
+        min-height: 40px;
+    }
+    
+    /* User section mobile */
+    .nav-user {
+        gap: 6px;
+    }
+    
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+    
+    .logout-btn {
+        padding: 6px 8px;
+        font-size: 10px;
+    }
+    
+    .logout-btn svg {
+        width: 10px;
+        height: 10px;
+    }
+    
+    /* Toast mobile optimization */
+    .toast {
+        left: 12px;
+        right: 12px;
+        font-size: 12px;
+        padding: 10px 12px;
+        border-radius: 8px;
+    }
+    
+    .toast.show {
+        right: 12px;
+    }
+    
+    /* Connection status mobile */
+    .connection-error,
+    .connection-success {
+        margin: 0 12px 12px;
+        padding: 10px 12px;
+        font-size: 12px;
+        border-radius: 8px;
+    }
+    
+    /* Loading state mobile */
+    .loading-state {
+        padding: 16px;
+    }
+    
+    .spinner {
+        width: 20px;
+        height: 20px;
+        border-width: 2px;
+    }
+    
+    .empty-state {
+        padding: 16px;
+        font-size: 12px;
+    }
+    
+    .empty-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
 }
 
-.nav-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    max-width: 420px;
-    margin: 0 auto;
+/* Extra small screens */
+@media (max-width: 360px) {
+    .nav-container {
+        padding: 0 8px;
+    }
+    
+    .main-container {
+        padding: 12px 8px;
+    }
+    
+    .welcome-section {
+        padding: 16px 12px;
+    }
+    
+    .welcome-content h1 {
+        font-size: 16px;
+    }
+    
+    .stats-grid {
+        gap: 6px;
+    }
+    
+    .stat-card {
+        padding: 10px 8px;
+    }
+    
+    .stat-value {
+        font-size: 16px;
+    }
+    
+    .stat-label {
+        font-size: 9px;
+    }
+    
+    .section-card {
+        padding: 12px;
+    }
+    
+    .btn {
+        font-size: 11px;
+        padding: 8px 10px;
+        min-height: 36px;
+    }
 }
 
-.nav-brand {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: 600;
-    color: #4f46e5;
+/* Landscape mobile orientation */
+@media (max-width: 767px) and (orientation: landscape) {
+    .welcome-section {
+        padding: 16px 20px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+    }
+    
+    .workout-sections {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .exercise-list {
+        max-height: 120px;
+    }
 }
 
-.brand-icon {
-    font-size: 20px;
+/* Touch improvements for all mobile */
+@media (hover: none) and (pointer: coarse) {
+    .btn,
+    .nav-link,
+    .logout-btn,
+    .mobile-menu-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    .stat-card:active,
+    .section-card:active {
+        transform: scale(0.98);
+    }
+    
+    .btn:active {
+        transform: scale(0.96);
+    }
+    
+    /* Prevent text selection on touch */
+    .stat-value,
+    .stat-label,
+    .section-title,
+    .exercise-name {
+        -webkit-user-select: none;
+        user-select: none;
+    }
 }
 
-.brand-text {
-    font-size: 18px;
+/* Dark mode mobile adjustments */
+@media (prefers-color-scheme: dark) and (max-width: 767px) {
+    .nav-menu {
+        background: #1f2937;
+        border-color: #374151;
+    }
+    
+    .nav-link {
+        color: #d1d5db;
+    }
+    
+    .nav-link:hover {
+        background: #374151;
+        color: #f3f4f6;
+    }
 }
 
-.hamburger {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    transition: background-color 0.2s ease;
-}
-
-.hamburger:hover {
-    background: rgba(79, 70, 229, 0.1);
-}
-
-.hamburger span {
-    width: 20px;
-    height: 2px;
-    background: #4f46e5;
-    border-radius: 1px;
-    transition: all 0.3s ease;
-}
-
-.hamburger.active span:first-child {
-    transform: rotate(45deg) translate(5px, 5px);
-}
-
-.hamburger.active span:nth-child(2) {
-    opacity: 0;
-}
-
-.hamburger.active span:last-child {
-    transform: rotate(-45deg) translate(7px, -6px);
-}
-
-.nav-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 16px 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    transform: translateY(-20px);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-}
-
-.nav-menu.active {
-    transform: translateY(0);
-    opacity: 1;
-    visibility: visible;
-}
-
-.nav-link {
-    padding: 12px 16px;
-    color: #6b7280;
-    text-decoration: none;
-    border-radius: 12px;
-    transition: all 0.2s ease;
-    font-weight: 500;
-}
-
-.nav-link:hover {
-    background: rgba(79, 70, 229, 0.1);
-    color: #4f46e5;
+/* Reduce motion for mobile users who prefer it */
+@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
+    .nav-menu,
+    .stat-card,
+    .section-card,
+    .btn,
+    .toast {
+        transition: none;
+        animation: none;
+    }
+    
+    .stat-card:hover,
+    .section-card:hover {
+        transform: none;
+    }
 }
     </style>
 </head>
 <body>
-    <nav class="mobile-nav" id="mobileNav">
-        <div class="nav-container">
-            <div class="nav-brand">
-                <span class="brand-icon">🏋️</span>
-                <span class="brand-text">FitTrack</span>
-            </div>
-            
-            <button class="hamburger" id="hamburgerBtn" aria-label="Toggle menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-        
-        <div class="nav-menu" id="navMenu">
-            <a href="/" class="nav-link">Home</a>
-            <a href="/excercise.html" class="nav-link">Workout</a>
-            <a href="/stats.html" class="nav-link">Stats</a>
-            <a href="/api/health" class="nav-link">Status</a>
-        </div>
-    </nav>
-
     <nav class="navbar">
         <div class="nav-container">
             <a href="/index.html" class="nav-brand">
@@ -1221,59 +1363,276 @@
             stopSessionTimer();
         });
 
-        // Mobile navigation functionality
-        document.addEventListener('DOMContentLoaded', () => {
-            const hamburgerBtn = document.getElementById('hamburgerBtn');
-            const navMenu = document.getElementById('navMenu');
-            const mobileNav = document.getElementById('mobileNav');
-            
-            if (hamburgerBtn && navMenu) {
-                hamburgerBtn.addEventListener('click', () => {
-                    hamburgerBtn.classList.toggle('active');
-                    navMenu.classList.toggle('active');
-                });
-                
-                // Close menu when clicking outside
-                document.addEventListener('click', (e) => {
-                    if (!mobileNav.contains(e.target)) {
-                        hamburgerBtn.classList.remove('active');
-                        navMenu.classList.remove('active');
-                    }
-                });
-                
-                // Close menu when window resizes to desktop
-                window.addEventListener('resize', () => {
-                    if (window.innerWidth > 768) {
-                        hamburgerBtn.classList.remove('active');
-                        navMenu.classList.remove('active');
-                    }
-                });
-            }
-            
-            // Show/hide navigation based on scroll (optional enhancement)
-            let lastScrollY = window.scrollY;
-            
-            window.addEventListener('scroll', () => {
-                if (window.innerWidth <= 768) {
-                    const currentScrollY = window.scrollY;
-                    
-                    if (currentScrollY > lastScrollY && currentScrollY > 100) {
-                        // Scrolling down - hide nav
-                        mobileNav.classList.remove('visible');
-                    } else {
-                        // Scrolling up - show nav
-                        mobileNav.classList.add('visible');
-                    }
-                    
-                    lastScrollY = currentScrollY;
-                }
-            });
-            
-            // Show nav initially on mobile
-            if (window.innerWidth <= 768) {
-                mobileNav.classList.add('visible');
+        function initializeMobileMenu() {
+    const menuBtn = document.querySelector('.mobile-menu-btn');
+    const menu = document.querySelector('.nav-menu');
+    const navContainer = document.querySelector('.nav-container');
+    
+    if (!menuBtn || !menu) return;
+    
+    // Toggle menu function
+    function toggleMenu() {
+        const isOpen = menu.classList.contains('show');
+        
+        if (isOpen) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    }
+    
+    // Open menu function
+    function openMenu() {
+        menu.classList.add('show');
+        menuBtn.classList.add('active');
+        
+        // Add overlay to prevent body scroll on mobile
+        document.body.style.overflow = 'hidden';
+        
+        // Update ARIA attributes for accessibility
+        menuBtn.setAttribute('aria-expanded', 'true');
+        menu.setAttribute('aria-hidden', 'false');
+    }
+    
+    // Close menu function
+    function closeMenu() {
+        menu.classList.remove('show');
+        menuBtn.classList.remove('active');
+        
+        // Restore body scroll
+        document.body.style.overflow = '';
+        
+        // Update ARIA attributes
+        menuBtn.setAttribute('aria-expanded', 'false');
+        menu.setAttribute('aria-hidden', 'true');
+    }
+    
+    // Menu button click handler
+    menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMenu();
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!navContainer.contains(e.target) && menu.classList.contains('show')) {
+            closeMenu();
+        }
+    });
+    
+    // Close menu when clicking on a nav link
+    const navLinks = menu.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                closeMenu();
             }
         });
+    });
+    
+    // Handle escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && menu.classList.contains('show')) {
+            closeMenu();
+            menuBtn.focus(); // Return focus to button
+        }
+    });
+    
+    // Handle window resize
+    function handleResize() {
+        if (window.innerWidth >= 768) {
+            // Desktop view - ensure menu is visible and reset mobile styles
+            menu.classList.remove('show');
+            menuBtn.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            // Reset ARIA attributes for desktop
+            menuBtn.setAttribute('aria-expanded', 'false');
+            menu.setAttribute('aria-hidden', 'false');
+        } else {
+            // Mobile view - ensure menu is hidden by default
+            if (!menu.classList.contains('show')) {
+                menu.setAttribute('aria-hidden', 'true');
+            }
+        }
+    }
+    
+    // Debounced resize handler for better performance
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(handleResize, 100);
+    });
+    
+    // Initialize ARIA attributes
+    menuBtn.setAttribute('aria-expanded', 'false');
+    menuBtn.setAttribute('aria-controls', 'nav-menu');
+    menu.setAttribute('id', 'nav-menu');
+    menu.setAttribute('aria-hidden', window.innerWidth >= 768 ? 'false' : 'true');
+    
+    // Initial setup
+    handleResize();
+}
+
+// Enhanced touch handling for better mobile experience
+function initializeTouchEnhancements() {
+    // Add touch feedback to interactive elements
+    const touchElements = document.querySelectorAll('.btn, .stat-card, .section-card, .nav-link');
+    
+    touchElements.forEach(element => {
+        element.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.98)';
+        }, { passive: true });
+        
+        element.addEventListener('touchend', function() {
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 100);
+        }, { passive: true });
+        
+        element.addEventListener('touchcancel', function() {
+            this.style.transform = '';
+        }, { passive: true });
+    });
+    
+    // Prevent double-tap zoom on buttons
+    const buttons = document.querySelectorAll('.btn, .mobile-menu-btn, .logout-btn');
+    buttons.forEach(button => {
+        button.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            this.click();
+        });
+    });
+}
+
+// Viewport height fix for mobile browsers
+function fixMobileViewport() {
+    // Fix for mobile browser viewport height issues
+    function setVH() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    
+    setVH();
+    window.addEventListener('resize', setVH);
+    window.addEventListener('orientationchange', () => {
+        setTimeout(setVH, 100);
+    });
+}
+
+// Improved toast function for mobile
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    const span = toast.querySelector('span');
+    
+    span.textContent = message;
+    
+    // Update toast style based on type
+    const colors = {
+        error: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
+        warning: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
+        success: 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
+    };
+    
+    toast.style.background = colors[type] || colors.success;
+    
+    // Ensure toast is visible on mobile
+    toast.classList.add('show');
+    
+    // Auto-hide toast
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, type === 'error' ? 5000 : 3000);
+    
+    // Announce to screen readers
+    if (span.getAttribute('role') !== 'status') {
+        span.setAttribute('role', 'status');
+        span.setAttribute('aria-live', 'polite');
+    }
+}
+
+// Initialize all mobile enhancements
+function initializeMobileEnhancements() {
+    // Initialize mobile menu
+    initializeMobileMenu();
+    
+    // Initialize touch enhancements
+    initializeTouchEnhancements();
+    
+    // Fix mobile viewport
+    fixMobileViewport();
+    
+    // Add mobile-specific classes
+    if (window.innerWidth < 768) {
+        document.body.classList.add('mobile');
+    }
+    
+    // Handle orientation changes
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            // Recalculate layouts after orientation change
+            if (window.innerWidth < 768) {
+                document.body.classList.add('mobile');
+            } else {
+                document.body.classList.remove('mobile');
+            }
+            
+            // Close mobile menu if open during orientation change
+            const menu = document.querySelector('.nav-menu');
+            const menuBtn = document.querySelector('.mobile-menu-btn');
+            if (menu && menuBtn) {
+                menu.classList.remove('show');
+                menuBtn.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }, 300);
+    });
+    
+    console.log('✅ Mobile enhancements initialized');
+}
+
+// Add this CSS for the --vh fix
+const mobileViewportCSS = `
+<style>
+    /* Mobile viewport height fix */
+    body.mobile {
+        min-height: calc(var(--vh, 1vh) * 100);
+    }
+    
+    /* Improved mobile menu transitions */
+    @media (max-width: 767px) {
+        .nav-menu.show {
+            animation: slideDown 0.2s ease forwards;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    }
+</style>
+`;
+
+// Inject the mobile CSS
+if (!document.querySelector('#mobile-viewport-css')) {
+    const style = document.createElement('style');
+    style.id = 'mobile-viewport-css';
+    style.textContent = mobileViewportCSS.replace(/<\/?style>/g, '');
+    document.head.appendChild(style);
+}
+
+// Initialize mobile enhancements when DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeMobileEnhancements);
+} else {
+    initializeMobileEnhancements();
+}
     </script>
 
     <style>
