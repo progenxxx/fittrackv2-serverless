@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FitTrack - History</title>
+    <title>FitTrack - Analytics</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -48,7 +48,7 @@
             text-decoration: none;
         }
 
-        .brand-icon {
+        .brand-logo {
             width: 36px;
             height: 36px;
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
@@ -57,14 +57,6 @@
             align-items: center;
             justify-content: center;
             color: white;
-        }
-
-        .brand-logo {
-            width: 36px;
-            height: 36px;
-            background: url('/logo.png') no-repeat center center;
-            background-size: contain;
-            border-radius: 12px;
         }
 
         .nav-menu {
@@ -303,18 +295,18 @@
         }
 
         .main-container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 32px 24px;
         }
 
         .page-header {
             text-align: center;
-            margin-bottom: 32px;
+            margin-bottom: 40px;
         }
 
         .page-title {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             background-clip: text;
@@ -328,105 +320,104 @@
             font-size: 18px;
         }
 
-        .stats-section {
+        .stats-overview {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 24px;
-            margin-bottom: 32px;
+            margin-bottom: 40px;
         }
 
-        .stat-card {
+        .overview-card {
             background: white;
             border-radius: 20px;
-            padding: 24px;
+            padding: 28px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             border: 1px solid #f1f5f9;
+            position: relative;
+            overflow: hidden;
             transition: all 0.2s ease;
         }
 
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px -3px rgba(0, 0, 0, 0.1);
+        .overview-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
         }
 
-        .stat-header {
+        .overview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--accent-color, #4f46e5);
+        }
+
+        .card-header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 16px;
         }
 
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
+            background: var(--accent-color, #4f46e5);
+            color: white;
         }
 
-        .stat-value {
-            font-size: 28px;
+        .card-trend {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 12px;
+        }
+
+        .trend-up {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .trend-down {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .card-value {
+            font-size: 32px;
             font-weight: 700;
             color: #1e293b;
             margin-bottom: 4px;
         }
 
-        .stat-label {
+        .card-label {
             color: #64748b;
             font-size: 14px;
             font-weight: 500;
         }
 
-        .filters-section {
-            background: white;
-            border-radius: 20px;
-            padding: 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid #f1f5f9;
+        .card-description {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 8px;
         }
 
-        .filters-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 16px;
-        }
-
-        .filters-row {
+        .charts-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
+            grid-template-columns: 2fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
         }
 
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .filter-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
-        }
-
-        .filter-input {
-            padding: 12px 16px;
-            border: 1px solid #d1d5db;
-            border-radius: 12px;
-            font-size: 14px;
-            transition: all 0.2s ease;
-        }
-
-        .filter-input:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .workouts-section {
+        .chart-card {
             background: white;
             border-radius: 20px;
             padding: 32px;
@@ -434,196 +425,230 @@
             border: 1px solid #f1f5f9;
         }
 
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .chart-header {
             margin-bottom: 24px;
         }
 
-        .section-title {
+        .chart-title {
             font-size: 20px;
             font-weight: 600;
             color: #1e293b;
+            margin-bottom: 4px;
         }
 
-        .workout-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
+        .chart-description {
+            color: #64748b;
+            font-size: 14px;
         }
 
-        .workout-card {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid #e2e8f0;
-            transition: all 0.2s ease;
+        .chart-container {
             position: relative;
+            height: 300px;
         }
 
-        .workout-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px -3px rgba(0, 0, 0, 0.1);
+        .progress-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 32px;
         }
 
-        .workout-header {
+        .progress-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f1f5f9;
+        }
+
+        .progress-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
+            align-items: center;
+            margin-bottom: 20px;
         }
 
-        .workout-date {
+        .progress-title {
             font-size: 18px;
             font-weight: 600;
             color: #1e293b;
         }
 
-        .workout-duration {
-            display: flex;
-            align-items: center;
-            gap: 4px;
+        .progress-value {
+            font-size: 24px;
+            font-weight: 700;
             color: #4f46e5;
-            font-weight: 500;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4f46e5, #7c3aed);
+            border-radius: 8px;
+            transition: width 1s ease;
+        }
+
+        .progress-details {
+            color: #64748b;
             font-size: 14px;
         }
 
-        .workout-stats {
+        .activity-section {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 16px;
+            gap: 32px;
         }
 
-        .workout-stat {
-            text-align: center;
+        .activity-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f1f5f9;
         }
 
-        .workout-stat-value {
+        .activity-header {
+            margin-bottom: 24px;
+        }
+
+        .activity-title {
             font-size: 20px;
-            font-weight: 700;
+            font-weight: 600;
             color: #1e293b;
+            margin-bottom: 4px;
         }
 
-        .workout-stat-label {
-            font-size: 12px;
+        .activity-subtitle {
             color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-size: 14px;
         }
 
-        .exercise-list {
-            max-height: 200px;
-            overflow-y: auto;
+        .activity-list {
+            list-style: none;
         }
 
-        .exercise-item {
+        .activity-item {
             display: flex;
             align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            background: white;
+            gap: 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 48px;
+            height: 48px;
             border-radius: 12px;
-            margin-bottom: 8px;
-            border: 1px solid #e2e8f0;
-        }
-
-        .exercise-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .exercise-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            background: #f8fafc;
         }
 
-        .exercise-info {
+        .activity-content {
             flex: 1;
         }
 
-        .exercise-name {
-            font-weight: 500;
+        .activity-name {
+            font-weight: 600;
             color: #1e293b;
             margin-bottom: 2px;
         }
 
-        .exercise-details {
+        .activity-details {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .activity-time {
+            color: #94a3b8;
             font-size: 12px;
-            color: #64748b;
         }
 
-        .cardio-exercise {
-            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-            color: white;
-        }
-
-        .resistance-exercise {
-            background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-            color: white;
-        }
-
-        .loading-state {
-            text-align: center;
-            padding: 48px 24px;
-            color: #64748b;
-        }
-
-        .spinner {
-            width: 32px;
-            height: 32px;
-            border: 3px solid #f1f5f9;
-            border-top: 3px solid #4f46e5;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 48px 24px;
-            color: #64748b;
-        }
-
-        .empty-icon {
-            width: 64px;
-            height: 64px;
-            margin: 0 auto 16px;
-            background: #f1f5f9;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .btn-primary {
+        .insights-card {
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             color: white;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        .insight-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(10px);
+        }
+
+        .insight-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .insight-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .insight-description {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #64748b;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+
+        .empty-state p {
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-start-workout {
+            background: #4f46e5;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.2s;
+        }
+
+        .btn-start-workout:hover {
+            background: #4338ca;
         }
 
         @keyframes spin {
@@ -631,32 +656,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
-        body.menu-open {
-            overflow: hidden;
-        }
-
+        /* Mobile Responsive Styles */
         @media (max-width: 768px) {
             .hamburger {
                 display: flex;
@@ -670,6 +670,10 @@
                 display: none;
             }
 
+            .nav-container {
+                padding: 0 16px;
+            }
+
             .main-container {
                 padding: 24px 16px;
             }
@@ -678,51 +682,115 @@
                 font-size: 28px;
             }
 
-            .stats-section {
+            .page-subtitle {
+                font-size: 16px;
+            }
+
+            .stats-overview {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
             }
 
-            .filters-section {
+            .overview-card {
                 padding: 20px;
             }
 
-            .workouts-section {
-                padding: 24px 20px;
+            .card-icon {
+                width: 48px;
+                height: 48px;
             }
 
-            .workout-grid {
+            .card-value {
+                font-size: 24px;
+            }
+
+            .charts-section {
                 grid-template-columns: 1fr;
+                gap: 24px;
             }
 
-            .filters-row {
+            .chart-card {
+                padding: 24px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .progress-section,
+            .activity-section {
                 grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stats-section {
-                grid-template-columns: 1fr;
+                gap: 24px;
             }
 
-            .filters-section {
-                padding: 16px;
-            }
-
-            .workouts-section {
-                padding: 20px 16px;
-            }
-
-            .workout-card {
-                padding: 20px;
+            .progress-card,
+            .activity-card {
+                padding: 24px;
             }
 
             .mobile-menu {
                 width: 90%;
             }
+        }
 
-            .nav-container {
-                padding: 0 16px;
+        @media (max-width: 480px) {
+            .stats-overview {
+                grid-template-columns: 1fr;
             }
+
+            .overview-card {
+                padding: 16px;
+            }
+
+            .card-value {
+                font-size: 20px;
+            }
+
+            .chart-card,
+            .progress-card,
+            .activity-card {
+                padding: 20px;
+            }
+
+            .activity-item {
+                padding: 12px 0;
+            }
+
+            .activity-icon {
+                width: 40px;
+                height: 40px;
+            }
+
+            .insight-item {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            .main-container {
+                padding: 16px 12px;
+            }
+
+            .overview-card,
+            .chart-card,
+            .progress-card,
+            .activity-card {
+                padding: 16px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .card-trend {
+                align-self: flex-end;
+            }
+        }
+
+        body.menu-open {
+            overflow: hidden;
         }
     </style>
 </head>
@@ -730,14 +798,14 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/index.html" class="nav-brand">
-                <div class="brand-logo"></div>
+                <div class="brand-logo">💪</div>
                 FitTrack
             </a>
             
             <div class="nav-menu">
-                <a href="index.html" class="nav-link">Home</a>
-                <a href="/stats.html" class="nav-link">Analytics</a>
-                <a href="/history.html" class="nav-link active">History</a>
+                <a href="/index.html" class="nav-link">Home</a>
+                <a href="/stats.html" class="nav-link active">Analytics</a>
+                <a href="/history.html" class="nav-link">History</a>
                 <a href="/excercise.html" class="nav-link">Exercise</a>
             </div>
             
@@ -772,16 +840,16 @@
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-header">
             <div class="nav-brand">
-                <div class="brand-logo"></div>
+                <div class="brand-logo">💪</div>
                 FitTrack
             </div>
             <button class="mobile-menu-close" id="mobileMenuClose">×</button>
         </div>
 
         <nav class="mobile-nav-links">
-            <a href="index.html" class="mobile-nav-link">Home</a>
-            <a href="/stats.html" class="mobile-nav-link">Analytics</a>
-            <a href="/history.html" class="mobile-nav-link active">History</a>
+            <a href="/index.html" class="mobile-nav-link">Home</a>
+            <a href="/stats.html" class="mobile-nav-link active">Analytics</a>
+            <a href="/history.html" class="mobile-nav-link">History</a>
             <a href="/excercise.html" class="mobile-nav-link">Exercise</a>
         </nav>
 
@@ -811,107 +879,173 @@
 
     <div class="main-container">
         <div class="page-header">
-            <h1 class="page-title">Workout History</h1>
-            <p class="page-subtitle">Review your fitness journey and track your progress</p>
+            <h1 class="page-title">Analytics Dashboard</h1>
+            <p class="page-subtitle">Track your progress and analyze your fitness journey</p>
         </div>
 
-        <div class="stats-section">
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white;">
-                        🏋️
+        <div class="stats-overview">
+            <div class="overview-card" style="--accent-color: #4f46e5;">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M8 16h4v8H8z" fill="currentColor"/>
+                            <path d="M12 12h4v12h-4z" fill="currentColor"/>
+                            <path d="M16 8h4v16h-4z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div class="card-trend trend-up" id="workoutsTrend" style="display: none;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" stroke="currentColor" stroke-width="2"/>
+                            <polyline points="17,6 23,6 23,12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        +12%
                     </div>
                 </div>
-                <div class="stat-value" id="totalWorkouts">0</div>
-                <div class="stat-label">Total Workouts</div>
+                <div class="card-value" id="totalWorkouts">0</div>
+                <div class="card-label">Total Workouts</div>
+                <div class="card-description">Completed sessions</div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white;">
-                        ⏱️
+            <div class="overview-card" style="--accent-color: #059669;">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <polyline points="12,6 12,12 16,14" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
+                    <div class="card-trend trend-up" id="timeTrend" style="display: none;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" stroke="currentColor" stroke-width="2"/>
+                            <polyline points="17,6 23,6 23,12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        +8%
                     </div>
                 </div>
-                <div class="stat-value" id="totalTime">0</div>
-                <div class="stat-label">Total Time</div>
+                <div class="card-value" id="totalTime">0</div>
+                <div class="card-label">Training Time</div>
+                <div class="card-description">Minutes spent exercising</div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white;">
-                        🔥
+            <div class="overview-card" style="--accent-color: #dc2626;">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div class="card-trend trend-up" id="caloriesTrend" style="display: none;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" stroke="currentColor" stroke-width="2"/>
+                            <polyline points="17,6 23,6 23,12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        +15%
                     </div>
                 </div>
-                <div class="stat-value" id="avgDuration">0</div>
-                <div class="stat-label">Avg Duration</div>
+                <div class="card-value" id="caloriesBurned">0</div>
+                <div class="card-label">Calories Burned</div>
+                <div class="card-description">Estimated total calories</div>
             </div>
 
-            <div class="stat-card">
-                <div class="stat-header">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: white;">
-                        💪
+            <div class="overview-card" style="--accent-color: #f59e0b;">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div class="card-trend trend-up" id="streakTrend" style="display: none;">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" stroke="currentColor" stroke-width="2"/>
+                            <polyline points="17,6 23,6 23,12" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                        +5 days
                     </div>
                 </div>
-                <div class="stat-value" id="totalExercises">0</div>
-                <div class="stat-label">Total Exercises</div>
+                <div class="card-value" id="currentStreak">0</div>
+                <div class="card-label">Current Streak</div>
+                <div class="card-description">Consecutive workout days</div>
             </div>
         </div>
 
-        <div class="filters-section">
-            <h3 class="filters-title">Filter Workouts</h3>
-            <div class="filters-row">
-                <div class="filter-group">
-                    <label class="filter-label" for="dateFilter">Date Range</label>
-                    <select class="filter-input" id="dateFilter">
-                        <option value="all">All Time</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="3months">Last 3 Months</option>
-                        <option value="year">This Year</option>
-                    </select>
+        <div class="charts-section">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Workout Duration Trends</h3>
+                    <p class="chart-description">Your workout duration over time</p>
                 </div>
-
-                <div class="filter-group">
-                    <label class="filter-label" for="typeFilter">Exercise Type</label>
-                    <select class="filter-input" id="typeFilter">
-                        <option value="all">All Types</option>
-                        <option value="cardio">Cardio</option>
-                        <option value="resistance">Resistance</option>
-                    </select>
+                <div class="chart-container">
+                    <canvas id="durationChart"></canvas>
                 </div>
+            </div>
 
-                <div class="filter-group">
-                    <label class="filter-label" for="sortFilter">Sort By</label>
-                    <select class="filter-input" id="sortFilter">
-                        <option value="date-desc">Newest First</option>
-                        <option value="date-asc">Oldest First</option>
-                        <option value="duration-desc">Longest Duration</option>
-                        <option value="duration-asc">Shortest Duration</option>
-                        <option value="exercises-desc">Most Exercises</option>
-                        <option value="exercises-asc">Fewest Exercises</option>
-                    </select>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">Exercise Distribution</h3>
+                    <p class="chart-description">Breakdown of exercise types</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="exerciseChart"></canvas>
                 </div>
             </div>
         </div>
 
-        <div class="workouts-section">
-            <div class="section-header">
-                <h3 class="section-title">Workout Sessions</h3>
-                <span id="workoutCount">0 workouts</span>
+        <div class="progress-section">
+            <div class="progress-card">
+                <div class="progress-header">
+                    <h3 class="progress-title">Weekly Goal</h3>
+                    <span class="progress-value" id="weeklyProgress">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="weeklyProgressBar" style="width: 0%"></div>
+                </div>
+                <p class="progress-details" id="weeklyDetails">0 of 5 workouts completed this week</p>
             </div>
-            
-            <div class="workout-grid" id="workoutGrid">
-                <div class="loading-state">
-                    <div class="spinner"></div>
-                    <p>Loading workout history...</p>
+
+            <div class="progress-card">
+                <div class="progress-header">
+                    <h3 class="progress-title">Monthly Goal</h3>
+                    <span class="progress-value" id="monthlyProgress">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="monthlyProgressBar" style="width: 0%"></div>
+                </div>
+                <p class="progress-details" id="monthlyDetails">0 of 1200 minutes completed this month</p>
+            </div>
+        </div>
+
+        <div class="activity-section">
+            <div class="activity-card">
+                <div class="activity-header">
+                    <h3 class="activity-title">Recent Activity</h3>
+                    <p class="activity-subtitle">Your latest workout sessions</p>
+                </div>
+                <ul class="activity-list" id="recentActivity">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </ul>
+            </div>
+
+            <div class="activity-card insights-card">
+                <div class="activity-header">
+                    <h3 class="activity-title">Insights & Tips</h3>
+                    <p class="activity-subtitle">Personalized recommendations</p>
+                </div>
+                <div class="insights-content" id="insights">
+                    <div class="insight-item">
+                        <div class="insight-title">Loading Insights...</div>
+                        <div class="insight-description">Analyzing your workout data to provide personalized recommendations.</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        let allWorkouts = [];
-        let filteredWorkouts = [];
+        let workouts = [];
+        let charts = {};
 
         function initializeMobileMenu() {
             const hamburger = document.getElementById('hamburger');
@@ -983,7 +1117,6 @@
             const userName = user.name || user.email || 'User';
             
             document.getElementById('userName').textContent = userName;
-            
             document.getElementById('mobileUserName').textContent = userName;
             
             const userAvatar = document.getElementById('userAvatar');
@@ -1005,258 +1138,352 @@
             window.location.href = '/login.html';
         }
 
-        async function loadWorkoutHistory() {
+        async function loadWorkoutStats() {
             try {
-                console.log('Loading workout history...');
+                console.log('Loading workout stats...');
                 const response = await fetch('/api/workouts');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                allWorkouts = await response.json();
-                console.log(`Loaded ${allWorkouts.length} workouts`);
+                workouts = await response.json();
+                console.log(`Loaded ${workouts.length} workouts`);
                 
-                allWorkouts.sort((a, b) => new Date(b.day) - new Date(a.day));
-                
-                filteredWorkouts = [...allWorkouts];
-                
-                updateStats();
-                displayWorkouts();
+                if (workouts.length === 0) {
+                    showEmptyState();
+                    return;
+                }
+
+                updateOverviewStats();
+                initializeCharts();
+                loadRecentActivity();
+                updateProgressBars();
+                generateInsights();
                 
             } catch (error) {
-                console.error('Error loading workout history:', error);
-                showErrorState();
+                console.error('Error loading workout stats:', error);
+                showErrorState('You are on a free-tier server, so you may experience a slow connection, but you can still explore by clicking "Start First Workout"');
             }
         }
 
-        function updateStats() {
-            const totalWorkouts = allWorkouts.length;
-            const totalTime = allWorkouts.reduce((sum, workout) => 
-                sum + workout.exercises.reduce((exSum, ex) => exSum + (ex.duration || 0), 0), 0
-            );
-            const avgDuration = totalWorkouts > 0 ? Math.round(totalTime / totalWorkouts) : 0;
-            const totalExercises = allWorkouts.reduce((sum, workout) => sum + workout.exercises.length, 0);
-            
-            document.getElementById('totalWorkouts').textContent = totalWorkouts;
-            document.getElementById('totalTime').textContent = `${totalTime}m`;
-            document.getElementById('avgDuration').textContent = `${avgDuration}m`;
-            document.getElementById('totalExercises').textContent = totalExercises;
-        }
-
-        function displayWorkouts() {
-            const workoutGrid = document.getElementById('workoutGrid');
-            const workoutCount = document.getElementById('workoutCount');
-            
-            workoutCount.textContent = `${filteredWorkouts.length} workout${filteredWorkouts.length !== 1 ? 's' : ''}`;
-            
-            if (filteredWorkouts.length === 0) {
-                workoutGrid.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🏋️</div>
-                        <h3>No workouts found</h3>
-                        <p>Try adjusting your filters or start your first workout!</p>
-                        <a href="/excercise.html" class="btn btn-primary">Start Workout</a>
-                    </div>
-                `;
-                return;
-            }
-
-            workoutGrid.innerHTML = filteredWorkouts.map(workout => {
-                const workoutDate = new Date(workout.day).toLocaleDateString('en-US', {
-                    weekday: 'short',
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                });
-                
-                const totalDuration = workout.exercises.reduce((sum, ex) => sum + (ex.duration || 0), 0);
-                const exerciseCount = workout.exercises.length;
-                
-                const exerciseTypes = [...new Set(workout.exercises.map(ex => ex.type))];
-                const cardioCount = workout.exercises.filter(ex => ex.type === 'cardio').length;
-                const resistanceCount = workout.exercises.filter(ex => ex.type === 'resistance').length;
-
-                return `
-                    <div class="workout-card">
-                        <div class="workout-header">
-                            <div class="workout-date">${workoutDate}</div>
-                            <div class="workout-duration">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-                                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                                    <polyline points="12,6 12,12 16,14" stroke="currentColor" stroke-width="2"/>
-                                </svg>
-                                ${totalDuration}m
-                            </div>
-                        </div>
-                        
-                        <div class="workout-stats">
-                            <div class="workout-stat">
-                                <div class="workout-stat-value">${exerciseCount}</div>
-                                <div class="workout-stat-label">Exercises</div>
-                            </div>
-                            <div class="workout-stat">
-                                <div class="workout-stat-value">${exerciseTypes.length}</div>
-                                <div class="workout-stat-label">Types</div>
-                            </div>
-                        </div>
-                        
-                        <div class="exercise-list">
-                            ${workout.exercises.slice(0, 6).map(exercise => {
-                                const isCardio = exercise.type === 'cardio';
-                                const exerciseClass = isCardio ? 'cardio-exercise' : 'resistance-exercise';
-                                
-                                let details = '';
-                                if (isCardio) {
-                                    details = `${exercise.distance || 0}km • ${exercise.duration || 0}min`;
-                                } else {
-                                    details = `${exercise.sets || 0} sets • ${exercise.reps || 0} reps • ${exercise.weight || 0}kg`;
-                                }
-                                
-                                return `
-                                    <div class="exercise-item">
-                                        <div class="exercise-icon ${exerciseClass}">
-                                            ${isCardio ? '🏃' : '💪'}
-                                        </div>
-                                        <div class="exercise-info">
-                                            <div class="exercise-name">${exercise.name || 'Unnamed Exercise'}</div>
-                                            <div class="exercise-details">${details}</div>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                            ${workout.exercises.length > 6 ? `
-                                <div class="exercise-item">
-                                    <div class="exercise-icon" style="background: #f1f5f9; color: #64748b;">
-                                        +${workout.exercises.length - 6}
-                                    </div>
-                                    <div class="exercise-info">
-                                        <div class="exercise-name">More exercises</div>
-                                        <div class="exercise-details">View full workout details</div>
-                                    </div>
-                                </div>
-                            ` : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function applyFilters() {
-            const dateFilter = document.getElementById('dateFilter').value;
-            const typeFilter = document.getElementById('typeFilter').value;
-            const sortFilter = document.getElementById('sortFilter').value;
-            
-            let filtered = [...allWorkouts];
-            
-            if (dateFilter !== 'all') {
-                const now = new Date();
-                let cutoffDate = new Date();
-                
-                switch (dateFilter) {
-                    case 'week':
-                        cutoffDate.setDate(now.getDate() - 7);
-                        break;
-                    case 'month':
-                        cutoffDate.setMonth(now.getMonth() - 1);
-                        break;
-                    case '3months':
-                        cutoffDate.setMonth(now.getMonth() - 3);
-                        break;
-                    case 'year':
-                        cutoffDate.setFullYear(now.getFullYear() - 1);
-                        break;
-                }
-                
-                filtered = filtered.filter(workout => new Date(workout.day) >= cutoffDate);
-            }
-            
-            if (typeFilter !== 'all') {
-                filtered = filtered.filter(workout => 
-                    workout.exercises.some(ex => ex.type === typeFilter)
-                );
-            }
-            
-            switch (sortFilter) {
-                case 'date-desc':
-                    filtered.sort((a, b) => new Date(b.day) - new Date(a.day));
-                    break;
-                case 'date-asc':
-                    filtered.sort((a, b) => new Date(a.day) - new Date(b.day));
-                    break;
-                case 'duration-desc':
-                    filtered.sort((a, b) => {
-                        const aDuration = a.exercises.reduce((sum, ex) => sum + (ex.duration || 0), 0);
-                        const bDuration = b.exercises.reduce((sum, ex) => sum + (ex.duration || 0), 0);
-                        return bDuration - aDuration;
-                    });
-                    break;
-                case 'duration-asc':
-                    filtered.sort((a, b) => {
-                        const aDuration = a.exercises.reduce((sum, ex) => sum + (ex.duration || 0), 0);
-                        const bDuration = b.exercises.reduce((sum, ex) => sum + (ex.duration || 0), 0);
-                        return aDuration - bDuration;
-                    });
-                    break;
-                case 'exercises-desc':
-                    filtered.sort((a, b) => b.exercises.length - a.exercises.length);
-                    break;
-                case 'exercises-asc':
-                    filtered.sort((a, b) => a.exercises.length - b.exercises.length);
-                    break;
-            }
-            
-            filteredWorkouts = filtered;
-            displayWorkouts();
-        }
-
-        function showErrorState() {
-            const workoutGrid = document.getElementById('workoutGrid');
-            workoutGrid.innerHTML = `
+        function showEmptyState() {
+            document.getElementById('recentActivity').innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">⚠️</div>
-                    <h3>Error loading workouts</h3>
-                    <p>Unable to load workout history. Please check your connection and try again.</p>
-                    <button onclick="loadWorkoutHistory()" class="btn btn-primary">Retry</button>
+                    <h3>No workout data available</h3>
+                    <p>Start tracking your workouts to see analytics and insights here.</p>
+                    <a href="/excercise.html" class="btn-start-workout">Start First Workout</a>
+                </div>
+            `;
+            
+            document.querySelector('.charts-section').style.display = 'none';
+        }
+
+        function showErrorState(message) {
+            document.getElementById('recentActivity').innerHTML = `
+                <div class="empty-state">
+                    <h3>Unable to load data</h3>
+                    <p>${message}</p>
+                    <a href="/excercise.html" class="btn-start-workout">Start First Workout</a>
                 </div>
             `;
         }
 
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-                color: white;
-                padding: 16px 20px;
-                border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                z-index: 1000;
-                font-family: 'Inter', sans-serif;
-                font-weight: 500;
-                animation: slideIn 0.3s ease-out;
-            `;
-            toast.textContent = message;
+        function updateOverviewStats() {
+            const totalWorkouts = workouts.length;
+            const totalTime = workouts.reduce((sum, workout) => 
+                sum + (workout.exercises || []).reduce((exSum, ex) => exSum + (ex.duration || 0), 0), 0
+            );
             
-            document.body.appendChild(toast);
+            const caloriesBurned = Math.round(totalTime * 5);
+            const streak = calculateStreak();
             
-            setTimeout(() => {
-                toast.style.animation = 'slideOut 0.3s ease-in forwards';
-                setTimeout(() => document.body.removeChild(toast), 300);
-            }, 3000);
+            document.getElementById('totalWorkouts').textContent = totalWorkouts;
+            document.getElementById('totalTime').textContent = `${totalTime}m`;
+            document.getElementById('caloriesBurned').textContent = caloriesBurned.toLocaleString();
+            document.getElementById('currentStreak').textContent = streak;
+
+            if (workouts.length > 5) {
+                document.getElementById('workoutsTrend').style.display = 'flex';
+                document.getElementById('timeTrend').style.display = 'flex';
+                document.getElementById('caloriesTrend').style.display = 'flex';
+                document.getElementById('streakTrend').style.display = 'flex';
+            }
+        }
+
+        function calculateStreak() {
+            if (workouts.length === 0) return 0;
+            
+            const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.day) - new Date(a.day));
+            let streak = 0;
+            let currentDate = new Date();
+            currentDate.setHours(0, 0, 0, 0);
+            
+            for (const workout of sortedWorkouts) {
+                const workoutDate = new Date(workout.day);
+                workoutDate.setHours(0, 0, 0, 0);
+                const daysDiff = Math.floor((currentDate - workoutDate) / (1000 * 60 * 60 * 24));
+                
+                if (daysDiff <= 1) {
+                    streak++;
+                    currentDate = workoutDate;
+                } else {
+                    break;
+                }
+            }
+            
+            return streak;
+        }
+
+        function initializeCharts() {
+            const recentWorkouts = workouts.slice(0, 10).reverse();
+            
+            if (recentWorkouts.length === 0) return;
+
+            const durationCtx = document.getElementById('durationChart').getContext('2d');
+            charts.duration = new Chart(durationCtx, {
+                type: 'line',
+                data: {
+                    labels: recentWorkouts.map(w => new Date(w.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+                    datasets: [{
+                        label: 'Duration (minutes)',
+                        data: recentWorkouts.map(w => 
+                            (w.exercises || []).reduce((sum, ex) => sum + (ex.duration || 0), 0)
+                        ),
+                        borderColor: '#4f46e5',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#4f46e5',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.05)' },
+                            ticks: { color: '#64748b' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#64748b' }
+                        }
+                    }
+                }
+            });
+
+            const exerciseTypes = {};
+            workouts.forEach(workout => {
+                (workout.exercises || []).forEach(ex => {
+                    const type = ex.type || ex.category || 'other';
+                    exerciseTypes[type] = (exerciseTypes[type] || 0) + 1;
+                });
+            });
+
+            const exerciseCtx = document.getElementById('exerciseChart').getContext('2d');
+            charts.exercise = new Chart(exerciseCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(exerciseTypes).map(type => 
+                        type.charAt(0).toUpperCase() + type.slice(1)
+                    ),
+                    datasets: [{
+                        data: Object.values(exerciseTypes),
+                        backgroundColor: ['#4f46e5', '#059669', '#dc2626', '#f59e0b'],
+                        borderWidth: 0,
+                        cutout: '65%'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                usePointStyle: true,
+                                color: '#64748b'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadRecentActivity() {
+            const activityList = document.getElementById('recentActivity');
+            const recentWorkouts = workouts.slice(0, 5);
+            
+            if (recentWorkouts.length === 0) {
+                activityList.innerHTML = `
+                    <div class="empty-state">
+                        <p>No recent activity. Start your first workout!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            activityList.innerHTML = recentWorkouts.map(workout => {
+                const duration = (workout.exercises || []).reduce((sum, ex) => sum + (ex.duration || 0), 0);
+                const exerciseCount = (workout.exercises || []).length;
+                const timeAgo = getTimeAgo(workout.day);
+                
+                return `
+                    <li class="activity-item">
+                        <div class="activity-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                <path d="M8 16h4v8H8z" fill="currentColor"/>
+                                <path d="M12 12h4v12h-4z" fill="currentColor"/>
+                                <path d="M16 8h4v16h-4z" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-name">Completed workout</div>
+                            <div class="activity-details">${exerciseCount} exercises • ${duration} minutes</div>
+                        </div>
+                        <div class="activity-time">${timeAgo}</div>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const workoutDate = new Date(date);
+            const diffMs = now - workoutDate;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            return workoutDate.toLocaleDateString();
+        }
+
+        function updateProgressBars() {
+            const thisWeekStart = new Date();
+            thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay());
+            thisWeekStart.setHours(0, 0, 0, 0);
+            
+            const thisWeekWorkouts = workouts.filter(w => new Date(w.day) >= thisWeekStart);
+            const weeklyGoal = 5;
+            const weeklyProgress = Math.min((thisWeekWorkouts.length / weeklyGoal) * 100, 100);
+            
+            document.getElementById('weeklyProgress').textContent = `${Math.round(weeklyProgress)}%`;
+            document.getElementById('weeklyProgressBar').style.width = `${weeklyProgress}%`;
+            document.getElementById('weeklyDetails').textContent = 
+                `${thisWeekWorkouts.length} of ${weeklyGoal} workouts completed this week`;
+
+            const thisMonthStart = new Date();
+            thisMonthStart.setDate(1);
+            thisMonthStart.setHours(0, 0, 0, 0);
+            
+            const thisMonthWorkouts = workouts.filter(w => new Date(w.day) >= thisMonthStart);
+            const thisMonthTime = thisMonthWorkouts.reduce((sum, workout) => 
+                sum + (workout.exercises || []).reduce((exSum, ex) => exSum + (ex.duration || 0), 0), 0
+            );
+            const monthlyGoal = 1200; 
+            const monthlyProgress = Math.min((thisMonthTime / monthlyGoal) * 100, 100);
+            
+            document.getElementById('monthlyProgress').textContent = `${Math.round(monthlyProgress)}%`;
+            document.getElementById('monthlyProgressBar').style.width = `${monthlyProgress}%`;
+            document.getElementById('monthlyDetails').textContent = 
+                `${thisMonthTime} of ${monthlyGoal} minutes completed this month`;
+        }
+
+        function generateInsights() {
+            const insights = [];
+            const avgDuration = workouts.length > 0 ? 
+                workouts.reduce((sum, w) => sum + (w.exercises || []).reduce((s, e) => s + (e.duration || 0), 0), 0) / workouts.length : 0;
+            
+            const streak = calculateStreak();
+            if (streak > 3) {
+                insights.push({
+                    title: "Great Consistency!",
+                    description: `You're on a ${streak}-day workout streak. Keep it up!`
+                });
+            } else if (workouts.length > 5) {
+                insights.push({
+                    title: "Consistency Opportunity",
+                    description: "Try to maintain regular workout intervals for better results."
+                });
+            }
+
+            if (avgDuration > 45) {
+                insights.push({
+                    title: "Excellent Duration",
+                    description: `Your average workout is ${Math.round(avgDuration)} minutes. Great endurance!`
+                });
+            } else if (avgDuration > 0) {
+                insights.push({
+                    title: "Room for Growth",
+                    description: `Consider gradually increasing workout duration from ${Math.round(avgDuration)} minutes.`
+                });
+            }
+
+            const exerciseTypes = new Set();
+            workouts.forEach(w => (w.exercises || []).forEach(e => exerciseTypes.add(e.type || e.category || 'other')));
+            
+            if (exerciseTypes.size > 1) {
+                insights.push({
+                    title: "Great Variety",
+                    description: "You're mixing cardio and resistance training effectively."
+                });
+            } else if (exerciseTypes.size === 1) {
+                const type = Array.from(exerciseTypes)[0];
+                const otherType = type === 'cardio' ? 'resistance training' : 'cardio';
+                insights.push({
+                    title: "Add Variety",
+                    description: `Consider incorporating ${otherType} into your routine.`
+                });
+            }
+
+            if (insights.length === 0) {
+                insights.push(
+                    {
+                        title: "Start Your Journey",
+                        description: "Begin tracking workouts to get personalized insights."
+                    },
+                    {
+                        title: "Consistency is Key",
+                        description: "Regular exercise is more beneficial than intense but sporadic workouts."
+                    }
+                );
+            }
+
+            document.getElementById('insights').innerHTML = insights.map(insight => `
+                <div class="insight-item">
+                    <div class="insight-title">${insight.title}</div>
+                    <div class="insight-description">${insight.description}</div>
+                </div>
+            `).join('');
         }
 
         window.addEventListener('storage', (e) => {
             if (e.key === 'workoutUpdated') {
-                console.log('Workout updated, refreshing history...');
-                loadWorkoutHistory();
+                loadWorkoutStats();
             }
         });
 
+        window.addEventListener('resize', () => {
+            Object.values(charts).forEach(chart => {
+                if (chart) {
+                    chart.resize();
+                }
+            });
+        });
+
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('Initializing FitTrack history page...');
+            console.log('Initializing FitTrack analytics page...');
             
             const user = checkAuth();
             if (!user) return;
@@ -1264,20 +1491,9 @@
             initializeUser(user);
             initializeMobileMenu();
             
-            document.getElementById('dateFilter').addEventListener('change', applyFilters);
-            document.getElementById('typeFilter').addEventListener('change', applyFilters);
-            document.getElementById('sortFilter').addEventListener('change', applyFilters);
+            await loadWorkoutStats();
             
-            await loadWorkoutHistory();
-            
-            console.log('History page initialization complete');
-        });
-
-        document.addEventListener('visibilitychange', async () => {
-            if (!document.hidden) {
-                console.log('Page became visible, refreshing data...');
-                await loadWorkoutHistory();
-            }
+            console.log('Analytics page initialization complete');
         });
     </script>
 </body>
