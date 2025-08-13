@@ -36,7 +36,7 @@
             margin: 0 auto;
             padding: 0 24px;
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
         }
 
@@ -123,6 +123,183 @@
         }
 
         .logout-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 24px;
+            height: 18px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .hamburger span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background: #64748b;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 300px;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            transition: right 0.3s ease;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-menu-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #64748b;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-menu-close:hover {
+            background: #f1f5f9;
+        }
+
+        .mobile-nav-links {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .mobile-nav-link {
+            display: block;
+            padding: 16px 20px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .mobile-nav-link:hover,
+        .mobile-nav-link.active {
+            color: #4f46e5;
+            background: #f8fafc;
+            border-left-color: #4f46e5;
+        }
+
+        .mobile-user-section {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .mobile-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .mobile-user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .mobile-user-details h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .mobile-user-details p {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .mobile-logout-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .mobile-logout-btn:hover {
             background: #f1f5f9;
             border-color: #cbd5e1;
         }
@@ -736,7 +913,45 @@
             background: #b91c1c;
         }
 
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        body.menu-open {
+            overflow: hidden;
+        }
+
         @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+
+            .nav-menu {
+                display: none;
+            }
+
+            .nav-user {
+                display: none;
+            }
+
             .main-container {
                 padding: 24px 16px;
             }
@@ -749,6 +964,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .filter-buttons {
+                flex-direction: column;
+            }
+
             .summary-stats {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -757,6 +976,7 @@
                 flex-direction: column;
                 gap: 16px;
                 text-align: center;
+                padding: 20px;
             }
 
             .workout-body {
@@ -780,6 +1000,14 @@
             .workout-actions {
                 flex-direction: column;
             }
+
+            .page-title {
+                font-size: 24px;
+            }
+
+            .page-subtitle {
+                font-size: 16px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -791,12 +1019,48 @@
                 grid-template-columns: 1fr;
             }
 
+            .mobile-menu {
+                width: 90%;
+            }
+
+            .nav-container {
+                padding: 0 16px;
+            }
+
+            .filters-card {
+                padding: 16px;
+                margin-bottom: 24px;
+            }
+
+            .summary-card {
+                padding: 16px;
+            }
+
+            .workout-item {
+                margin-bottom: 16px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 360px) {
             .page-title {
+                font-size: 20px;
+            }
+
+            .summary-number {
                 font-size: 24px;
             }
 
-            .page-subtitle {
-                font-size: 16px;
+            .workout-date {
+                font-size: 18px;
+            }
+
+            .summary-item-value {
+                font-size: 18px;
             }
         }
     </style>
@@ -818,13 +1082,13 @@
             </div>
             
             <div class="nav-user">
-                <!-- <div class="user-avatar" id="userAvatar">
+                <div class="user-avatar" id="userAvatar">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                         <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
-                <span id="userName">User</span> -->
+                <span id="userName">User</span>
                 <button class="logout-btn" onclick="logout()">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline; margin-right: 4px;">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -834,8 +1098,56 @@
                     Logout
                 </button>
             </div>
+
+            <button class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </nav>
+
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="nav-brand">
+                <div class="brand-logo"></div>
+                FitTrack
+            </div>
+            <button class="mobile-menu-close" id="mobileMenuClose">×</button>
+        </div>
+
+        <nav class="mobile-nav-links">
+            <a href="index.html" class="mobile-nav-link">Home</a>
+            <a href="/stats.html" class="mobile-nav-link">Analytics</a>
+            <a href="/history.html" class="mobile-nav-link active">History</a>
+            <a href="/excercise.html" class="mobile-nav-link">Exercise</a>
+        </nav>
+
+        <div class="mobile-user-section">
+            <div class="mobile-user-info">
+                <div class="mobile-user-avatar" id="mobileUserAvatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="mobile-user-details">
+                    <h3 id="mobileUserName">User</h3>
+                    <p>FitTrack Member</p>
+                </div>
+            </div>
+            <button class="mobile-logout-btn" onclick="logout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Logout
+            </button>
+        </div>
+    </div>
 
     <div class="main-container">
         <div class="page-header">
@@ -945,6 +1257,57 @@
         let allWorkouts = [];
         let filteredWorkouts = [];
         let workoutToDelete = null;
+
+        function initializeMobileMenu() {
+            const hamburger = document.getElementById('hamburger');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+            const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+            function openMobileMenu() {
+                hamburger.classList.add('active');
+                mobileMenu.classList.add('active');
+                mobileMenuOverlay.style.display = 'block';
+                mobileMenuOverlay.classList.add('active');
+                document.body.classList.add('menu-open');
+            }
+
+            function closeMobileMenu() {
+                hamburger.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                mobileMenuOverlay.classList.remove('active');
+                document.body.classList.remove('menu-open');
+                
+                setTimeout(() => {
+                    if (!mobileMenuOverlay.classList.contains('active')) {
+                        mobileMenuOverlay.style.display = 'none';
+                    }
+                }, 300);
+            }
+
+            hamburger.addEventListener('click', openMobileMenu);
+            mobileMenuClose.addEventListener('click', closeMobileMenu);
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    setTimeout(closeMobileMenu, 150);
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    closeMobileMenu();
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+                    closeMobileMenu();
+                }
+            });
+        }
 
         function getExerciseIcon(category) {
             const icons = {
@@ -1102,39 +1465,35 @@
             `;
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const user = JSON.parse(localStorage.getItem('user') || 'null');
-            if (!user) {
-                window.location.href = '/login.html';
-                return;
-            }
-            
-            displayUserInfo(user);
-            
-            await initializeWorkout();
-            startSessionTimer();
-        });
-
         function displayUserInfo(user) {
             const userNameElement = document.getElementById('userName');
             const userAvatarElement = document.getElementById('userAvatar');
+            const mobileUserNameElement = document.getElementById('mobileUserName');
+            const mobileUserAvatarElement = document.getElementById('mobileUserAvatar');
             
-            if (userNameElement && user.name) {
-                userNameElement.textContent = user.name;
+            const userName = user.name || user.email || 'User';
+            
+            if (userNameElement) {
+                userNameElement.textContent = userName;
             }
             
-            if (userAvatarElement && user.name) {
+            if (mobileUserNameElement) {
+                mobileUserNameElement.textContent = userName;
+            }
+            
+            if (user.picture) {
+                const avatarImg = `<img src="${user.picture}" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                if (userAvatarElement) userAvatarElement.innerHTML = avatarImg;
+                if (mobileUserAvatarElement) mobileUserAvatarElement.innerHTML = avatarImg;
+            } else if (user.name) {
                 const firstLetter = user.name.charAt(0).toUpperCase();
-                userAvatarElement.innerHTML = firstLetter;
+                if (userAvatarElement) userAvatarElement.innerHTML = firstLetter;
+                if (mobileUserAvatarElement) mobileUserAvatarElement.innerHTML = firstLetter;
             }
         }
 
         function logout() {
-            localStorage.removeItem('user');
-            localStorage.removeItem('currentWorkoutId');
-            localStorage.removeItem('newWorkoutExercises');
-            localStorage.removeItem('workoutStartTime');
-            
+            localStorage.clear();
             window.location.href = '/login.html';
         }
 
@@ -1332,15 +1691,23 @@
             }
         });
 
-        document.addEventListener('DOMContentLoaded', initializePage);
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = JSON.parse(localStorage.getItem('user') || 'null');
+            if (!user) {
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            displayUserInfo(user);
+            initializeMobileMenu();
+            await initializePage();
+        });
 
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeDeleteModal();
             }
         });
-
-        
     </script>
 </body>
 </html>
