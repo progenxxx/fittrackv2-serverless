@@ -1,4 +1,3 @@
-// Fixed models/Workout.js with complete exercise types
 const mongoose = require("mongoose");
 
 const exerciseSchema = new mongoose.Schema({
@@ -6,19 +5,12 @@ const exerciseSchema = new mongoose.Schema({
         type: String,
         required: [true, "Exercise type is required"],
         enum: [
-            // Main categories
             "cardio", "resistance", "flexibility", "balance", "sports_specific", "recovery",
-            // Cardio subcategories
             "low_intensity_cardio", "moderate_intensity_cardio", "high_intensity_cardio", "hiit",
-            // Resistance subcategories
             "bodyweight", "free_weights", "machines", "resistance_bands", "powerlifting", "olympic_lifting",
-            // Flexibility subcategories - FIXED: Added missing types
             "static_stretching", "dynamic_stretching", "yoga", "pilates",
-            // Balance subcategories
             "balance_training", "functional_movement", "tai_chi",
-            // Sports specific subcategories
             "plyometrics", "agility", "endurance", "crossfit",
-            // Recovery subcategories
             "active_recovery", "mobility_work", "meditation"
         ],
         trim: true
@@ -41,7 +33,6 @@ const exerciseSchema = new mongoose.Schema({
         required: [true, "Duration is required"]
     },
     
-    // Intensity and effort tracking
     intensity: {
         type: String,
         enum: ["light", "moderate", "vigorous", "maximum"],
@@ -59,7 +50,6 @@ const exerciseSchema = new mongoose.Schema({
         }
     },
     
-    // Equipment used
     equipment: {
         type: String,
         enum: [
@@ -69,7 +59,6 @@ const exerciseSchema = new mongoose.Schema({
         default: "none"
     },
     
-    // Muscle groups targeted (for resistance exercises)
     muscleGroups: [{
         type: String,
         enum: [
@@ -78,7 +67,6 @@ const exerciseSchema = new mongoose.Schema({
         ]
     }],
     
-    // Cardio-specific fields
     distance: {
         type: Number,
         min: [0, "Distance cannot be negative"],
@@ -99,7 +87,6 @@ const exerciseSchema = new mongoose.Schema({
         min: [0, "Calories cannot be negative"]
     },
     
-    // Resistance-specific fields
     weight: {
         type: Number,
         min: [0, "Weight cannot be negative"],
@@ -118,10 +105,9 @@ const exerciseSchema = new mongoose.Schema({
     restBetweenSets: {
         type: Number,
         min: [0, "Rest time cannot be negative"],
-        default: 60 // seconds
+        default: 60 
     },
     
-    // Flexibility-specific fields
     stretchHoldTime: {
         type: Number,
         min: [0, "Hold time cannot be negative"]
@@ -131,7 +117,6 @@ const exerciseSchema = new mongoose.Schema({
         enum: ["poor", "fair", "good", "excellent"]
     },
     
-    // Additional tracking fields
     notes: {
         type: String,
         maxlength: [500, "Notes cannot exceed 500 characters"],
@@ -153,20 +138,15 @@ const exerciseSchema = new mongoose.Schema({
     timestamps: false
 });
 
-// Pre-save middleware for exercise validation
 exerciseSchema.pre('save', function(next) {
-    // Set category based on type if not provided
     if (!this.category) {
-        // Map exercise types to categories
         const typeToCategory = {
-            // Cardio types
             'cardio': 'cardio',
             'low_intensity_cardio': 'cardio',
             'moderate_intensity_cardio': 'cardio',
             'high_intensity_cardio': 'cardio',
             'hiit': 'cardio',
             
-            // Resistance types
             'resistance': 'resistance',
             'bodyweight': 'resistance',
             'free_weights': 'resistance',
@@ -175,27 +155,23 @@ exerciseSchema.pre('save', function(next) {
             'powerlifting': 'resistance',
             'olympic_lifting': 'resistance',
             
-            // Flexibility types - FIXED: Added missing mappings
             'flexibility': 'flexibility',
             'static_stretching': 'flexibility',
             'dynamic_stretching': 'flexibility',
             'yoga': 'flexibility',
             'pilates': 'flexibility',
             
-            // Balance types
             'balance': 'balance',
             'balance_training': 'balance',
             'functional_movement': 'balance',
             'tai_chi': 'balance',
             
-            // Sports specific types
             'sports_specific': 'sports_specific',
             'plyometrics': 'sports_specific',
             'agility': 'sports_specific',
             'endurance': 'sports_specific',
             'crossfit': 'sports_specific',
             
-            // Recovery types
             'recovery': 'recovery',
             'active_recovery': 'recovery',
             'mobility_work': 'recovery',
@@ -205,7 +181,6 @@ exerciseSchema.pre('save', function(next) {
         this.category = typeToCategory[this.type];
     }
     
-    // Validate category-specific requirements
     if (this.category === 'cardio') {
         if (!this.duration || this.duration <= 0) {
             return next(new Error('Cardio exercises must have a positive duration'));
@@ -214,7 +189,6 @@ exerciseSchema.pre('save', function(next) {
         if (!this.duration || this.duration <= 0) {
             return next(new Error('Resistance exercises must have a positive duration'));
         }
-        // For traditional resistance training, require sets and reps
         if (['resistance', 'free_weights', 'machines', 'powerlifting'].includes(this.type)) {
             if (!this.reps || this.reps <= 0) {
                 return next(new Error('Traditional resistance exercises must have positive reps'));
@@ -232,7 +206,6 @@ exerciseSchema.pre('save', function(next) {
     next();
 });
 
-// Virtual for total volume (for resistance exercises)
 exerciseSchema.virtual('totalVolume').get(function() {
     if (this.category === 'resistance' && this.weight && this.reps && this.sets) {
         return this.weight * this.reps * this.sets;
@@ -240,7 +213,6 @@ exerciseSchema.virtual('totalVolume').get(function() {
     return 0;
 });
 
-// Virtual for calories per minute estimate
 exerciseSchema.virtual('caloriesPerMinute').get(function() {
     if (this.caloriesBurned && this.duration) {
         return Math.round((this.caloriesBurned / this.duration) * 100) / 100;
@@ -248,7 +220,6 @@ exerciseSchema.virtual('caloriesPerMinute').get(function() {
     return 0;
 });
 
-// Virtual for pace (for cardio exercises)
 exerciseSchema.virtual('pace').get(function() {
     if (this.category === 'cardio' && this.distance && this.duration) {
         const paceMinutesPerKm = this.duration / this.distance;
@@ -270,7 +241,6 @@ const workoutSchema = new mongoose.Schema({
         default: []
     },
     
-    // Workout-level tracking
     title: {
         type: String,
         trim: true,
@@ -328,7 +298,7 @@ const workoutSchema = new mongoose.Schema({
     }],
     personalRecords: [{
         exercise: String,
-        metric: String, // e.g., "max_weight", "best_time", "longest_distance"
+        metric: String, 
         value: Number,
         unit: String
     }]
@@ -338,7 +308,6 @@ const workoutSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
-// Enhanced virtuals
 workoutSchema.virtual('totalDuration').get(function() {
     return this.exercises.reduce((total, exercise) => total + (exercise.duration || 0), 0);
 });
@@ -420,7 +389,6 @@ workoutSchema.virtual('averageIntensity').get(function() {
     return 'maximum';
 });
 
-// Indexes for better performance
 workoutSchema.index({ day: -1 });
 workoutSchema.index({ workoutType: 1 });
 workoutSchema.index({ 'exercises.category': 1 });
@@ -428,9 +396,7 @@ workoutSchema.index({ 'exercises.type': 1 });
 workoutSchema.index({ location: 1 });
 workoutSchema.index({ difficulty: 1 });
 
-// Pre-save middleware for workout validation
 workoutSchema.pre('save', function(next) {
-    // Auto-determine workout type based on exercises
     if (!this.workoutType || this.workoutType === 'mixed') {
         const categories = new Set(this.exercises.map(ex => ex.category));
         
@@ -460,7 +426,6 @@ workoutSchema.pre('save', function(next) {
         }
     }
     
-    // Auto-generate title if not provided
     if (!this.title) {
         const date = new Date(this.day).toLocaleDateString();
         const primaryCategory = this.exercises.length > 0 ? 
@@ -471,7 +436,6 @@ workoutSchema.pre('save', function(next) {
     next();
 });
 
-// Instance methods
 workoutSchema.methods.addExercise = function(exerciseData) {
     this.exercises.push(exerciseData);
     return this.save();
@@ -498,7 +462,6 @@ workoutSchema.methods.calculateWorkoutStats = function() {
     };
 };
 
-// Static methods
 workoutSchema.statics.findByDateRange = function(startDate, endDate) {
     return this.find({
         day: {

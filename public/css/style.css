@@ -1,4 +1,3 @@
-/* GENERAL STYLES */
 *,
 *::before,
 *::after {
@@ -10,7 +9,6 @@
 html,
 body,
 .wrapper {
-    /* background-color: #f8f6f6; */
     font-family: 'Lexend', sans-serif;
     height: 100%;
 }
@@ -19,7 +17,6 @@ body,
     background-color: #f8f6f6;
     position: relative;
     z-index: 5;
-    /* padding-bottom: 100px; */
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -59,7 +56,6 @@ h3 {
     padding: 10px;
 }
 
-/* NAVBAR */
 nav {
     background-color: white;
     position: relative;
@@ -104,7 +100,6 @@ nav a {
     border-bottom: solid 3px black;
 }
 
-/* HEADER */
 header {
     height: 120px;
     padding-top: 50px;
@@ -116,7 +111,6 @@ header h1 {
     transform: skewX(-2deg);
 }
 
-/* BUTTONS */
 .buttons .ui.button:first-child {
     border-radius: 8px;
 }
@@ -136,7 +130,6 @@ button {
     background: linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
 }
 
-/* FORMS */
 form label {
     width: 150px;
     margin-top: 0.7rem;
@@ -170,7 +163,6 @@ button {
     background: linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
 }
 
-/* FOOTER */
 footer {
     height: fit-content;
     width: 100%;
@@ -185,7 +177,6 @@ footer {
     font-size: 15px;
 }
 
-/* SUCCESS MESSAGE */
 #toast {
     border-radius: 4px;
     border: solid 1px hsl(94, 90%, 16%);
@@ -209,12 +200,10 @@ footer {
     right: 10px;
     background-color: hsl(94, 40%, 86%);
     color: hsl(94, 90%, 16%);
-    /* transition: all 1.2s; */
     animation-name: toast;
     animation-duration: 3s;
     animation-fill-mode: forwards;
     animation-delay: 0.2s;
-    /* animation-timing-function: cubic-bezier(0.785, 0.135, 0.15, 0.86); */
 }
 
 @keyframes toast {
@@ -228,7 +217,6 @@ footer {
     }
 }
 
-/* ------- MEDIA QUERIES ------- */
 @media (max-width: 675px) {
     nav {
         height: 170px;

@@ -23,18 +23,10 @@
     font-weight: 600;
 }
 
-/* WORKOUT SEARCH */
 #history-search-div {
     width: fit-content;
     margin: 10px auto;
 }
-
-/* 
-<-- Label for select element -->
-#history-search-div label {
-    font-weight: 500;
-} 
-*/
 
 #history-search-select {
     font-family: 'Lexend', sans-serif;
@@ -59,7 +51,6 @@
     color: rgb(255, 238, 191);
 }
 
-/* EXERCISE COLOUR KEY */ 
 #exercise-color-key {
     width: 50%;
     height: 50px;
@@ -87,7 +78,6 @@
     background: rgb(198, 193, 218);
 }
 
-/* WORKOUT DIVS */
 .history-content {
     height: 100%;
 }
@@ -113,7 +103,6 @@
     color: rgb(232, 237, 248);
 }
 
-/* EXERCISE DIVS */ 
 .last-exercise {
     border-bottom: solid 2px rgb(95, 136, 170);
 }
@@ -145,31 +134,27 @@
     padding-left: 30px;
 }
 
-/* Container for each workout entry */
 .workout-entry {
-    background-color: #f9f9f9; /* light gray card */
-    border: 1px solid #ddd;    /* subtle border */
+    background-color: #f9f9f9; 
+    border: 1px solid #ddd;   
     border-radius: 8px;
     padding: 15px 20px;
     margin-bottom: 15px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
-/* Date heading inside each card */
 .workout-entry .workout-date {
     font-weight: 600;
     font-size: 1.1rem;
     margin-bottom: 8px;
 }
 
-/* Exercise details */
 .workout-entry .exercise-detail {
     padding-left: 10px;
     margin-bottom: 5px;
     font-size: 0.95rem;
 }
 
-/* Resistance / Cardio badges */
 .workout-entry .exercise-detail span.type {
     font-weight: 600;
     text-transform: capitalize;
@@ -188,36 +173,6 @@
     background-color: #ff6b6b;
 }
 
-
-/* 
-<-- Edit/delete exercise buttons -->
-.exercise-btn-div {
-    text-align: center;
-    margin: 15px 0;
-}
-
-.edit-exercise-btn, .delete-exercise-btn {
-    font-family: 'Lexend', sans-serif;
-    display: inline-block;
-    width: 46%;
-    margin: 0 5px;
-    border-radius: 5px;
-    border: solid 2px rgb(148, 148, 148);
-    color: rgb(148, 148, 148);
-    background: white;
-}
-
-.edit-exercise-btn:hover {
-    border: solid 2px rgb(184, 209, 115);
-    color: rgb(184, 209, 115);
-}
-
-.delete-exercise-btn:hover {
-    border: solid 2px rgb(255, 77, 77);
-    color: rgb(255, 77, 77);
-} 
-*/
-
 .delete-workout-btn {
     font-family: 'Lexend', sans-serif;
     height: 100%;
@@ -235,7 +190,6 @@
     background: rgb(82, 82, 82);
 }
 
-/* NO WORKOUT HISTORY */
 #no-workout-history {
     display: none;
     font-size: 35px;
@@ -266,7 +220,6 @@
     color: white;
 }
 
-/* DELETE CONFIRMATION MODAL */
 .modal-bg {
     display: none;
     position: fixed;
@@ -326,7 +279,6 @@
     color: white;
 }
 
-/* ------- MEDIA QUERIES ------- */
 @media (max-width: 768px) {
     #exercise-color-key {
         width: 95%;

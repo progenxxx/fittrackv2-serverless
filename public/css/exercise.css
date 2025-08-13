@@ -27,7 +27,6 @@ form .resistance-form div {
     height: 80px;
 }
 
-/* SELECT */
 select {
     font-family: 'Lexend', sans-serif;
     display: block;
@@ -63,7 +62,6 @@ select option {
     width: 100%;
 }
 
-/* INPUT */ 
 input {
     font-family: 'Lexend', sans-serif;
     display: block;
@@ -77,7 +75,6 @@ input {
     padding: 10px;
 }
 
-/* FORM */
 form label {
     width: 150px;
     margin-top: 0.7rem;
@@ -94,7 +91,6 @@ form::after {
     clear: both;
 }
 
-/* BUTTONS */
 .exercise .buttons {
     margin-top: 20px;
     display: flex;
@@ -143,7 +139,6 @@ form::after {
     background-color: rgb(224, 247, 241);
 }
 
-/* ------- MEDIA QUERIES ------- */
 @media (max-width: 500px) {
     .exercise-wrapper header {
         height: 80px;
