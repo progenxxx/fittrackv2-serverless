@@ -1559,17 +1559,14 @@
         });
 
         function displayUserInfo(user) {
-            const userNameElement = document.getElementById('userName');
-            const userAvatarElement = document.getElementById('userAvatar');
+            document.getElementById('userName').textContent = user.name || 'User';
+            document.getElementById('userNameWelcome').textContent = user.name || 'User';
             
-            if (userNameElement && user.name) {
-                userNameElement.textContent = user.name;
-            }
-            
-            // Update avatar with first letter of name if available
-            if (userAvatarElement && user.name) {
-                const firstLetter = user.name.charAt(0).toUpperCase();
-                userAvatarElement.innerHTML = firstLetter;
+            const userAvatar = document.getElementById('userAvatar');
+            if (user.picture) {
+                userAvatar.innerHTML = `<img src="${user.picture}" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+            } else if (user.name) {
+                userAvatar.innerHTML = user.name.charAt(0).toUpperCase();
             }
         }
 
