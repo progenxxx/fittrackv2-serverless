@@ -57,14 +57,8 @@
             align-items: center;
             justify-content: center;
             color: white;
-        }
-
-        .brand-logo {
-            width: 36px;
-            height: 36px;
-            background: url('/logo.png') no-repeat center center;
-            background-size: contain;
-            border-radius: 12px;
+            font-weight: bold;
+            font-size: 18px;
         }
 
         .nav-menu {
@@ -125,7 +119,6 @@
             border-color: #cbd5e1;
         }
 
-        /* Hamburger Menu Styles */
         .hamburger {
             display: none;
             flex-direction: column;
@@ -536,6 +529,7 @@
             width: 24px;
             height: 24px;
             color: #4f46e5;
+            font-size: 18px;
         }
 
         .type-label {
@@ -642,6 +636,7 @@
             border-left: 4px solid #4f46e5;
             font-size: 14px;
             color: #64748b;
+            position: relative;
         }
 
         .exercise-item strong {
@@ -657,6 +652,24 @@
             font-size: 11px;
             font-weight: 600;
             margin-left: 8px;
+        }
+
+        .exercise-item .delete-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .exercise-item .delete-btn:hover {
+            background: #dc2626;
         }
 
         .popular-exercises {
@@ -744,28 +757,6 @@
         @keyframes spin {
             0% { transform: translate(-50%, -50%) rotate(0deg); }
             100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
         }
 
         @media (max-width: 768px) {
@@ -922,7 +913,6 @@
             }
         }
 
-        /* Prevent body scroll when mobile menu is open */
         body.menu-open {
             overflow: hidden;
         }
@@ -932,7 +922,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/index.html" class="nav-brand">
-                <div class="brand-logo"></div>
+                <div class="brand-icon">FT</div>
                 FitTrack
             </a>
             
@@ -940,25 +930,13 @@
                 <a href="index.html" class="nav-link">Home</a>
                 <a href="/stats.html" class="nav-link">Analytics</a>
                 <a href="/history.html" class="nav-link">History</a>
-                <a href="/excercise.html" class="nav-link active">Exercise</a>
+                <a href="/exercise.html" class="nav-link active">Exercise</a>
             </div>
             
             <div class="nav-user">
-                <div class="user-avatar" id="userAvatar">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
+                <div class="user-avatar" id="userAvatar">U</div>
                 <span id="userName">User</span>
-                <button class="logout-btn" onclick="logout()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline; margin-right: 4px;">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Logout
-                </button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
 
             <button class="hamburger" id="hamburger">
@@ -974,7 +952,7 @@
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-header">
             <div class="nav-brand">
-                <div class="brand-logo"></div>
+                <div class="brand-icon">FT</div>
                 FitTrack
             </div>
             <button class="mobile-menu-close" id="mobileMenuClose">×</button>
@@ -984,30 +962,18 @@
             <a href="index.html" class="mobile-nav-link">Home</a>
             <a href="/stats.html" class="mobile-nav-link">Analytics</a>
             <a href="/history.html" class="mobile-nav-link">History</a>
-            <a href="/excercise.html" class="mobile-nav-link active">Exercise</a>
+            <a href="/exercise.html" class="mobile-nav-link active">Exercise</a>
         </nav>
 
         <div class="mobile-user-section">
             <div class="mobile-user-info">
-                <div class="mobile-user-avatar" id="mobileUserAvatar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
+                <div class="mobile-user-avatar" id="mobileUserAvatar">U</div>
                 <div class="mobile-user-details">
                     <h3 id="mobileUserName">User</h3>
                     <p>FitTrack Member</p>
                 </div>
             </div>
-            <button class="mobile-logout-btn" onclick="logout()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Logout
-            </button>
+            <button class="mobile-logout-btn" onclick="logout()">Logout</button>
         </div>
     </div>
 
@@ -1043,13 +1009,7 @@
             <div class="category-selector">
                 <div class="category-card" data-category="cardio">
                     <div class="category-header">
-                        <div class="category-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-                            <path d="M50,85 C50,85 20,60 20,40 C20,25 30,15 45,20 C50,22 50,22 55,20 C70,15 80,25 80,40 C80,60 50,85 50,85 Z" 
-                                    fill="#e74c3c" 
-                                    stroke="#c0392b" 
-                                    stroke-width="2"/>
-                            <ellipse cx="35" cy="35" rx="8" ry="6" fill="#ff6b6b" opacity="0.7"/>
-                            </svg></div>
+                        <div class="category-icon">♥</div>
                         <div class="category-name">Cardio</div>
                     </div>
                     <div class="category-description">Aerobic exercises that improve cardiovascular health</div>
@@ -1090,7 +1050,7 @@
 
                 <div class="category-card" data-category="balance">
                     <div class="category-header">
-                        <div class="category-icon">⚖️</div>
+                        <div class="category-icon">⚖</div>
                         <div class="category-name">Balance & Stability</div>
                     </div>
                     <div class="category-description">Exercises that improve balance, coordination, and stability</div>
@@ -1132,7 +1092,7 @@
         <form id="exerciseForm">
             <div class="exercise-type-form" id="cardioForm">
                 <div class="type-indicator">
-                    <div class="type-icon">❤️</div>
+                    <div class="type-icon">♥</div>
                     <span class="type-label">Cardio Exercise</span>
                 </div>
 
@@ -1330,7 +1290,7 @@
 
             <div class="exercise-type-form" id="balanceForm">
                 <div class="type-indicator">
-                    <div class="type-icon">⚖️</div>
+                    <div class="type-icon">⚖</div>
                     <span class="type-label">Balance & Stability</span>
                 </div>
 
@@ -1377,7 +1337,7 @@
                 </div>
             </div>
 
-            <div class="exercise-type-form" id="sportsForm">
+            <div class="exercise-type-form" id="sports_specificForm">
                 <div class="type-indicator">
                     <div class="type-icon">🏃</div>
                     <span class="type-label">Sports-Specific Training</span>
@@ -1488,57 +1448,39 @@
             </div>
 
             <div class="form-actions">
-                <button type="button" class="btn btn-primary" id="addExerciseBtn" disabled>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                        <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    </svg>
-                    Add Exercise
-                </button>
-                <button type="button" class="btn btn-success" id="completeWorkoutBtn" disabled>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                        <polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Complete Workout
-                </button>
+                <button type="button" class="btn btn-primary" id="addExerciseBtn" disabled>Add Exercise</button>
+                <button type="button" class="btn btn-success" id="completeWorkoutBtn" disabled>Complete Workout</button>
             </div>
         </form>
     </div>
 
     <div class="toast" id="toast">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
         <span>Exercise added successfully!</span>
     </div>
 
     <script>
-        const EXERCISE_TYPES = {
-            cardio: {
-                examples: ['Running', 'Cycling', 'Swimming', 'Jump Rope', 'Elliptical', 'Rowing', 'Burpees', 'Mountain Climbers']
-            },
-            resistance: {
-                examples: ['Push-ups', 'Squats', 'Bench Press', 'Deadlift', 'Pull-ups', 'Overhead Press', 'Lunges', 'Planks']
-            },
-            flexibility: {
-                examples: ['Hatha Yoga', 'Vinyasa Flow', 'Pilates', 'Dynamic Warm-up', 'Cool-down Stretch', 'Foam Rolling']
-            },
-            balance: {
-                examples: ['Single Leg Stand', 'Tree Pose', 'Tai Chi Form', 'Balance Board', 'Heel-to-Toe Walk']
-            },
-            sports_specific: {
-                examples: ['Box Jumps', 'Ladder Drills', 'Sprint Intervals', 'Kettlebell Swings', 'Battle Ropes', 'Medicine Ball Throws']
-            },
-            recovery: {
-                examples: ['Easy Walk', 'Foam Rolling', 'Gentle Yoga', 'Meditation', 'Breathing Exercises', 'Light Swimming']
-            }
-        };
-
         let workoutStartTime = Date.now();
         let sessionTimer;
         let currentWorkoutId = null;
         let selectedCategory = null;
         let selectedIntensity = 'moderate';
+
+        function initializeLocalStorage() {
+            if (!localStorage.getItem('fittrack_workouts')) {
+                localStorage.setItem('fittrack_workouts', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('fittrack_exercises')) {
+                localStorage.setItem('fittrack_exercises', JSON.stringify([]));
+            }
+            if (!localStorage.getItem('fittrack_stats')) {
+                localStorage.setItem('fittrack_stats', JSON.stringify({
+                    totalWorkouts: 0,
+                    totalDuration: 0,
+                    totalExercises: 0,
+                    favoriteExercises: []
+                }));
+            }
+        }
 
         function initializeMobileMenu() {
             const hamburger = document.getElementById('hamburger');
@@ -1592,17 +1534,18 @@
         }
 
         function checkAuth() {
-            const user = localStorage.getItem('user');
+            const user = localStorage.getItem('fittrack_user');
             if (!user) {
-                window.location.href = '/login.html';
-                return null;
+                const defaultUser = { name: 'User', email: 'user@example.com' };
+                localStorage.setItem('fittrack_user', JSON.stringify(defaultUser));
+                return defaultUser;
             }
             try {
                 return JSON.parse(user);
             } catch (e) {
-                console.error('Error parsing user data:', e);
-                window.location.href = '/login.html';
-                return null;
+                const defaultUser = { name: 'User', email: 'user@example.com' };
+                localStorage.setItem('fittrack_user', JSON.stringify(defaultUser));
+                return defaultUser;
             }
         }
 
@@ -1610,48 +1553,37 @@
             const userName = user.name || user.email || 'User';
             
             document.getElementById('userName').textContent = userName;
-            
             document.getElementById('mobileUserName').textContent = userName;
             
             const userAvatar = document.getElementById('userAvatar');
             const mobileUserAvatar = document.getElementById('mobileUserAvatar');
             
-            if (user.picture) {
-                const avatarImg = `<img src="${user.picture}" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-                userAvatar.innerHTML = avatarImg;
-                mobileUserAvatar.innerHTML = avatarImg;
-            } else if (user.name) {
+            if (user.name) {
                 const initials = user.name.charAt(0).toUpperCase();
-                userAvatar.innerHTML = initials;
-                mobileUserAvatar.innerHTML = initials;
+                userAvatar.textContent = initials;
+                mobileUserAvatar.textContent = initials;
             }
         }
 
         function logout() {
-            localStorage.clear();
-            window.location.href = '/login.html';
+            if (confirm('Are you sure you want to logout? Your current workout will be saved.')) {
+                localStorage.removeItem('fittrack_user');
+                localStorage.removeItem('currentWorkoutId');
+                localStorage.removeItem('workoutStartTime');
+                window.location.reload();
+            }
         }
 
-        async function initializeWorkout() {
-            try {
-                currentWorkoutId = localStorage.getItem('currentWorkoutId');
-                
-                if (!currentWorkoutId) {
-                    console.log('Starting new workout session...');
-                    currentWorkoutId = 'workout_' + Date.now();
-                    localStorage.setItem('currentWorkoutId', currentWorkoutId);
-                    localStorage.setItem('newWorkoutExercises', JSON.stringify([]));
-                    console.log('New workout created:', currentWorkoutId);
-                } else {
-                    console.log('Resuming existing workout:', currentWorkoutId);
-                }
-                
-                await updateWorkoutStats();
-                
-            } catch (error) {
-                console.error('Error initializing workout:', error);
-                showToast('Error starting workout. Please check your connection.', 'error');
+        function initializeWorkout() {
+            currentWorkoutId = localStorage.getItem('currentWorkoutId');
+            
+            if (!currentWorkoutId) {
+                currentWorkoutId = 'workout_' + Date.now();
+                localStorage.setItem('currentWorkoutId', currentWorkoutId);
+                localStorage.setItem('currentWorkoutExercises', JSON.stringify([]));
             }
+            
+            updateWorkoutStats();
         }
 
         function startSessionTimer() {
@@ -1672,13 +1604,11 @@
             }, 1000);
         }
 
-        async function updateWorkoutStats() {
+        function updateWorkoutStats() {
             try {
-                if (!currentWorkoutId) return;
-                
-                const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
+                const exercises = JSON.parse(localStorage.getItem('currentWorkoutExercises') || '[]');
                 const exerciseCount = exercises.length;
-                const totalDuration = exercises.reduce((sum, ex) => sum + (ex.duration || 0), 0);
+                const totalDuration = exercises.reduce((sum, ex) => sum + (parseInt(ex.duration) || 0), 0);
                 
                 document.getElementById('exerciseCount').textContent = exerciseCount;
                 document.getElementById('totalDuration').textContent = `${totalDuration} min`;
@@ -1712,11 +1642,11 @@
                 item.className = 'exercise-item';
                 
                 let details = `<strong>${exercise.name}</strong>`;
-                details += `<span class="category-badge">${exercise.category || exercise.type}</span><br>`;
+                details += `<span class="category-badge">${exercise.category}</span><br>`;
                 
-                if (exercise.category === 'resistance' || exercise.type === 'resistance') {
+                if (exercise.category === 'resistance') {
                     details += `${exercise.weight || 0}kg × ${exercise.sets || 0} sets × ${exercise.reps || 0} reps (${exercise.duration || 0} min)`;
-                } else if (exercise.category === 'cardio' || exercise.type === 'cardio') {
+                } else if (exercise.category === 'cardio') {
                     details += `${exercise.distance || 0}km in ${exercise.duration || 0} minutes`;
                 } else {
                     details += `Duration: ${exercise.duration || 0} minutes`;
@@ -1725,10 +1655,20 @@
                 if (exercise.intensity) {
                     details += ` • Intensity: ${exercise.intensity}`;
                 }
+
+                details += `<button class="delete-btn" onclick="deleteExercise(${index})">Delete</button>`;
                 
                 item.innerHTML = details;
                 list.appendChild(item);
             });
+        }
+
+        function deleteExercise(index) {
+            const exercises = JSON.parse(localStorage.getItem('currentWorkoutExercises') || '[]');
+            exercises.splice(index, 1);
+            localStorage.setItem('currentWorkoutExercises', JSON.stringify(exercises));
+            updateWorkoutStats();
+            showToast('Exercise deleted successfully!', 'success');
         }
 
         document.querySelectorAll('.category-card').forEach(card => {
@@ -1831,20 +1771,24 @@
             btn.disabled = true;
             
             try {
-                const exerciseData = await buildExerciseData();
-                console.log('Adding exercise:', exerciseData);
+                const exerciseData = buildExerciseData();
                 
-                // Get existing exercises
-                const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
+                const exercises = JSON.parse(localStorage.getItem('currentWorkoutExercises') || '[]');
                 exercises.push(exerciseData);
-                localStorage.setItem('newWorkoutExercises', JSON.stringify(exercises));
+                localStorage.setItem('currentWorkoutExercises', JSON.stringify(exercises));
+                
+                const allExercises = JSON.parse(localStorage.getItem('fittrack_exercises') || '[]');
+                allExercises.push({
+                    ...exerciseData,
+                    id: Date.now(),
+                    workoutId: currentWorkoutId,
+                    timestamp: new Date().toISOString()
+                });
+                localStorage.setItem('fittrack_exercises', JSON.stringify(allExercises));
                 
                 showToast('Exercise added successfully!', 'success');
                 resetForm();
-                await updateWorkoutStats();
-                
-                // Notify other pages
-                localStorage.setItem('workoutUpdated', Date.now().toString());
+                updateWorkoutStats();
                 
             } catch (error) {
                 console.error('Error adding exercise:', error);
@@ -1855,13 +1799,13 @@
             }
         });
 
-        async function buildExerciseData() {
+        function buildExerciseData() {
             const commonData = {
                 category: selectedCategory,
                 intensity: selectedIntensity,
                 notes: document.getElementById('exerciseNotes').value.trim(),
-                perceivedExertion: parseInt(document.getElementById('perceivedExertion').value) || undefined,
-                performanceRating: parseInt(document.getElementById('performanceRating').value) || undefined
+                perceivedExertion: parseInt(document.getElementById('perceivedExertion').value) || null,
+                performanceRating: parseInt(document.getElementById('performanceRating').value) || null
             };
 
             let exerciseData = { ...commonData };
@@ -1873,8 +1817,8 @@
                     name: document.getElementById('cardioName').value.trim(),
                     distance: parseFloat(document.getElementById('cardioDistance').value),
                     duration: parseInt(document.getElementById('cardioDuration').value),
-                    caloriesBurned: parseInt(document.getElementById('cardioCalories').value) || undefined,
-                    averageHeartRate: parseInt(document.getElementById('cardioHeartRate').value) || undefined
+                    caloriesBurned: parseInt(document.getElementById('cardioCalories').value) || null,
+                    averageHeartRate: parseInt(document.getElementById('cardioHeartRate').value) || null
                 };
             } else if (selectedCategory === 'resistance') {
                 exerciseData = {
@@ -1894,7 +1838,7 @@
                     type: document.getElementById('flexibilityType').value,
                     name: document.getElementById('flexibilityName').value.trim(),
                     duration: parseInt(document.getElementById('flexibilityDuration').value),
-                    stretchHoldTime: parseInt(document.getElementById('flexibilityHold').value) || undefined
+                    stretchHoldTime: parseInt(document.getElementById('flexibilityHold').value) || null
                 };
             } else if (selectedCategory === 'balance') {
                 exerciseData = {
@@ -1910,7 +1854,7 @@
                     type: document.getElementById('sportsType').value,
                     name: document.getElementById('sportsName').value.trim(),
                     duration: parseInt(document.getElementById('sportsDuration').value),
-                    sets: parseInt(document.getElementById('sportsRounds').value) || undefined
+                    sets: parseInt(document.getElementById('sportsRounds').value) || null
                 };
             } else if (selectedCategory === 'recovery') {
                 exerciseData = {
@@ -1924,7 +1868,7 @@
             return exerciseData;
         }
 
-        document.getElementById('completeWorkoutBtn').addEventListener('click', async function() {
+        document.getElementById('completeWorkoutBtn').addEventListener('click', function() {
             const btn = this;
             
             if (!currentWorkoutId) {
@@ -1936,7 +1880,7 @@
             btn.disabled = true;
             
             try {
-                const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
+                const exercises = JSON.parse(localStorage.getItem('currentWorkoutExercises') || '[]');
                 if (exercises.length === 0) {
                     showToast('Please add at least one exercise before completing the workout.', 'error');
                     btn.classList.remove('btn-loading');
@@ -1944,18 +1888,37 @@
                     return;
                 }
                 
-                console.log('Completing workout:', currentWorkoutId);
+                const workoutEndTime = Date.now();
+                const totalDuration = Math.floor((workoutEndTime - workoutStartTime) / 60000);
+                
+                const workout = {
+                    id: currentWorkoutId,
+                    startTime: new Date(workoutStartTime).toISOString(),
+                    endTime: new Date(workoutEndTime).toISOString(),
+                    duration: totalDuration,
+                    exercises: exercises,
+                    exerciseCount: exercises.length,
+                    totalExerciseDuration: exercises.reduce((sum, ex) => sum + (parseInt(ex.duration) || 0), 0)
+                };
+                
+                const workouts = JSON.parse(localStorage.getItem('fittrack_workouts') || '[]');
+                workouts.push(workout);
+                localStorage.setItem('fittrack_workouts', JSON.stringify(workouts));
+                
+                const stats = JSON.parse(localStorage.getItem('fittrack_stats') || '{}');
+                stats.totalWorkouts = (stats.totalWorkouts || 0) + 1;
+                stats.totalDuration = (stats.totalDuration || 0) + totalDuration;
+                stats.totalExercises = (stats.totalExercises || 0) + exercises.length;
+                localStorage.setItem('fittrack_stats', JSON.stringify(stats));
                 
                 localStorage.removeItem('currentWorkoutId');
-                localStorage.removeItem('newWorkoutExercises');
+                localStorage.removeItem('currentWorkoutExercises');
                 localStorage.removeItem('workoutStartTime');
                 
                 showToast('Workout completed successfully!', 'success');
                 
-                localStorage.setItem('workoutUpdated', Date.now().toString());
-                
                 setTimeout(() => {
-                    window.location.href = '/index.html';
+                    window.location.href = 'index.html';
                 }, 2000);
                 
             } catch (error) {
@@ -1996,16 +1959,13 @@
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             const text = toast.querySelector('span');
-            const icon = toast.querySelector('svg');
             
             text.textContent = message;
             
             if (type === 'success') {
                 toast.style.background = 'linear-gradient(135deg, #059669 0%, #10b981 100%)';
-                icon.innerHTML = '<polyline points="20,6 9,17 4,12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
             } else if (type === 'error') {
                 toast.style.background = 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)';
-                icon.innerHTML = '<line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
             }
             
             toast.classList.add('show');
@@ -2015,14 +1975,12 @@
             }, 3000);
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeLocalStorage();
             const user = checkAuth();
-            if (!user) return;
-            
             initializeUser(user);
             initializeMobileMenu();
-            
-            await initializeWorkout();
+            initializeWorkout();
             startSessionTimer();
         });
 
