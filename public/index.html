@@ -14,16 +14,460 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(8px);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #4f46e5;
+            text-decoration: none;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            padding-top: 80px; /* Add space for nav on mobile */
+            color: white;
         }
 
-        /* Mobile Navigation Styles */
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background: url('/logo.png') no-repeat center center;
+            background-size: contain;
+            border-radius: 12px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-link {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #4f46e5;
+            background: #f1f5f9;
+        }
+
+        .nav-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .logout-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        .welcome-section {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            border-radius: 24px;
+            padding: 40px;
+            color: white;
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .welcome-content h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .welcome-content p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f1f5f9;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .workout-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f1f5f9;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .section-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .workout-info {
+            margin-bottom: 24px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8fafc;
+            color: #4f46e5;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
+        .current-workout {
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            color: white;
+        }
+
+        .current-workout .section-icon {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .current-workout .info-item {
+            border-bottom-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .current-workout .info-label {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .current-workout .info-value {
+            color: white;
+        }
+
+        .exercise-list {
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .exercise-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .exercise-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .exercise-details {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 32px;
+            color: #64748b;
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 32px;
+            color: #64748b;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #f1f5f9;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        .session-status {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .session-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .session-inactive {
+            background: rgba(107, 114, 128, 0.1);
+            color: #374151;
+            border: 1px solid rgba(107, 114, 128, 0.2);
+        }
+
+        .session-timer {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .nav-menu {
+                order: 2;
+            }
+
+            .nav-user {
+                order: 1;
+            }
+
+            .welcome-section {
+                padding: 32px 24px;
+            }
+
+            .welcome-content h1 {
+                font-size: 24px;
+            }
+
+            .workout-sections {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-card {
+                padding: 24px;
+            }
+        }
+
         .mobile-nav {
             position: fixed;
             top: 0;
@@ -139,530 +583,121 @@
             background: rgba(79, 70, 229, 0.1);
             color: #4f46e5;
         }
+        .mobile-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1000;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease;
+}
 
-        /* Auth Container Styles */
-        .auth-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            width: 100%;
-            max-width: 420px;
-            animation: slideUp 0.6s ease-out;
-            margin-top: 20px; /* Extra margin on mobile */
-        }
+.mobile-nav.visible {
+    transform: translateY(0);
+}
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    max-width: 420px;
+    margin: 0 auto;
+}
 
-        .auth-header {
-            text-align: center;
-            padding: 40px 32px 32px;
-            background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%);
-        }
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: #4f46e5;
+}
 
-        .brand-logo {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto 24px;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-size: contain;
-        }
+.brand-icon {
+    font-size: 20px;
+}
 
-        .auth-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 8px;
-        }
+.brand-text {
+    font-size: 18px;
+}
 
-        .auth-subtitle {
-            color: #6b7280;
-            font-size: 16px;
-            font-weight: 400;
-        }
+.hamburger {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
 
-        .auth-form {
-            padding: 32px;
-        }
+.hamburger:hover {
+    background: rgba(79, 70, 229, 0.1);
+}
 
-        .google-signin {
-            width: 100%;
-            height: 56px;
-            background: #ffffff;
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-size: 16px;
-            font-weight: 500;
-            color: #374151;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 24px;
-            text-decoration: none;
-        }
+.hamburger span {
+    width: 20px;
+    height: 2px;
+    background: #4f46e5;
+    border-radius: 1px;
+    transition: all 0.3s ease;
+}
 
-        .google-signin:hover {
-            background: #f9fafb;
-            border-color: #d1d5db;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        }
+.hamburger.active span:first-child {
+    transform: rotate(45deg) translate(5px, 5px);
+}
 
-        .google-signin:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+}
 
-        .google-icon {
-            width: 24px;
-            height: 24px;
-        }
+.hamburger.active span:last-child {
+    transform: rotate(-45deg) translate(7px, -6px);
+}
 
-        .divider {
-            display: flex;
-            align-items: center;
-            margin: 24px 0;
-            color: #9ca3af;
-            font-size: 14px;
-        }
+.nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transform: translateY(-20px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
 
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: #e5e7eb;
-        }
+.nav-menu.active {
+    transform: translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
 
-        .divider span {
-            padding: 0 16px;
-        }
+.nav-link {
+    padding: 12px 16px;
+    color: #6b7280;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    font-weight: 500;
+}
 
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .input-field {
-            width: 100%;
-            height: 56px;
-            padding: 0 16px;
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            font-size: 16px;
-            background: #ffffff;
-            transition: all 0.2s ease;
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .signin-btn {
-            width: 100%;
-            height: 56px;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            border: none;
-            border-radius: 16px;
-            color: #ffffff;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 16px;
-        }
-
-        .signin-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
-        }
-
-        .demo-link {
-            display: block;
-            text-align: center;
-            color: #6b7280;
-            font-size: 14px;
-            text-decoration: none;
-            padding: 12px 0;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .demo-link:hover {
-            background: #f3f4f6;
-            color: #4f46e5;
-        }
-
-        .error-message, .success-message {
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .error-message {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #dc2626;
-        }
-
-        .success-message {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
-        }
-
-        .loading {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid #ffffff;
-            border-radius: 50%;
-            border-top: 2px solid transparent;
-            animation: spin 1s linear infinite;
-            margin-right: 8px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Tablet Styles */
-        @media (max-width: 768px) {
-            .mobile-nav {
-                transform: translateY(0); /* Show nav on mobile */
-            }
-            
-            body {
-                padding: 100px 16px 20px; /* More top padding for nav */
-            }
-            
-            .auth-container {
-                margin: 0;
-                border-radius: 20px;
-            }
-            
-            .auth-header {
-                padding: 24px 20px 20px;
-            }
-            
-            .brand-logo {
-                width: 80px;
-                height: 80px;
-                margin-bottom: 16px;
-            }
-            
-            .auth-title {
-                font-size: 24px;
-                margin-bottom: 6px;
-            }
-            
-            .auth-subtitle {
-                font-size: 14px;
-            }
-            
-            .auth-form {
-                padding: 20px;
-            }
-            
-            .google-signin,
-            .input-field,
-            .signin-btn {
-                height: 48px;
-                font-size: 14px;
-            }
-            
-            .divider {
-                margin: 20px 0;
-                font-size: 12px;
-            }
-            
-            .input-group {
-                margin-bottom: 16px;
-            }
-            
-            .input-label {
-                font-size: 13px;
-                margin-bottom: 6px;
-            }
-            
-            .google-icon {
-                width: 20px;
-                height: 20px;
-            }
-        }
-
-        /* Mobile Styles */
-        @media (max-width: 480px) {
-            .nav-container {
-                padding: 10px 16px;
-            }
-            
-            .brand-text {
-                font-size: 16px;
-            }
-            
-            .brand-icon {
-                font-size: 18px;
-            }
-            
-            body {
-                padding: 90px 12px 16px;
-            }
-            
-            .auth-container {
-                border-radius: 16px;
-                margin-top: 10px;
-            }
-            
-            .auth-header {
-                padding: 20px 16px 16px;
-            }
-            
-            .auth-form {
-                padding: 16px;
-            }
-            
-            .brand-logo {
-                width: 60px;
-                height: 60px;
-                border-radius: 16px;
-            }
-            
-            .auth-title {
-                font-size: 22px;
-            }
-            
-            .auth-subtitle {
-                font-size: 13px;
-            }
-            
-            .google-signin,
-            .input-field,
-            .signin-btn {
-                height: 44px;
-                border-radius: 12px;
-                font-size: 14px;
-            }
-            
-            .google-signin {
-                gap: 8px;
-            }
-            
-            .google-icon {
-                width: 18px;
-                height: 18px;
-            }
-            
-            .divider {
-                margin: 16px 0;
-                font-size: 11px;
-            }
-            
-            .divider span {
-                padding: 0 12px;
-            }
-            
-            .input-group {
-                margin-bottom: 14px;
-            }
-            
-            .input-label {
-                font-size: 12px;
-            }
-            
-            .input-field {
-                padding: 0 12px;
-            }
-            
-            .signin-btn {
-                margin-bottom: 12px;
-            }
-            
-            .demo-link {
-                font-size: 13px;
-                padding: 10px 0;
-            }
-        }
-
-        /* Desktop - hide navigation */
-        @media (min-width: 769px) {
-            .mobile-nav {
-                display: none;
-            }
-            
-            body {
-                padding: 20px; /* Reset to original padding */
-                padding-top: 20px;
-            }
-            
-            .auth-container {
-                margin-top: 0;
-            }
-        }
-
-        /* Touch-friendly enhancements */
-        @media (hover: none) and (pointer: coarse) {
-            .google-signin,
-            .signin-btn,
-            .demo-link,
-            .nav-link {
-                min-height: 44px; /* iOS touch target minimum */
-            }
-            
-            .hamburger {
-                min-height: 44px;
-                min-width: 44px;
-                justify-content: center;
-                align-items: center;
-            }
-            
-            .input-field {
-                font-size: 16px; /* Prevent zoom on iOS */
-            }
-            
-            .google-signin:active,
-            .signin-btn:active,
-            .nav-link:active {
-                transform: scale(0.98);
-            }
-        }
-
-        /* High contrast mode support */
-        @media (prefers-contrast: high) {
-            .auth-container {
-                border: 2px solid #000000;
-            }
-            
-            .google-signin {
-                border-color: #000000;
-            }
-            
-            .input-field {
-                border-color: #000000;
-            }
-        }
-
-        /* Reduce motion for users who prefer it */
-        @media (prefers-reduced-motion: reduce) {
-            .auth-container,
-            .mobile-nav,
-            .nav-menu,
-            .hamburger span,
-            .google-signin,
-            .signin-btn,
-            .demo-link,
-            .nav-link {
-                animation: none;
-                transition: none;
-            }
-            
-            @keyframes slideUp {
-                from {
-                    opacity: 0;
-                }
-                to {
-                    opacity: 1;
-                }
-            }
-        }
-
-        /* Dark mode support (if user's system is in dark mode) */
-        @media (prefers-color-scheme: dark) {
-            .mobile-nav {
-                background: rgba(17, 24, 39, 0.95);
-                border-bottom-color: rgba(75, 85, 99, 0.2);
-            }
-            
-            .nav-brand {
-                color: #8b5cf6;
-            }
-            
-            .hamburger span {
-                background: #8b5cf6;
-            }
-            
-            .hamburger:hover {
-                background: rgba(139, 92, 246, 0.1);
-            }
-            
-            .nav-menu {
-                background: rgba(17, 24, 39, 0.95);
-                border-bottom-color: rgba(75, 85, 99, 0.2);
-            }
-            
-            .nav-link {
-                color: #d1d5db;
-            }
-            
-            .nav-link:hover {
-                background: rgba(139, 92, 246, 0.1);
-                color: #a78bfa;
-            }
-        }
-
-        /* Focus styles for accessibility */
-        .hamburger:focus,
-        .google-signin:focus,
-        .input-field:focus,
-        .signin-btn:focus,
-        .demo-link:focus,
-        .nav-link:focus {
-            outline: 2px solid #4f46e5;
-            outline-offset: 2px;
-        }
-
-        /* Loading states */
-        .google-signin.loading,
-        .signin-btn.loading {
-            pointer-events: none;
-        }
-
-        /* Animation delays for staggered effects */
-        .nav-link:nth-child(1) {
-            transition-delay: 0.1s;
-        }
-
-        .nav-link:nth-child(2) {
-            transition-delay: 0.15s;
-        }
-
-        .nav-link:nth-child(3) {
-            transition-delay: 0.2s;
-        }
-
-        .nav-link:nth-child(4) {
-            transition-delay: 0.25s;
-        }
+.nav-link:hover {
+    background: rgba(79, 70, 229, 0.1);
+    color: #4f46e5;
+}
     </style>
 </head>
 <body>
