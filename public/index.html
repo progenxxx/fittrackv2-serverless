@@ -125,6 +125,184 @@
             border-color: #cbd5e1;
         }
 
+        /* Hamburger Menu Styles */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 24px;
+            height: 18px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .hamburger span {
+            display: block;
+            height: 2px;
+            width: 100%;
+            background: #64748b;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+            transform-origin: center;
+        }
+
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+            transform: scaleX(0);
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -6px);
+        }
+
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-menu-overlay.active {
+            opacity: 1;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 300px;
+            height: 100%;
+            background: white;
+            z-index: 1000;
+            transition: right 0.3s ease;
+            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            padding: 20px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mobile-menu-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #64748b;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .mobile-menu-close:hover {
+            background: #f1f5f9;
+        }
+
+        .mobile-nav-links {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .mobile-nav-link {
+            display: block;
+            padding: 16px 20px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .mobile-nav-link:hover,
+        .mobile-nav-link.active {
+            color: #4f46e5;
+            background: #f8fafc;
+            border-left-color: #4f46e5;
+        }
+
+        .mobile-user-section {
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+
+        .mobile-user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .mobile-user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .mobile-user-details h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .mobile-user-details p {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .mobile-logout-btn {
+            width: 100%;
+            padding: 12px 16px;
+            background: transparent;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .mobile-logout-btn:hover {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+        }
+
         .main-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -423,18 +601,39 @@
             100% { transform: rotate(360deg); }
         }
 
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
         @media (max-width: 768px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 16px;
+            .hamburger {
+                display: flex;
             }
 
             .nav-menu {
-                order: 2;
+                display: none;
             }
 
             .nav-user {
-                order: 1;
+                display: none;
             }
 
             .welcome-section {
@@ -466,402 +665,24 @@
             .section-card {
                 padding: 24px;
             }
+
+            .mobile-menu {
+                width: 90%;
+            }
+
+            .nav-container {
+                padding: 0 16px;
+            }
+
+            .main-container {
+                padding: 24px 16px;
+            }
         }
 
-        /* Add these mobile fixes to your existing <style> section */
-
-/* Mobile Menu Improvements */
-@media (max-width: 767px) {
-    .nav-container {
-        position: relative;
-    }
-    
-    .nav-menu {
-        position: absolute;
-        top: calc(100% + 12px);
-        left: 16px;
-        right: 16px;
-        background: white;
-        border-radius: 12px;
-        padding: 16px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        border: 1px solid #e2e8f0;
-        z-index: 1000;
-        flex-direction: column !important;
-        gap: 8px !important;
-        opacity: 0;
-        transform: translateY(-10px);
-        visibility: hidden;
-        transition: all 0.2s ease;
-    }
-    
-    .nav-menu.show {
-        opacity: 1;
-        transform: translateY(0);
-        visibility: visible;
-    }
-    
-    .nav-link {
-        padding: 12px 16px;
-        border-radius: 8px;
-        text-align: center;
-        width: 100%;
-    }
-    
-    .mobile-menu-btn {
-        padding: 8px;
-        border-radius: 8px;
-        transition: background-color 0.2s ease;
-    }
-    
-    .mobile-menu-btn:hover {
-        background: #f1f5f9;
-    }
-    
-    /* Hamburger Animation */
-    .mobile-menu-btn svg {
-        transition: transform 0.2s ease;
-    }
-    
-    .mobile-menu-btn.active svg {
-        transform: rotate(90deg);
-    }
-}
-
-/* Enhanced Mobile Responsive Styles */
-@media (max-width: 480px) {
-    .nav-container {
-        padding: 0 12px;
-    }
-    
-    .nav-brand {
-        font-size: 16px;
-    }
-    
-    .brand-icon {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
-    }
-    
-    .main-container {
-        padding: 16px 12px;
-    }
-    
-    /* Welcome section improvements */
-    .welcome-section {
-        padding: 20px 16px;
-        margin-bottom: 20px;
-        border-radius: 12px;
-    }
-    
-    .welcome-content h1 {
-        font-size: 18px;
-        line-height: 1.4;
-    }
-    
-    .welcome-content p {
-        font-size: 13px;
-    }
-    
-    /* Stats grid mobile optimization */
-    .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 20px;
-    }
-    
-    .stat-card {
-        padding: 12px 10px;
-        border-radius: 12px;
-        text-align: center;
-    }
-    
-    .stat-icon {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
-        margin: 0 auto 8px;
-    }
-    
-    .stat-value {
-        font-size: 18px;
-        margin-bottom: 4px;
-    }
-    
-    .stat-label {
-        font-size: 10px;
-        line-height: 1.2;
-    }
-    
-    /* Workout sections mobile optimization */
-    .workout-sections {
-        gap: 16px;
-    }
-    
-    .section-card {
-        padding: 16px;
-        border-radius: 12px;
-    }
-    
-    .section-header {
-        gap: 10px;
-        margin-bottom: 12px;
-    }
-    
-    .section-icon {
-        width: 36px;
-        height: 36px;
-        font-size: 16px;
-    }
-    
-    .section-title {
-        font-size: 16px;
-    }
-    
-    .workout-info {
-        margin-bottom: 12px;
-    }
-    
-    .info-item {
-        padding: 6px 0;
-        font-size: 12px;
-    }
-    
-    .info-label,
-    .info-value {
-        font-size: 11px;
-    }
-    
-    /* Exercise list improvements */
-    .exercise-list {
-        margin-bottom: 12px;
-        max-height: 160px;
-    }
-    
-    .exercise-item {
-        padding: 10px;
-        margin-bottom: 6px;
-        border-radius: 8px;
-    }
-    
-    .exercise-name {
-        font-size: 12px;
-        margin-bottom: 2px;
-    }
-    
-    .exercise-details {
-        font-size: 10px;
-    }
-    
-    /* Button improvements */
-    .action-buttons {
-        grid-template-columns: 1fr;
-        gap: 8px;
-    }
-    
-    .btn {
-        padding: 10px 12px;
-        font-size: 12px;
-        border-radius: 10px;
-        min-height: 40px;
-    }
-    
-    /* User section mobile */
-    .nav-user {
-        gap: 6px;
-    }
-    
-    .user-avatar {
-        width: 28px;
-        height: 28px;
-        font-size: 11px;
-    }
-    
-    .logout-btn {
-        padding: 6px 8px;
-        font-size: 10px;
-    }
-    
-    .logout-btn svg {
-        width: 10px;
-        height: 10px;
-    }
-    
-    /* Toast mobile optimization */
-    .toast {
-        left: 12px;
-        right: 12px;
-        font-size: 12px;
-        padding: 10px 12px;
-        border-radius: 8px;
-    }
-    
-    .toast.show {
-        right: 12px;
-    }
-    
-    /* Connection status mobile */
-    .connection-error,
-    .connection-success {
-        margin: 0 12px 12px;
-        padding: 10px 12px;
-        font-size: 12px;
-        border-radius: 8px;
-    }
-    
-    /* Loading state mobile */
-    .loading-state {
-        padding: 16px;
-    }
-    
-    .spinner {
-        width: 20px;
-        height: 20px;
-        border-width: 2px;
-    }
-    
-    .empty-state {
-        padding: 16px;
-        font-size: 12px;
-    }
-    
-    .empty-icon {
-        width: 40px;
-        height: 40px;
-        font-size: 16px;
-        margin-bottom: 8px;
-    }
-}
-
-/* Extra small screens */
-@media (max-width: 360px) {
-    .nav-container {
-        padding: 0 8px;
-    }
-    
-    .main-container {
-        padding: 12px 8px;
-    }
-    
-    .welcome-section {
-        padding: 16px 12px;
-    }
-    
-    .welcome-content h1 {
-        font-size: 16px;
-    }
-    
-    .stats-grid {
-        gap: 6px;
-    }
-    
-    .stat-card {
-        padding: 10px 8px;
-    }
-    
-    .stat-value {
-        font-size: 16px;
-    }
-    
-    .stat-label {
-        font-size: 9px;
-    }
-    
-    .section-card {
-        padding: 12px;
-    }
-    
-    .btn {
-        font-size: 11px;
-        padding: 8px 10px;
-        min-height: 36px;
-    }
-}
-
-/* Landscape mobile orientation */
-@media (max-width: 767px) and (orientation: landscape) {
-    .welcome-section {
-        padding: 16px 20px;
-    }
-    
-    .stats-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 8px;
-    }
-    
-    .workout-sections {
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-    
-    .exercise-list {
-        max-height: 120px;
-    }
-}
-
-/* Touch improvements for all mobile */
-@media (hover: none) and (pointer: coarse) {
-    .btn,
-    .nav-link,
-    .logout-btn,
-    .mobile-menu-btn {
-        min-height: 44px;
-        min-width: 44px;
-    }
-    
-    .stat-card:active,
-    .section-card:active {
-        transform: scale(0.98);
-    }
-    
-    .btn:active {
-        transform: scale(0.96);
-    }
-    
-    /* Prevent text selection on touch */
-    .stat-value,
-    .stat-label,
-    .section-title,
-    .exercise-name {
-        -webkit-user-select: none;
-        user-select: none;
-    }
-}
-
-/* Dark mode mobile adjustments */
-@media (prefers-color-scheme: dark) and (max-width: 767px) {
-    .nav-menu {
-        background: #1f2937;
-        border-color: #374151;
-    }
-    
-    .nav-link {
-        color: #d1d5db;
-    }
-    
-    .nav-link:hover {
-        background: #374151;
-        color: #f3f4f6;
-    }
-}
-
-/* Reduce motion for mobile users who prefer it */
-@media (prefers-reduced-motion: reduce) and (max-width: 767px) {
-    .nav-menu,
-    .stat-card,
-    .section-card,
-    .btn,
-    .toast {
-        transition: none;
-        animation: none;
-    }
-    
-    .stat-card:hover,
-    .section-card:hover {
-        transform: none;
-    }
-}
+        /* Prevent body scroll when mobile menu is open */
+        body.menu-open {
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -896,8 +717,59 @@
                     Logout
                 </button>
             </div>
+
+            <!-- Hamburger Menu Button -->
+            <button class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
     </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="nav-brand">
+                <div class="brand-logo"></div>
+                FitTrack
+            </div>
+            <button class="mobile-menu-close" id="mobileMenuClose">×</button>
+        </div>
+
+        <nav class="mobile-nav-links">
+            <a href="#" class="mobile-nav-link active">Home</a>
+            <a href="/stats.html" class="mobile-nav-link">Analytics</a>
+            <a href="/history.html" class="mobile-nav-link">History</a>
+            <a href="/excercise.html" class="mobile-nav-link">Exercise</a>
+        </nav>
+
+        <div class="mobile-user-section">
+            <div class="mobile-user-info">
+                <div class="mobile-user-avatar" id="mobileUserAvatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </div>
+                <div class="mobile-user-details">
+                    <h3 id="mobileUserName">User</h3>
+                    <p>FitTrack Member</p>
+                </div>
+            </div>
+            <button class="mobile-logout-btn" onclick="logout()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Logout
+            </button>
+        </div>
+    </div>
 
     <div class="main-container">
         <div class="welcome-section">
@@ -1008,6 +880,62 @@
         let sessionTimer = null;
         let sessionStartTime = null;
 
+        // Mobile menu functionality
+        function initializeMobileMenu() {
+            const hamburger = document.getElementById('hamburger');
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+            const mobileMenuClose = document.getElementById('mobileMenuClose');
+
+            function openMobileMenu() {
+                hamburger.classList.add('active');
+                mobileMenu.classList.add('active');
+                mobileMenuOverlay.style.display = 'block';
+                mobileMenuOverlay.classList.add('active');
+                document.body.classList.add('menu-open');
+            }
+
+            function closeMobileMenu() {
+                hamburger.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                mobileMenuOverlay.classList.remove('active');
+                document.body.classList.remove('menu-open');
+                
+                setTimeout(() => {
+                    if (!mobileMenuOverlay.classList.contains('active')) {
+                        mobileMenuOverlay.style.display = 'none';
+                    }
+                }, 300);
+            }
+
+            // Event listeners
+            hamburger.addEventListener('click', openMobileMenu);
+            mobileMenuClose.addEventListener('click', closeMobileMenu);
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+
+            // Close menu when clicking on mobile nav links
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    setTimeout(closeMobileMenu, 150);
+                });
+            });
+
+            // Close menu on window resize if screen becomes larger
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    closeMobileMenu();
+                }
+            });
+
+            // Handle escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+                    closeMobileMenu();
+                }
+            });
+        }
+
         // Check authentication
         function checkAuth() {
             const user = localStorage.getItem('user');
@@ -1026,14 +954,26 @@
 
         // Initialize user display
         function initializeUser(user) {
-            document.getElementById('userName').textContent = user.name || user.email || 'User';
-            document.getElementById('userNameWelcome').textContent = user.name || user.email || 'User';
+            const userName = user.name || user.email || 'User';
+            
+            // Update desktop navigation
+            document.getElementById('userName').textContent = userName;
+            document.getElementById('userNameWelcome').textContent = userName;
+            
+            // Update mobile navigation
+            document.getElementById('mobileUserName').textContent = userName;
             
             const userAvatar = document.getElementById('userAvatar');
+            const mobileUserAvatar = document.getElementById('mobileUserAvatar');
+            
             if (user.picture) {
-                userAvatar.innerHTML = `<img src="${user.picture}" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                const avatarImg = `<img src="${user.picture}" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                userAvatar.innerHTML = avatarImg;
+                mobileUserAvatar.innerHTML = avatarImg;
             } else if (user.name) {
-                userAvatar.innerHTML = user.name.charAt(0).toUpperCase();
+                const initials = user.name.charAt(0).toUpperCase();
+                userAvatar.innerHTML = initials;
+                mobileUserAvatar.innerHTML = initials;
             }
         }
 
@@ -1337,6 +1277,7 @@
             if (!user) return;
             
             initializeUser(user);
+            initializeMobileMenu();
             updateWelcomeMessage();
             
             // Load data
@@ -1362,301 +1303,6 @@
         window.addEventListener('beforeunload', () => {
             stopSessionTimer();
         });
-
-        function initializeMobileMenu() {
-    const menuBtn = document.querySelector('.mobile-menu-btn');
-    const menu = document.querySelector('.nav-menu');
-    const navContainer = document.querySelector('.nav-container');
-    
-    if (!menuBtn || !menu) return;
-    
-    // Toggle menu function
-    function toggleMenu() {
-        const isOpen = menu.classList.contains('show');
-        
-        if (isOpen) {
-            closeMenu();
-        } else {
-            openMenu();
-        }
-    }
-    
-    // Open menu function
-    function openMenu() {
-        menu.classList.add('show');
-        menuBtn.classList.add('active');
-        
-        // Add overlay to prevent body scroll on mobile
-        document.body.style.overflow = 'hidden';
-        
-        // Update ARIA attributes for accessibility
-        menuBtn.setAttribute('aria-expanded', 'true');
-        menu.setAttribute('aria-hidden', 'false');
-    }
-    
-    // Close menu function
-    function closeMenu() {
-        menu.classList.remove('show');
-        menuBtn.classList.remove('active');
-        
-        // Restore body scroll
-        document.body.style.overflow = '';
-        
-        // Update ARIA attributes
-        menuBtn.setAttribute('aria-expanded', 'false');
-        menu.setAttribute('aria-hidden', 'true');
-    }
-    
-    // Menu button click handler
-    menuBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleMenu();
-    });
-    
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!navContainer.contains(e.target) && menu.classList.contains('show')) {
-            closeMenu();
-        }
-    });
-    
-    // Close menu when clicking on a nav link
-    const navLinks = menu.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            if (window.innerWidth < 768) {
-                closeMenu();
-            }
-        });
-    });
-    
-    // Handle escape key
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && menu.classList.contains('show')) {
-            closeMenu();
-            menuBtn.focus(); // Return focus to button
-        }
-    });
-    
-    // Handle window resize
-    function handleResize() {
-        if (window.innerWidth >= 768) {
-            // Desktop view - ensure menu is visible and reset mobile styles
-            menu.classList.remove('show');
-            menuBtn.classList.remove('active');
-            document.body.style.overflow = '';
-            
-            // Reset ARIA attributes for desktop
-            menuBtn.setAttribute('aria-expanded', 'false');
-            menu.setAttribute('aria-hidden', 'false');
-        } else {
-            // Mobile view - ensure menu is hidden by default
-            if (!menu.classList.contains('show')) {
-                menu.setAttribute('aria-hidden', 'true');
-            }
-        }
-    }
-    
-    // Debounced resize handler for better performance
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(handleResize, 100);
-    });
-    
-    // Initialize ARIA attributes
-    menuBtn.setAttribute('aria-expanded', 'false');
-    menuBtn.setAttribute('aria-controls', 'nav-menu');
-    menu.setAttribute('id', 'nav-menu');
-    menu.setAttribute('aria-hidden', window.innerWidth >= 768 ? 'false' : 'true');
-    
-    // Initial setup
-    handleResize();
-}
-
-// Enhanced touch handling for better mobile experience
-function initializeTouchEnhancements() {
-    // Add touch feedback to interactive elements
-    const touchElements = document.querySelectorAll('.btn, .stat-card, .section-card, .nav-link');
-    
-    touchElements.forEach(element => {
-        element.addEventListener('touchstart', function() {
-            this.style.transform = 'scale(0.98)';
-        }, { passive: true });
-        
-        element.addEventListener('touchend', function() {
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 100);
-        }, { passive: true });
-        
-        element.addEventListener('touchcancel', function() {
-            this.style.transform = '';
-        }, { passive: true });
-    });
-    
-    // Prevent double-tap zoom on buttons
-    const buttons = document.querySelectorAll('.btn, .mobile-menu-btn, .logout-btn');
-    buttons.forEach(button => {
-        button.addEventListener('touchend', function(e) {
-            e.preventDefault();
-            this.click();
-        });
-    });
-}
-
-// Viewport height fix for mobile browsers
-function fixMobileViewport() {
-    // Fix for mobile browser viewport height issues
-    function setVH() {
-        const vh = window.innerHeight * 0.01;
-        document.documentElement.style.setProperty('--vh', `${vh}px`);
-    }
-    
-    setVH();
-    window.addEventListener('resize', setVH);
-    window.addEventListener('orientationchange', () => {
-        setTimeout(setVH, 100);
-    });
-}
-
-// Improved toast function for mobile
-function showToast(message, type = 'success') {
-    const toast = document.getElementById('toast');
-    const span = toast.querySelector('span');
-    
-    span.textContent = message;
-    
-    // Update toast style based on type
-    const colors = {
-        error: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
-        warning: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
-        success: 'linear-gradient(135deg, #059669 0%, #10b981 100%)'
-    };
-    
-    toast.style.background = colors[type] || colors.success;
-    
-    // Ensure toast is visible on mobile
-    toast.classList.add('show');
-    
-    // Auto-hide toast
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, type === 'error' ? 5000 : 3000);
-    
-    // Announce to screen readers
-    if (span.getAttribute('role') !== 'status') {
-        span.setAttribute('role', 'status');
-        span.setAttribute('aria-live', 'polite');
-    }
-}
-
-// Initialize all mobile enhancements
-function initializeMobileEnhancements() {
-    // Initialize mobile menu
-    initializeMobileMenu();
-    
-    // Initialize touch enhancements
-    initializeTouchEnhancements();
-    
-    // Fix mobile viewport
-    fixMobileViewport();
-    
-    // Add mobile-specific classes
-    if (window.innerWidth < 768) {
-        document.body.classList.add('mobile');
-    }
-    
-    // Handle orientation changes
-    window.addEventListener('orientationchange', () => {
-        setTimeout(() => {
-            // Recalculate layouts after orientation change
-            if (window.innerWidth < 768) {
-                document.body.classList.add('mobile');
-            } else {
-                document.body.classList.remove('mobile');
-            }
-            
-            // Close mobile menu if open during orientation change
-            const menu = document.querySelector('.nav-menu');
-            const menuBtn = document.querySelector('.mobile-menu-btn');
-            if (menu && menuBtn) {
-                menu.classList.remove('show');
-                menuBtn.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-        }, 300);
-    });
-    
-    console.log('✅ Mobile enhancements initialized');
-}
-
-// Add this CSS for the --vh fix
-const mobileViewportCSS = `
-<style>
-    /* Mobile viewport height fix */
-    body.mobile {
-        min-height: calc(var(--vh, 1vh) * 100);
-    }
-    
-    /* Improved mobile menu transitions */
-    @media (max-width: 767px) {
-        .nav-menu.show {
-            animation: slideDown 0.2s ease forwards;
-        }
-        
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    }
-</style>
-`;
-
-// Inject the mobile CSS
-if (!document.querySelector('#mobile-viewport-css')) {
-    const style = document.createElement('style');
-    style.id = 'mobile-viewport-css';
-    style.textContent = mobileViewportCSS.replace(/<\/?style>/g, '');
-    document.head.appendChild(style);
-}
-
-// Initialize mobile enhancements when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeMobileEnhancements);
-} else {
-    initializeMobileEnhancements();
-}
     </script>
-
-    <style>
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes slideOut {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-    </style>
 </body>
 </html>
