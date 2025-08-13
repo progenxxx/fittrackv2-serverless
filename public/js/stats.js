@@ -186,7 +186,7 @@ function showEmptyStatsState() {
                     <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
                     <h3 style="margin-bottom: 0.5rem;">No Workout Data</h3>
                     <p style="text-align: center; margin-bottom: 1rem;">Start tracking your workouts to see analytics here.</p>
-                    <a href="/excercise.html" style="background: #4CAF50; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none;">Start First Workout</a>
+                    <a href="/exercise.html" style="background: #4CAF50; color: white; padding: 0.5rem 1rem; border-radius: 0.5rem; text-decoration: none;">Start First Workout</a>
                 </div>
             `;
         }

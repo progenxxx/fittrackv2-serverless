@@ -1040,7 +1040,7 @@
                     <i class="fas fa-dumbbell"></i>
                     <h3>${message || defaultMessage}</h3>
                     <p>${message ? errorSubtext : defaultSubtext}</p>
-                    ${!message ? '<a href="/excercise.html" class="btn-start-workout"><i class="fas fa-plus"></i> Start First Workout</a>' : ''}
+                    ${!message ? '<a href="/exercise.html" class="btn-start-workout"><i class="fas fa-plus"></i> Start First Workout</a>' : ''}
                 </div>
             `;
         }
@@ -1229,7 +1229,7 @@
                     showToast('Workout template saved! Redirecting to exercise page...');
                     
                     setTimeout(() => {
-                        window.location.href = '/excercise.html';
+                        window.location.href = '/exercise.html';
                     }, 1500);
                 } else {
                     throw new Error('Workout not found or has no exercises');
