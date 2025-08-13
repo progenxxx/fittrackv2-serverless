@@ -51,14 +51,15 @@
         }
 
         .brand-logo {
-            width: 120px;
-            height: 120px;
+            width: 80px;
+            height: 80px;
             margin: 0 auto 24px;
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 32px;
         }
 
         .auth-title {
@@ -76,6 +77,40 @@
 
         .auth-form {
             padding: 32px;
+        }
+
+        .form-tabs {
+            display: flex;
+            margin-bottom: 32px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            padding: 4px;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 12px;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-content {
+            display: none;
+        }
+
+        .form-content.active {
+            display: block;
         }
 
         .google-signin {
@@ -164,7 +199,7 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
-        .signin-btn {
+        .auth-btn {
             width: 100%;
             height: 56px;
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
@@ -178,9 +213,15 @@
             margin-bottom: 16px;
         }
 
-        .signin-btn:hover {
+        .auth-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
         .demo-link {
@@ -199,7 +240,7 @@
             color: #4f46e5;
         }
 
-        .error-message, .success-message {
+        .message {
             padding: 12px 16px;
             border-radius: 12px;
             font-size: 14px;
@@ -207,16 +248,22 @@
             display: none;
         }
 
-        .error-message {
+        .message.error {
             background: #fef2f2;
             border: 1px solid #fecaca;
             color: #dc2626;
         }
 
-        .success-message {
+        .message.success {
             background: #f0fdf4;
             border: 1px solid #bbf7d0;
             color: #166534;
+        }
+
+        .message.info {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
         }
 
         .loading {
@@ -235,6 +282,53 @@
             100% { transform: rotate(360deg); }
         }
 
+        .password-setup-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .password-setup-content {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        .modal-description {
+            color: #6b7280;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
         @media (max-width: 480px) {
             .auth-container {
                 margin: 0 16px;
@@ -247,156 +341,347 @@
             .auth-form {
                 padding: 24px;
             }
-        }
 
-        .brand-logo {
-            width: 80px;
-            height: 80px;
-            background: url('/logo.png') no-repeat center center;
-            background-size: contain;
-            border-radius: 12px;
+            .password-setup-content {
+                padding: 32px 24px;
+            }
         }
-        
     </style>
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-header">
-            <div class="brand-logo">
-            </div>
+            <div class="brand-logo">🏋️</div>
             <h1 class="auth-title">FitTrack</h1>
             <p class="auth-subtitle">Track your fitness journey with precision</p>
         </div>
         
         <div class="auth-form">
-            <div class="error-message" id="errorMessage">
-                Invalid credentials. Please try again.
+            <div class="form-tabs">
+                <button class="tab-button active" onclick="switchTab('login')">Login</button>
+                <button class="tab-button" onclick="switchTab('signup')">Sign Up</button>
             </div>
+
+            <div class="message" id="messageContainer"></div>
             
-            <div class="success-message" id="successMessage">
-                Login successful! Redirecting...
-            </div>
-            
-            <button class="google-signin" id="googleSignIn">
-                <svg class="google-icon" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                Continue with Google
-            </button>
-            
-            <div class="divider">
-                <span>or sign in with email</span>
-            </div>
-            
-            <form id="loginForm">
-                <div class="input-group">
-                    <label class="input-label" for="email">Email address</label>
-                    <input type="email" id="email" class="input-field" placeholder="Enter your email" required>
+            <div id="loginForm" class="form-content active">
+                <button class="google-signin" id="googleSignInLogin" onclick="handleGoogleAuth('login')">
+                    <svg class="google-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Continue with Google
+                </button>
+                
+                <div class="divider">
+                    <span>or sign in with email</span>
                 </div>
                 
-                <div class="input-group">
-                    <label class="input-label" for="password">Password</label>
-                    <input type="password" id="password" class="input-field" placeholder="Enter your password" required>
+                <form id="emailLoginForm" onsubmit="handleEmailLogin(event)">
+                    <div class="input-group">
+                        <label class="input-label" for="loginEmail">Email address</label>
+                        <input type="email" id="loginEmail" class="input-field" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label" for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" class="input-field" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="auth-btn" id="loginBtn">Sign In</button>
+                </form>
+            </div>
+
+            <div id="signupForm" class="form-content">
+                <button class="google-signin" id="googleSignInSignup" onclick="handleGoogleAuth('signup')">
+                    <svg class="google-icon" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    Sign up with Google
+                </button>
+                
+                <div class="divider">
+                    <span>or create account with email</span>
                 </div>
                 
-                <button type="submit" class="signin-btn" id="emailSignInBtn">Sign In</button>
+                <form id="emailSignupForm" onsubmit="handleEmailSignup(event)">
+                    <div class="input-group">
+                        <label class="input-label" for="signupName">Full name</label>
+                        <input type="text" id="signupName" class="input-field" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label" for="signupEmail">Email address</label>
+                        <input type="email" id="signupEmail" class="input-field" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label" for="signupPassword">Password</label>
+                        <input type="password" id="signupPassword" class="input-field" placeholder="Create a password (6+ characters)" required minlength="6">
+                    </div>
+                    
+                    <button type="submit" class="auth-btn" id="signupBtn">Create Account</button>
+                </form>
+            </div>
+            
+            <a href="#" class="demo-link" id="demoLogin">Try demo account</a>
+        </div>
+    </div>
+
+    <div class="password-setup-modal" id="passwordSetupModal">
+        <div class="password-setup-content">
+            <h2 class="modal-title">Set Up Password</h2>
+            <p class="modal-description">
+                For security purposes, please set a password for your Google account. 
+                This will be required for future logins.
+            </p>
+            
+            <div class="message" id="passwordModalMessage"></div>
+            
+            <form id="passwordSetupForm" onsubmit="handlePasswordSetup(event)">
+                <div class="input-group">
+                    <label class="input-label" for="newPassword">Create Password</label>
+                    <input type="password" id="newPassword" class="input-field" placeholder="Enter a secure password" required minlength="6">
+                </div>
+                
+                <button type="submit" class="auth-btn" id="passwordSetupBtn">Set Password & Continue</button>
             </form>
-            
-            <!-- <a href="#" class="demo-link" style="visibility: hidden;" id="demoLogin">Try demo account</a> -->
-             <a href="#" class="demo-link" id="demoLogin">Try demo account</a>
         </div>
     </div>
 
     <script>
         const GOOGLE_CLIENT_ID = "37964137800-0ovkpenn8196dpbcbg0fph7elk6uoic4.apps.googleusercontent.com";
         let isLoading = false;
+        let currentUserId = null;
+        let pendingGoogleData = null;
 
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            const successDiv = document.getElementById('successMessage');
+        function switchTab(tabName) {
+            const loginTab = document.querySelector('.tab-button:first-child');
+            const signupTab = document.querySelector('.tab-button:last-child');
+            const loginForm = document.getElementById('loginForm');
+            const signupForm = document.getElementById('signupForm');
             
-            successDiv.style.display = 'none';
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
+            hideMessage();
             
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        function showSuccess(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            const successDiv = document.getElementById('successMessage');
-            
-            errorDiv.style.display = 'none';
-            successDiv.textContent = message;
-            successDiv.style.display = 'block';
-        }
-
-        function setLoading(elementId, loading) {
-            const element = document.getElementById(elementId);
-            if (loading) {
-                element.disabled = true;
-                element.innerHTML = '<span class="loading"></span>Signing in...';
+            if (tabName === 'login') {
+                loginTab.classList.add('active');
+                signupTab.classList.remove('active');
+                loginForm.classList.add('active');
+                signupForm.classList.remove('active');
             } else {
-                element.disabled = false;
-                if (elementId === 'emailSignInBtn') {
-                    element.textContent = 'Sign In';
-                } else if (elementId === 'googleSignIn') {
-                    element.innerHTML = `
-                        <svg class="google-icon" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                        </svg>
-                        Continue with Google
-                    `;
-                }
+                signupTab.classList.add('active');
+                loginTab.classList.remove('active');
+                signupForm.classList.add('active');
+                loginForm.classList.remove('active');
             }
         }
 
-        function saveUserAndRedirect(userData) {
+        function showMessage(message, type = 'error') {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.textContent = message;
+            messageContainer.className = `message ${type}`;
+            messageContainer.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(hideMessage, 5000);
+            }
+        }
+
+        function showPasswordModalMessage(message, type = 'error') {
+            const messageContainer = document.getElementById('passwordModalMessage');
+            messageContainer.textContent = message;
+            messageContainer.className = `message ${type}`;
+            messageContainer.style.display = 'block';
+        }
+
+        function hideMessage() {
+            const messageContainer = document.getElementById('messageContainer');
+            const passwordModalMessage = document.getElementById('passwordModalMessage');
+            messageContainer.style.display = 'none';
+            passwordModalMessage.style.display = 'none';
+        }
+
+        function setLoading(elementId, loading, originalText) {
+            const element = document.getElementById(elementId);
+            if (loading) {
+                element.disabled = true;
+                element.innerHTML = '<span class="loading"></span>Processing...';
+            } else {
+                element.disabled = false;
+                element.innerHTML = originalText;
+            }
+        }
+
+        function showPasswordSetupModal(userId, googleData) {
+            currentUserId = userId;
+            pendingGoogleData = googleData;
+            document.getElementById('passwordSetupModal').style.display = 'flex';
+            document.getElementById('newPassword').focus();
+        }
+
+        function hidePasswordSetupModal() {
+            document.getElementById('passwordSetupModal').style.display = 'none';
+            currentUserId = null;
+            pendingGoogleData = null;
+            hideMessage();
+        }
+
+        async function handleEmailSignup(event) {
+            event.preventDefault();
+            
+            if (isLoading) return;
+            isLoading = true;
+            
+            const name = document.getElementById('signupName').value.trim();
+            const email = document.getElementById('signupEmail').value.trim();
+            const password = document.getElementById('signupPassword').value;
+            
+            if (!name || !email || !password) {
+                showMessage('Please fill in all fields.');
+                isLoading = false;
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('Password must be at least 6 characters long.');
+                isLoading = false;
+                return;
+            }
+            
+            setLoading('signupBtn', true, 'Create Account');
+            
             try {
-                userData.loginTime = new Date().toISOString();
+                const response = await fetch('/api/auth/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
                 
-                localStorage.removeItem('user');
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.details || data.error || 'Signup failed');
+                }
+                
+                showMessage('Account created successfully! Please sign in.', 'success');
                 
                 setTimeout(() => {
-                    localStorage.setItem('user', JSON.stringify(userData));
-                    
-                    const savedData = localStorage.getItem('user');
-                    if (savedData) {
-                        console.log('User data saved successfully:', JSON.parse(savedData));
-                        showSuccess('Login successful! Redirecting...');
-                        
-                        setTimeout(() => {
-                            const redirectPaths = ['/', '/index.html', './index.html', 'index.html'];
-                            let currentPath = 0;
-                            
-                            function tryRedirect() {
-                                if (currentPath < redirectPaths.length) {
-                                    console.log(`Trying redirect to: ${redirectPaths[currentPath]}`);
-                                    window.location.href = redirectPaths[currentPath];
-                                } else {
-                                    console.error('All redirect attempts failed');
-                                    showError('Redirect failed. Please navigate to the main page manually.');
-                                }
-                            }
-                            
-                            tryRedirect();
-                        }, 1500);
-                    } else {
-                        throw new Error('Failed to verify saved user data');
-                    }
-                }, 100);
+                    switchTab('login');
+                    document.getElementById('loginEmail').value = email;
+                    document.getElementById('loginPassword').focus();
+                }, 1500);
                 
             } catch (error) {
-                console.error('Error saving user data:', error);
-                showError('Login successful but failed to save session. Please try again.');
+                console.error('Signup error:', error);
+                showMessage(error.message || 'Failed to create account. Please try again.');
+            } finally {
+                setLoading('signupBtn', false, 'Create Account');
+                isLoading = false;
+            }
+        }
+
+        async function handleEmailLogin(event) {
+            event.preventDefault();
+            
+            if (isLoading) return;
+            isLoading = true;
+            
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showMessage('Please enter both email and password.');
+                isLoading = false;
+                return;
+            }
+            
+            setLoading('loginBtn', true, 'Sign In');
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    if (data.requiresPasswordSetup) {
+                        showPasswordSetupModal(data.userId);
+                        return;
+                    }
+                    throw new Error(data.details || data.error || 'Login failed');
+                }
+                
+                showMessage('Login successful! Redirecting...', 'success');
+                saveUserAndRedirect(data.user);
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage(error.message || 'Login failed. Please check your credentials.');
+            } finally {
+                setLoading('loginBtn', false, 'Sign In');
+                isLoading = false;
+            }
+        }
+
+        async function handlePasswordSetup(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('newPassword').value;
+            
+            if (password.length < 6) {
+                showPasswordModalMessage('Password must be at least 6 characters long.');
+                return;
+            }
+            
+            setLoading('passwordSetupBtn', true, 'Set Password & Continue');
+            
+            try {
+                const response = await fetch('/api/auth/set-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userId: currentUserId,
+                        password: password
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.details || data.error || 'Failed to set password');
+                }
+                
+                showPasswordModalMessage('Password set successfully! Logging you in...', 'success');
+                
+                setTimeout(() => {
+                    hidePasswordSetupModal();
+                    
+                    if (pendingGoogleData) {
+                        saveUserAndRedirect(pendingGoogleData);
+                    } else {
+                        window.location.href = '/';
+                    }
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Password setup error:', error);
+                showPasswordModalMessage(error.message || 'Failed to set password. Please try again.');
+            } finally {
+                setLoading('passwordSetupBtn', false, 'Set Password & Continue');
             }
         }
 
@@ -420,7 +705,7 @@
             }
         }
 
-        function handleGoogleSignIn(response) {
+        async function handleGoogleSignIn(response) {
             try {
                 if (!response.credential) {
                     throw new Error('No credential received');
@@ -428,21 +713,75 @@
 
                 const userInfo = parseJwt(response.credential);
                 
-                const userData = {
-                    id: userInfo.sub,
+                const googleData = {
+                    googleId: userInfo.sub,
                     email: userInfo.email,
                     name: userInfo.name,
-                    picture: userInfo.picture,
-                    loginMethod: 'google'
+                    picture: userInfo.picture
                 };
                 
-                saveUserAndRedirect(userData);
+                const apiResponse = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(googleData)
+                });
+                
+                const data = await apiResponse.json();
+                
+                if (!apiResponse.ok) {
+                    throw new Error(data.details || data.error || 'Google authentication failed');
+                }
+                
+                if (data.requiresPassword) {
+                    showMessage('Welcome! Please set a password for security.', 'info');
+                    showPasswordSetupModal(data.user.id, data.user);
+                } else {
+                    showMessage(`Welcome back, ${data.user.name}!`, 'success');
+                    saveUserAndRedirect(data.user);
+                }
                 
             } catch (error) {
                 console.error('Google sign-in error:', error);
-                showError('Google sign-in failed. Please try the email login or demo account.');
-                setLoading('googleSignIn', false);
+                showMessage('Google sign-in failed. Please try email login.');
             }
+        }
+
+        function handleGoogleAuth(mode) {
+            if (isLoading) return;
+            
+            const buttonId = mode === 'login' ? 'googleSignInLogin' : 'googleSignInSignup';
+            const originalText = mode === 'login' ? 
+                '<svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Continue with Google' :
+                '<svg class="google-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>Sign up with Google';
+            
+            setLoading(buttonId, true, originalText);
+            isLoading = true;
+
+            if (typeof google !== 'undefined' && google.accounts) {
+                try {
+                    google.accounts.id.prompt((notification) => {
+                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                            console.log('Google prompt not displayed, trying alternative method');
+                            window.location.href = '/auth/google';
+                        }
+                        setLoading(buttonId, false, originalText);
+                        isLoading = false;
+                    });
+                } catch (error) {
+                    console.error('Google Sign-In prompt error:', error);
+                    window.location.href = '/auth/google';
+                }
+            } else {
+                console.log('Google Sign-In not available, trying server-side OAuth');
+                window.location.href = '/auth/google';
+            }
+
+            setTimeout(() => {
+                setLoading(buttonId, false, originalText);
+                isLoading = false;
+            }, 5000);
         }
 
         function parseJwt(token) {
@@ -458,125 +797,31 @@
             }
         }
 
-        document.getElementById('googleSignIn').addEventListener('click', () => {
-            if (isLoading) return;
-            
-            setLoading('googleSignIn', true);
-            isLoading = true;
-
-            if (typeof google !== 'undefined' && google.accounts) {
-                try {
-                    google.accounts.id.prompt((notification) => {
-                        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-                            console.log('Google prompt not displayed, trying alternative method');
-                            window.location.href = '/auth/google';
-                        }
-                        setLoading('googleSignIn', false);
-                        isLoading = false;
-                    });
-                } catch (error) {
-                    console.error('Google Sign-In prompt error:', error);
-                    window.location.href = '/auth/google';
-                }
-            } else {
-                console.log('Google Sign-In not available, trying server-side OAuth');
-                window.location.href = '/auth/google';
-            }
-
-            setTimeout(() => {
-                setLoading('googleSignIn', false);
-                isLoading = false;
-            }, 5000);
-        });
-
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            if (isLoading) return;
-            
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
-            
-            if (!email || !password) {
-                showError('Please fill in all fields.');
-                return;
-            }
-            
-            if (!email.includes('@') || email.length < 5) {
-                showError('Please enter a valid email address.');
-                return;
-            }
-            
-            if (password.length < 6) {
-                showError('Password must be at least 6 characters long.');
-                return;
-            }
-
-            setLoading('emailSignInBtn', true);
-            isLoading = true;
-            
-            setTimeout(() => {
-                const userData = {
-                    id: Date.now().toString(),
-                    email: email,
-                    name: email.split('@')[0],
-                    picture: null,
-                    loginMethod: 'email'
-                };
+        function saveUserAndRedirect(userData) {
+            try {
+                userData.loginTime = new Date().toISOString();
                 
-                saveUserAndRedirect(userData);
-                setLoading('emailSignInBtn', false);
-                isLoading = false;
-            }, 1000);
-        });
-
-        document.getElementById('demoLogin').addEventListener('click', (e) => {
-            e.preventDefault();
-            
-            if (isLoading) return;
-            
-            isLoading = true;
-            
-            const demoUser = {
-                id: 'demo_user',
-                email: 'demo@fittrack.com',
-                name: 'Demo User',
-                picture: null,
-                loginMethod: 'demo'
-            };
-            
-            setTimeout(() => {
-                saveUserAndRedirect(demoUser);
-                isLoading = false;
-            }, 500);
-        });
-
-        function handleOAuthCallback() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const userData = urlParams.get('user');
-            const error = urlParams.get('error');
-            
-            if (userData) {
-                try {
-                    const user = JSON.parse(atob(userData));
-                    console.log('OAuth callback received user data:', user);
-                    saveUserAndRedirect(user);
-                    return true;
-                } catch (e) {
-                    console.error('Error parsing OAuth user data:', e);
-                    showError('Authentication data error. Please try again.');
-                }
+                localStorage.removeItem('user');
+                
+                setTimeout(() => {
+                    localStorage.setItem('user', JSON.stringify(userData));
+                    
+                    const savedData = localStorage.getItem('user');
+                    if (savedData) {
+                        console.log('User data saved successfully');
+                        
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1500);
+                    } else {
+                        throw new Error('Failed to verify saved user data');
+                    }
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error saving user data:', error);
+                showMessage('Login successful but failed to save session. Please try again.');
             }
-            
-            if (error) {
-                let errorMessage = 'Authentication failed. Please try again.';
-                if (error === 'oauth_failed') {
-                    errorMessage = 'Google authentication failed. Please try email login or demo account.';
-                }
-                showError(errorMessage);
-            }
-
-            return false;
         }
 
         function checkExistingSession() {
@@ -584,7 +829,7 @@
                 const user = localStorage.getItem('user');
                 if (user) {
                     const userData = JSON.parse(user);
-                    console.log('Found existing user session:', userData);
+                    console.log('Found existing user session');
                     window.location.href = '/';
                     return true;
                 }
@@ -595,19 +840,67 @@
             return false;
         }
 
+        function handleOAuthCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userData = urlParams.get('user');
+            const error = urlParams.get('error');
+            
+            if (userData) {
+                try {
+                    const user = JSON.parse(atob(userData));
+                    console.log('OAuth callback received user data');
+                    saveUserAndRedirect(user);
+                    return true;
+                } catch (e) {
+                    console.error('Error parsing OAuth user data:', e);
+                    showMessage('Authentication data error. Please try again.');
+                }
+            }
+            
+            if (error) {
+                let errorMessage = 'Authentication failed. Please try again.';
+                if (error === 'oauth_failed') {
+                    errorMessage = 'Google authentication failed. Please try email login.';
+                }
+                showMessage(errorMessage);
+            }
+
+            return false;
+        }
+
+        document.getElementById('demoLogin').addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            if (isLoading) return;
+            isLoading = true;
+            
+            const demoUser = {
+                id: 'demo_user',
+                email: 'demo@fittrack.com',
+                name: 'Demo User',
+                picture: null,
+                loginMethod: 'demo',
+                isVerified: true
+            };
+            
+            showMessage('Logging in as demo user...', 'info');
+            
+            setTimeout(() => {
+                saveUserAndRedirect(demoUser);
+                isLoading = false;
+            }, 1000);
+        });
+
         document.addEventListener('DOMContentLoaded', () => {
             const inputs = document.querySelectorAll('.input-field');
             inputs.forEach(input => {
-                input.addEventListener('focus', () => {
-                    const errorDiv = document.getElementById('errorMessage');
-                    const successDiv = document.getElementById('successMessage');
-                    if (errorDiv.style.display === 'block') {
-                        errorDiv.style.display = 'none';
-                    }
-                    if (successDiv.style.display === 'block') {
-                        successDiv.style.display = 'none';
-                    }
-                });
+                input.addEventListener('focus', hideMessage);
+            });
+
+            document.getElementById('passwordSetupModal').addEventListener('click', (e) => {
+                if (e.target === e.currentTarget) {
+                    hidePasswordSetupModal();
+                }
             });
         });
 
@@ -633,16 +926,6 @@
                 };
                 document.head.appendChild(script);
             }, 100);
-        });
-
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden && typeof google !== 'undefined') {
-                setTimeout(initializeGoogleSignIn, 100);
-            }
-        });
-
-        window.addEventListener('storage', (e) => {
-            console.log('localStorage changed:', e.key, e.newValue);
         });
     </script>
 </body>

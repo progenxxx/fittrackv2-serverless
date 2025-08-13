@@ -3,23 +3,21 @@ const express = require("express");
 const logger = require("morgan");
 const mongoose = require("mongoose");
 const path = require("path");
+const bcrypt = require("bcryptjs");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
 
-// Enhanced logging
 console.log("🚀 Starting FitTrack Server...");
 console.log("📅", new Date().toISOString());
 console.log("🔧 Node.js version:", process.version);
 console.log("🌐 Environment:", process.env.NODE_ENV || "development");
 
-// Middleware setup
 app.use(logger("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static("public"));
 
-// Security headers
 app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
@@ -27,13 +25,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// Request logging middleware
 app.use((req, res, next) => {
     console.log(`📡 ${req.method} ${req.url} - ${req.ip} - ${new Date().toISOString()}`);
     next();
 });
 
-// MongoDB connection (keeping your existing connection code)
 const MONGO_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/workout";
 
 console.log("🔗 Attempting to connect to MongoDB...");
@@ -68,7 +64,6 @@ mongoose.connect(MONGO_URI, mongooseOptions)
         console.log("📱 Server will continue running but database features won't work until MongoDB is connected.");
     });
 
-// MongoDB connection event listeners
 mongoose.connection.on('connected', () => {
     console.log('🔌 Mongoose connected to MongoDB');
 });
@@ -81,7 +76,6 @@ mongoose.connection.on('disconnected', () => {
     console.log('🔌 Mongoose disconnected from MongoDB');
 });
 
-// Environment variable validation
 const validateOAuthConfig = () => {
     const requiredVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
     const missing = requiredVars.filter(varName => !process.env[varName]);
@@ -97,7 +91,6 @@ const validateOAuthConfig = () => {
     return true;
 };
 
-// Enhanced Google OAuth Routes (keeping your existing OAuth code)
 app.get('/auth/google', (req, res) => {
     console.log('🔐 Google OAuth login request received');
     
@@ -228,20 +221,39 @@ app.get('/auth/callback', async (req, res) => {
             throw new Error('Incomplete user information received');
         }
         
-        const userData = {
-            id: userInfo.id,
-            email: userInfo.email,
-            name: userInfo.name || userInfo.email.split('@')[0],
-            picture: userInfo.picture || null,
-            loginMethod: 'google',
-            loginTime: new Date().toISOString(),
-            verified: userInfo.verified_email || false
-        };
-        
-        const userDataEncoded = Buffer.from(JSON.stringify(userData)).toString('base64');
-        console.log('✅ OAuth authentication successful for:', userData.email);
-        
-        res.redirect(`/login.html?success=oauth_complete&user=${userDataEncoded}`);
+        try {
+            const User = require("./models/User");
+            const user = await User.createGoogleUser({
+                id: userInfo.id,
+                email: userInfo.email,
+                name: userInfo.name || userInfo.email.split('@')[0],
+                picture: userInfo.picture || null
+            });
+
+            await user.updateLastLogin();
+
+            const userData = {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                picture: user.picture,
+                loginMethod: user.loginMethod,
+                isVerified: user.isVerified,
+                isGoogleUser: user.isGoogleUser,
+                lastLogin: user.lastLogin
+            };
+
+            const userDataEncoded = Buffer.from(JSON.stringify(userData)).toString('base64');
+            console.log('✅ OAuth authentication successful for:', userData.email);
+
+            const requiresPassword = user.isGoogleUser && !user.password;
+            const redirectParam = requiresPassword ? 'password_setup_required' : 'oauth_complete';
+            
+            res.redirect(`/login.html?success=${redirectParam}&user=${userDataEncoded}`);
+        } catch (dbError) {
+            console.error('❌ Database error during Google auth:', dbError);
+            throw new Error('Database error during authentication');
+        }
         
     } catch (error) {
         console.error('❌ OAuth callback error:', error.message);
@@ -265,11 +277,256 @@ app.use('/auth/*', (req, res, next) => {
     res.redirect('/login.html?error=auth_route_not_found');
 });
 
-// API Routes
+console.log("🔌 Loading authentication routes...");
+try {
+    const authRoutes = require("./routes/auth-routes");
+    app.use(authRoutes);
+    console.log("✅ Authentication routes loaded successfully");
+} catch (err) {
+    console.warn("⚠️ Authentication routes file not found, creating fallback routes");
+    
+    const User = require("./models/User");
+    
+    app.post("/api/auth/signup", async (req, res) => {
+        try {
+            const { email, password, name } = req.body;
+            
+            if (!email || !password || !name) {
+                return res.status(400).json({
+                    error: "Missing required fields",
+                    details: "Email, password, and name are required"
+                });
+            }
+            
+            if (password.length < 6) {
+                return res.status(400).json({
+                    error: "Password too short",
+                    details: "Password must be at least 6 characters long"
+                });
+            }
+            
+            const existingUser = await User.findByEmail(email);
+            if (existingUser) {
+                return res.status(409).json({
+                    error: "User already exists",
+                    details: "An account with this email already exists"
+                });
+            }
+            
+            const newUser = new User({
+                email: email.toLowerCase(),
+                password,
+                name: name.trim(),
+                loginMethod: "email",
+                isVerified: false
+            });
+            
+            const savedUser = await newUser.save();
+            
+            const userResponse = {
+                id: savedUser._id,
+                email: savedUser.email,
+                name: savedUser.name,
+                picture: savedUser.picture,
+                loginMethod: savedUser.loginMethod,
+                isVerified: savedUser.isVerified,
+                createdAt: savedUser.createdAt
+            };
+            
+            res.status(201).json({
+                message: "Account created successfully",
+                user: userResponse,
+                requiresPassword: true
+            });
+            
+        } catch (error) {
+            console.error("Signup error:", error);
+            
+            if (error.name === 'ValidationError') {
+                return res.status(400).json({
+                    error: "Validation failed",
+                    details: Object.values(error.errors).map(e => e.message).join(', ')
+                });
+            }
+            
+            if (error.code === 11000) {
+                return res.status(409).json({
+                    error: "Email already registered",
+                    details: "This email address is already registered"
+                });
+            }
+            
+            res.status(500).json({
+                error: "Server error during signup",
+                details: "Please try again later"
+            });
+        }
+    });
+
+    app.post("/api/auth/login", async (req, res) => {
+        try {
+            const { email, password } = req.body;
+            
+            if (!email || !password) {
+                return res.status(400).json({
+                    error: "Missing credentials",
+                    details: "Email and password are required"
+                });
+            }
+            
+            const user = await User.findByEmail(email);
+            if (!user) {
+                return res.status(401).json({
+                    error: "Invalid credentials",
+                    details: "Email or password is incorrect"
+                });
+            }
+            
+            if (user.isGoogleUser && !user.password) {
+                return res.status(400).json({
+                    error: "Google account requires password setup",
+                    details: "Please set a password for your Google account first",
+                    requiresPasswordSetup: true,
+                    userId: user._id
+                });
+            }
+            
+            const isPasswordValid = await user.comparePassword(password);
+            if (!isPasswordValid) {
+                return res.status(401).json({
+                    error: "Invalid credentials",
+                    details: "Email or password is incorrect"
+                });
+            }
+            
+            await user.updateLastLogin();
+            
+            const userResponse = {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                picture: user.picture,
+                loginMethod: user.loginMethod,
+                isVerified: user.isVerified,
+                isGoogleUser: user.isGoogleUser,
+                lastLogin: user.lastLogin
+            };
+            
+            res.json({
+                message: "Login successful",
+                user: userResponse,
+                requiresPassword: false
+            });
+            
+        } catch (error) {
+            console.error("Login error:", error);
+            res.status(500).json({
+                error: "Server error during login",
+                details: "Please try again later"
+            });
+        }
+    });
+
+    app.post("/api/auth/set-password", async (req, res) => {
+        try {
+            const { userId, password } = req.body;
+            
+            if (!userId || !password) {
+                return res.status(400).json({
+                    error: "Missing required fields",
+                    details: "User ID and password are required"
+                });
+            }
+            
+            if (password.length < 6) {
+                return res.status(400).json({
+                    error: "Password too short",
+                    details: "Password must be at least 6 characters long"
+                });
+            }
+            
+            const user = await User.findById(userId);
+            if (!user) {
+                return res.status(404).json({
+                    error: "User not found",
+                    details: "Invalid user ID"
+                });
+            }
+            
+            user.password = password;
+            await user.save();
+            
+            res.json({
+                message: "Password set successfully",
+                requiresPassword: false
+            });
+            
+        } catch (error) {
+            console.error("Set password error:", error);
+            res.status(500).json({
+                error: "Server error setting password",
+                details: "Please try again later"
+            });
+        }
+    });
+
+    app.post("/api/auth/google", async (req, res) => {
+        try {
+            const { googleId, email, name, picture } = req.body;
+            
+            if (!googleId || !email || !name) {
+                return res.status(400).json({
+                    error: "Missing Google user data",
+                    details: "Google ID, email, and name are required"
+                });
+            }
+            
+            let user = await User.findByGoogleId(googleId);
+            
+            if (!user) {
+                user = await User.createGoogleUser({
+                    id: googleId,
+                    email,
+                    name,
+                    picture
+                });
+            }
+            
+            await user.updateLastLogin();
+            
+            const userResponse = {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                picture: user.picture,
+                loginMethod: user.loginMethod,
+                isVerified: user.isVerified,
+                isGoogleUser: user.isGoogleUser,
+                lastLogin: user.lastLogin
+            };
+            
+            const requiresPasswordSetup = user.isGoogleUser && !user.password;
+            
+            res.json({
+                message: requiresPasswordSetup ? "Google signup successful - password setup required" : "Google login successful",
+                user: userResponse,
+                requiresPassword: requiresPasswordSetup,
+                isNewUser: !user.password
+            });
+            
+        } catch (error) {
+            console.error("Google auth error:", error);
+            res.status(500).json({
+                error: "Server error during Google authentication",
+                details: "Please try again later"
+            });
+        }
+    });
+}
+
 console.log("🔌 Loading API routes...");
 require("./routes/api-routes")(app);
 
-// HTML Routes - Add fallback if html-routes.js doesn't exist
 console.log("🔌 Loading HTML routes...");
 try {
     require("./routes/html-routes")(app);
@@ -277,7 +534,6 @@ try {
 } catch (err) {
     console.warn("⚠️ HTML routes file not found, using fallback routes");
     
-    // Fallback HTML routes
     app.get("/", (req, res) => {
         console.log("🏠 Root route (fallback)");
         res.send(`
@@ -312,131 +568,26 @@ try {
     });
 
     app.get(["/login", "/login.html"], (req, res) => {
-        console.log("🔐 Login route (fallback)");
-        res.send(`
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>FitTrack - Login</title>
-                <style>
-                    body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
-                    .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); text-align: center; max-width: 400px; width: 90%; }
-                    .logo { font-size: 3rem; margin-bottom: 20px; }
-                    h1 { color: #333; margin-bottom: 10px; }
-                    .subtitle { color: #666; margin-bottom: 30px; }
-                    .btn { background: #4285f4; color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 16px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; transition: all 0.3s ease; margin: 10px 0; }
-                    .btn:hover { background: #3367d6; transform: translateY(-2px); }
-                    .error { background: #fee; color: #c33; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-                    .success { background: #efe; color: #363; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <div class="logo">🏋️</div>
-                    <h1>FitTrack</h1>
-                    <p class="subtitle">Track your fitness journey</p>
-                    <div id="messages"></div>
-                    <a href="/auth/google" class="btn">
-                        🔐 Login with Google
-                    </a>
-                    <br><br>
-                    <a href="/api/health" style="color: #666; font-size: 14px;">Check System Status</a>
-                </div>
-                <script>
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const error = urlParams.get('error');
-                    const success = urlParams.get('success');
-                    const messagesDiv = document.getElementById('messages');
-
-                    if (error) {
-                        const errorMessages = {
-                            'oauth_config_missing': 'OAuth configuration missing.',
-                            'oauth_failed': 'Authentication failed.',
-                            'oauth_denied': 'Authentication denied.',
-                            'oauth_no_code': 'No authorization code received.',
-                            'oauth_expired': 'Authorization expired. Try again.',
-                            'network_error': 'Network error. Check connection.',
-                            'oauth_timeout': 'Authentication timed out.',
-                            'oauth_invalid_state': 'Invalid security token.',
-                            'auth_route_not_found': 'Auth route not found.'
-                        };
-                        messagesDiv.innerHTML = '<div class="error">' + (errorMessages[error] || 'Authentication error.') + '</div>';
-                    }
-
-                    if (success === 'oauth_complete') {
-                        const userData = urlParams.get('user');
-                        if (userData) {
-                            try {
-                                const user = JSON.parse(atob(userData));
-                                messagesDiv.innerHTML = '<div class="success">Welcome, ' + (user.name || user.email) + '!</div>';
-                                sessionStorage.setItem('fittrack_user', JSON.stringify(user));
-                                setTimeout(() => window.location.href = '/excercise.html', 2000);
-                            } catch (e) {
-                                console.error('Error parsing user data:', e);
-                            }
-                        }
-                    }
-                </script>
-            </body>
-            </html>
-        `);
+        console.log("🔐 Login route (fallback - should not be used if login.html exists)");
+        res.sendFile(path.join(__dirname, "public", "login.html"), (err) => {
+            if (err) {
+                console.error("❌ login.html not found:", err.message);
+                res.status(404).send("Login page not found. Please create login.html in the public directory.");
+            }
+        });
     });
 
     app.get(["/exercise", "/excercise.html"], (req, res) => {
         console.log("🏋️ Exercise route (fallback)");
-        res.send(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Exercise Entry - FitTrack</title>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
-                    .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-                    h1 { color: #333; text-align: center; margin-bottom: 30px; }
-                    .coming-soon { text-align: center; padding: 60px 20px; }
-                    .coming-soon h2 { color: #667eea; margin-bottom: 20px; }
-                    .coming-soon p { color: #666; font-size: 1.1rem; line-height: 1.6; margin-bottom: 30px; }
-                    a { color: #667eea; text-decoration: none; }
-                    a:hover { text-decoration: underline; }
-                    .nav { text-align: center; margin-bottom: 30px; }
-                    .nav a { margin: 0 15px; padding: 10px 20px; background: #667eea; color: white; border-radius: 25px; }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <h1>🏋️ Exercise Entry</h1>
-                    <div class="nav">
-                        <a href="/">🏠 Home</a>
-                        <a href="/login.html">🔐 Login</a>
-                        <a href="/api/workouts">📊 View Workouts</a>
-                        <a href="/api/health">🏥 Status</a>
-                    </div>
-                    <div class="coming-soon">
-                        <h2>Exercise Entry Form</h2>
-                        <p>
-                            The exercise entry form will be displayed here once you create the excercise.html file 
-                            in your public directory. This is a placeholder to ensure your routing works correctly.
-                        </p>
-                        <p>
-                            For now, you can test your API endpoints directly:
-                            <br><br>
-                            <a href="/api/workouts">View All Workouts (JSON)</a><br>
-                            <a href="/api/health">API Health Check</a><br>
-                            <a href="/api/exercise-types">Exercise Types & Categories</a>
-                        </p>
-                    </div>
-                </div>
-            </body>
-            </html>
-        `);
+        res.sendFile(path.join(__dirname, "public", "excercise.html"), (err) => {
+            if (err) {
+                console.error("❌ excercise.html not found:", err.message);
+                res.status(404).send("Exercise page not found. Please create excercise.html in the public directory.");
+            }
+        });
     });
 }
 
-// Health check endpoint
 app.get('/health', (req, res) => {
     res.json({
         status: 'healthy',
@@ -444,11 +595,11 @@ app.get('/health', (req, res) => {
         server: 'FitTrack API Server',
         mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
         environment: process.env.NODE_ENV || 'development',
-        mongoUri: process.env.MONGODB_URI ? 'configured' : 'missing'
+        mongoUri: process.env.MONGODB_URI ? 'configured' : 'missing',
+        authentication: 'enabled'
     });
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
     console.error('❌ Unhandled error:', err);
     res.status(500).json({
@@ -457,7 +608,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 404 handler for unmatched routes
 app.use((req, res) => {
     console.log(`❌ 404 - Route not found: ${req.method} ${req.url}`);
     
@@ -496,7 +646,6 @@ app.use((req, res) => {
     }
 });
 
-// Handle app termination
 process.on('SIGINT', async () => {
     console.log('\n🛑 Received SIGINT, shutting down gracefully...');
     try {
@@ -521,9 +670,8 @@ process.on('SIGTERM', async () => {
     }
 });
 
-// Start server
 app.listen(PORT, () => {
-    console.log("\n🎉 FitTrack Server is running!");
+    console.log("\n🎉 FitTrack Server with Enhanced Authentication is running!");
     console.log(`🚀 Server URL: http://localhost:${PORT}`);
     console.log(`🔐 Login page: http://localhost:${PORT}/login.html`);
     console.log(`🏋️  Exercise page: http://localhost:${PORT}/excercise.html`);
@@ -538,14 +686,25 @@ app.listen(PORT, () => {
     }
     
     console.log("\n📝 Available endpoints:");
-    console.log("   GET  /                    - Home page");
-    console.log("   GET  /login.html          - Login page");
-    console.log("   GET  /excercise.html       - Add exercise page");
-    console.log("   GET  /api/workouts        - Get all workouts");
-    console.log("   POST /api/workouts        - Create new workout");
-    console.log("   GET  /api/health          - API health check");
-    console.log("   GET  /auth/google         - Google OAuth login");
+    console.log("   GET  /                       - Home page");
+    console.log("   GET  /login.html             - Enhanced login/signup page");
+    console.log("   GET  /excercise.html         - Add exercise page");
+    console.log("   GET  /api/workouts           - Get all workouts");
+    console.log("   POST /api/workouts           - Create new workout");
+    console.log("   POST /api/auth/signup        - Create new account");
+    console.log("   POST /api/auth/login         - Login with email/password");
+    console.log("   POST /api/auth/google        - Google authentication");
+    console.log("   POST /api/auth/set-password  - Set password for Google users");
+    console.log("   GET  /api/health             - API health check");
+    console.log("   GET  /auth/google            - Google OAuth login");
     console.log("\n🔧 To stop server: Ctrl+C");
+    console.log("\n🔐 Security Features:");
+    console.log("   ✅ Email/Password Registration");
+    console.log("   ✅ Google OAuth Integration");
+    console.log("   ✅ Password Hashing (bcrypt)");
+    console.log("   ✅ Secure Password Setup for Google Users");
+    console.log("   ✅ Input Validation");
+    console.log("   ✅ Session Management");
 });
 
 module.exports = app;

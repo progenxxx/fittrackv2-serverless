@@ -1,7 +1,7 @@
 {
   "name": "fittrack",
   "version": "1.0.0",
-  "description": "A workout tracking application",
+  "description": "A workout tracking application with secure authentication",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -11,6 +11,7 @@
     "build": "echo 'Build complete'"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "dotenv": "^17.2.1",
     "express": "^4.21.2",
     "mongodb": "^6.18.0",
@@ -24,7 +25,11 @@
   "keywords": [
     "workout",
     "fitness",
-    "tracker"
+    "tracker",
+    "authentication",
+    "google-oauth",
+    "bcrypt",
+    "security"
   ],
   "engines": {
     "node": ">=18.0.0"
