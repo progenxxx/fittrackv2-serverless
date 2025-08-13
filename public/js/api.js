@@ -1,6 +1,50 @@
 const API = {
-    // FIXED: Use relative URLs for Vercel deployment
-    baseURL: '',  // Empty string means use current domain
+    // Use relative URLs for deployment flexibility
+    baseURL: '',
+
+    // Enhanced session management
+    session: {
+        getCurrentWorkoutId() {
+            return localStorage.getItem("currentWorkoutId");
+        },
+        
+        getCurrentExercises() {
+            return JSON.parse(localStorage.getItem("newWorkoutExercises") || "[]");
+        },
+        
+        getSessionStartTime() {
+            return localStorage.getItem("workoutStartTime");
+        },
+        
+        isSessionActive() {
+            return !!(this.getCurrentWorkoutId() && this.getCurrentExercises().length > 0);
+        },
+        
+        startNewSession(workoutId) {
+            localStorage.setItem("currentWorkoutId", workoutId);
+            localStorage.setItem("workoutStartTime", Date.now().toString());
+            localStorage.setItem("newWorkoutExercises", JSON.stringify([]));
+        },
+        
+        addExerciseToSession(exercise) {
+            const exercises = this.getCurrentExercises();
+            exercises.push(exercise);
+            localStorage.setItem("newWorkoutExercises", JSON.stringify(exercises));
+            // Trigger storage event for other tabs
+            window.dispatchEvent(new StorageEvent('storage', {
+                key: 'newWorkoutExercises',
+                newValue: JSON.stringify(exercises)
+            }));
+        },
+        
+        clearSession() {
+            localStorage.removeItem("currentWorkoutId");
+            localStorage.removeItem("newWorkoutExercises");
+            localStorage.removeItem("workoutStartTime");
+            // Notify other tabs
+            localStorage.setItem("workoutUpdated", Date.now().toString());
+        }
+    },
 
     async getAllWorkouts() {
         try {
@@ -10,8 +54,7 @@ const API = {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                // FIXED: Add timeout for serverless functions
-                signal: AbortSignal.timeout(30000) // 30 second timeout for Vercel
+                signal: AbortSignal.timeout(30000)
             });
             
             if (!res.ok) {
@@ -26,7 +69,6 @@ const API = {
         } catch (error) {
             console.error("❌ Error fetching workouts:", error);
             
-            // FIXED: Better error handling for different scenarios
             if (error.name === 'AbortError') {
                 throw new Error('Request timeout - Server may be slow to respond');
             } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
@@ -86,19 +128,15 @@ const API = {
     },
 
     async addExercise(exerciseData) {
-        let workoutId = localStorage.getItem("currentWorkoutId");
+        let workoutId = this.session.getCurrentWorkoutId();
         
-        if (!workoutId) {
-            const urlParams = new URLSearchParams(window.location.search);
-            workoutId = urlParams.get('id');
-        }
-
         if (!workoutId) {
             throw new Error("No workout in progress. Please start a new workout first.");
         }
 
         try {
             console.log('🔄 Adding exercise to workout:', workoutId);
+            console.log('Exercise data:', exerciseData);
 
             const res = await fetch(`${this.baseURL}/api/workouts/${workoutId}/exercises`, {
                 method: "POST",
@@ -110,11 +148,22 @@ const API = {
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({ error: 'Unknown error' }));
                 console.error('❌ Add exercise error:', res.status, errorData);
+                
+                if (res.status === 404) {
+                    // Workout not found, clear invalid session
+                    this.session.clearSession();
+                    throw new Error('Workout not found. Session has been reset. Please start a new workout.');
+                }
+                
                 throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
             }
 
             const updatedWorkout = await res.json();
             console.log('✅ Exercise added successfully');
+            
+            // Update local session with the exercise
+            this.session.addExerciseToSession(exerciseData);
+            
             return updatedWorkout;
         } catch (error) {
             console.error("❌ Error adding exercise:", error);
@@ -232,9 +281,8 @@ const API = {
             
             const newWorkout = await this.createWorkout(workoutData);
             
-            localStorage.setItem("currentWorkoutId", newWorkout._id);
-            localStorage.setItem("workoutStartTime", Date.now().toString());
-            localStorage.setItem("newWorkoutExercises", JSON.stringify([]));
+            // Initialize session
+            this.session.startNewSession(newWorkout._id);
             
             console.log('✅ New workout started:', newWorkout._id);
             return newWorkout;
@@ -246,7 +294,7 @@ const API = {
     },
 
     async completeCurrentWorkout() {
-        const workoutId = localStorage.getItem("currentWorkoutId");
+        const workoutId = this.session.getCurrentWorkoutId();
         
         if (!workoutId) {
             console.log('⚠️ No workout to complete');
@@ -258,17 +306,16 @@ const API = {
             
             const workout = await this.getWorkout(workoutId);
             
-            localStorage.removeItem("currentWorkoutId");
-            localStorage.removeItem("newWorkoutExercises");
-            localStorage.removeItem("workoutStartTime");
-
-            localStorage.setItem("workoutUpdated", Date.now().toString());
+            // Clear session
+            this.session.clearSession();
             
             console.log('✅ Workout completed successfully');
             return workout;
             
         } catch (error) {
             console.error("❌ Error completing workout:", error);
+            // Clear session anyway to prevent stuck state
+            this.session.clearSession();
             throw error;
         }
     },
@@ -279,10 +326,9 @@ const API = {
             const res = await fetch(`${this.baseURL}/api/health`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
-                signal: AbortSignal.timeout(20000) // 20 second timeout for health check
+                signal: AbortSignal.timeout(20000)
             });
             
-            // Even if not OK, try to parse the response for more info
             let data;
             try {
                 data = await res.json();
@@ -293,7 +339,6 @@ const API = {
             if (!res.ok) {
                 console.warn('⚠️ Health check returned non-OK status:', res.status, data);
                 
-                // For 503, server is running but has issues (likely database)
                 if (res.status === 503) {
                     return { 
                         status: 'degraded', 
@@ -350,7 +395,7 @@ const API = {
                     
                     workout.exercises.forEach(exercise => {
                         stats.totalDuration += exercise.duration || 0;
-                        if (exercise.type === 'resistance') {
+                        if (exercise.type === 'resistance' || exercise.category === 'resistance') {
                             const weight = exercise.weight || 0;
                             const reps = exercise.reps || 0;
                             const sets = exercise.sets || 1;
@@ -370,6 +415,34 @@ const API = {
         }
     },
 
+    // Enhanced session synchronization
+    async syncCurrentSession() {
+        const workoutId = this.session.getCurrentWorkoutId();
+        
+        if (!workoutId) return null;
+        
+        try {
+            const workout = await this.getWorkout(workoutId);
+            
+            if (workout && workout.exercises) {
+                // Sync local storage with server data
+                localStorage.setItem("newWorkoutExercises", JSON.stringify(workout.exercises));
+                
+                console.log(`🔄 Session synced: ${workout.exercises.length} exercises`);
+                return workout;
+            }
+        } catch (error) {
+            if (error.message.includes('not found')) {
+                console.warn('⚠️ Current workout not found on server, clearing session');
+                this.session.clearSession();
+            } else {
+                console.error('❌ Error syncing session:', error);
+            }
+        }
+        
+        return null;
+    },
+
     // Aliases for compatibility
     async getWorkouts() {
         return this.getAllWorkouts();
@@ -380,12 +453,12 @@ const API = {
     }
 };
 
-// FIXED: Initialize API when DOM loads
+// Initialize API when DOM loads
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('🔄 API initialized for domain:', window.location.origin);
     console.log('📍 Current URL:', window.location.href);
     
-    // Test API connection on page load with better error handling
+    // Test API connection
     try {
         const health = await API.checkHealth();
         
@@ -393,195 +466,62 @@ document.addEventListener('DOMContentLoaded', async () => {
             console.log('✅ API connection verified - All systems operational');
         } else if (health.status === 'degraded') {
             console.warn('⚠️ API partially working - Database issues detected:', health.message);
-            console.warn('   This may cause workout data loading issues');
         } else {
             console.error('❌ API health check failed:', health.status, health.message);
-            console.error('   Check Vercel deployment and server logs');
         }
     } catch (error) {
         console.error('❌ Initial API health check failed:', error.message);
-        console.error('   This may indicate deployment or routing issues');
     }
+    
+    // Sync session on page load
+    await API.syncCurrentSession();
 });
 
-// Handle page visibility changes to reconnect if needed
+// Handle page visibility changes
 document.addEventListener('visibilitychange', async () => {
     if (!document.hidden) {
-        console.log('🔄 Page visible again, checking API connection...');
-        try {
-            const health = await API.checkHealth();
-            if (health.status === 'healthy') {
-                console.log('✅ API reconnection successful');
-            } else {
-                console.warn('⚠️ API reconnection issues:', health.status);
-            }
-        } catch (error) {
-            console.warn('⚠️ API reconnection check failed:', error.message);
-        }
-    }
-});
-
-// Enhanced global error handler
-window.addEventListener('error', (event) => {
-    if (event.error && (event.error.message.includes('fetch') || event.error.message.includes('NetworkError'))) {
-        console.error('🌐 Network error detected:', event.error.message);
-        console.error('   Check internet connection and Vercel deployment status');
-    }
-});
-
-// Unhandled promise rejection handler
-window.addEventListener('unhandledrejection', (event) => {
-    if (event.reason && event.reason.message && event.reason.message.includes('Failed to fetch')) {
-        console.error('🌐 Unhandled fetch error:', event.reason.message);
-        console.error('   This usually indicates API endpoint or network issues');
+        console.log('🔄 Page visible again, syncing session...');
+        await API.syncCurrentSession();
     }
 });
 
 // Enhanced debug tools
 if (typeof window !== 'undefined') {
     window.API_DEBUG = {
-        async testConnection() {
-            try {
-                console.log('🔍 Testing API connection...');
-                const health = await API.checkHealth();
-                console.log('🔍 Health Check Result:', health);
-                
-                if (health.status === 'healthy') {
-                    console.log('✅ Server and database are working correctly');
-                } else if (health.status === 'degraded') {
-                    console.warn('⚠️ Server is running but database has issues');
-                    console.warn('   Details:', health.details);
-                } else if (health.status === 'endpoint_not_found') {
-                    console.error('❌ Health endpoint not found - Check server routes');
-                } else {
-                    console.error('❌ Server health check failed:', health.message);
-                }
-                
-                return health;
-            } catch (error) {
-                console.error('🔍 API Connection Test Failed:', error);
-                return { error: error.message };
-            }
-        },
-
-        async testCreateWorkout() {
-            try {
-                console.log('🔍 Testing workout creation...');
-                const workout = await API.startNewWorkout();
-                console.log('🔍 Test Workout Created:', workout);
-                return workout;
-            } catch (error) {
-                console.error('🔍 Test Workout Creation Failed:', error);
-                return { error: error.message };
-            }
-        },
-
-        async testGetWorkouts() {
-            try {
-                console.log('🔍 Testing get workouts...');
-                const workouts = await API.getAllWorkouts();
-                console.log('🔍 Test Get Workouts - Found:', workouts.length, 'workouts');
-                return workouts;
-            } catch (error) {
-                console.error('🔍 Test Get Workouts Failed:', error);
-                return { error: error.message };
-            }
-        },
-
-        async testAllEndpoints() {
-            console.log('🔍 Testing all API endpoints...');
+        async testSession() {
+            console.log('🔍 Testing session management...');
+            console.log('Current Workout ID:', API.session.getCurrentWorkoutId());
+            console.log('Current Exercises:', API.session.getCurrentExercises());
+            console.log('Session Start Time:', API.session.getSessionStartTime());
+            console.log('Is Session Active:', API.session.isSessionActive());
             
-            const results = {
-                health: await this.testConnection(),
-                getWorkouts: await this.testGetWorkouts()
+            return {
+                workoutId: API.session.getCurrentWorkoutId(),
+                exercises: API.session.getCurrentExercises(),
+                startTime: API.session.getSessionStartTime(),
+                isActive: API.session.isSessionActive()
             };
-
-            // Only test workout creation if other tests pass
-            if (results.health.status === 'healthy' || results.health.status === 'degraded') {
-                results.createWorkout = await this.testCreateWorkout();
-            }
-
-            console.log('🔍 All API Test Results:', results);
-            
-            // Summary
-            const healthyEndpoints = Object.keys(results).filter(key => 
-                results[key] && !results[key].error
-            ).length;
-            
-            console.log(`📊 Test Summary: ${healthyEndpoints}/${Object.keys(results).length} endpoints working`);
-            
-            return results;
         },
-
-        // Quick diagnostics
-        async diagnose() {
-            console.log('🔧 Running API diagnostics...');
-            console.log('📍 Current domain:', window.location.origin);
-            console.log('📍 Full URL:', window.location.href);
-            console.log('📍 API base URL:', API.baseURL || 'relative (current domain)');
-            
-            const results = await this.testAllEndpoints();
-            
-            // Provide recommendations
-            if (results.health.error) {
-                console.log('💡 Recommendations:');
-                console.log('   1. Check if Vercel deployment is successful');
-                console.log('   2. Verify API routes are properly configured');
-                console.log('   3. Check server logs in Vercel dashboard');
-            } else if (results.health.status === 'degraded') {
-                console.log('💡 Recommendations:');
-                console.log('   1. Check MongoDB connection in server logs');
-                console.log('   2. Verify MONGODB_URI environment variable');
-                console.log('   3. Ensure MongoDB Atlas cluster is running');
-            }
-            
-            return results;
+        
+        async clearSession() {
+            console.log('🔧 Clearing session...');
+            API.session.clearSession();
+            console.log('✅ Session cleared');
+        },
+        
+        async syncSession() {
+            console.log('🔄 Syncing session...');
+            const result = await API.syncCurrentSession();
+            console.log('Session sync result:', result);
+            return result;
         }
     };
     
     console.log('🔧 Enhanced API Debug tools available:');
-    console.log('   - window.API_DEBUG.testConnection()');
-    console.log('   - window.API_DEBUG.testAllEndpoints()');
-    console.log('   - window.API_DEBUG.diagnose()');
+    console.log('   - window.API_DEBUG.testSession()');
+    console.log('   - window.API_DEBUG.clearSession()');
+    console.log('   - window.API_DEBUG.syncSession()');
 }
-
-// Auto-retry mechanism for failed requests with exponential backoff
-const originalFetch = window.fetch;
-window.fetch = async function(url, options = {}) {
-    const maxRetries = 3;
-    let lastError;
-    
-    for (let i = 0; i <= maxRetries; i++) {
-        try {
-            const response = await originalFetch(url, options);
-            
-            // If it's a 503, 500, or 502 error and we have retries left, wait and retry
-            if ((response.status === 503 || response.status === 500 || response.status === 502) && i < maxRetries) {
-                console.log(`🔄 Retrying request to ${url} (attempt ${i + 2}/${maxRetries + 1})`);
-                await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i))); // Exponential backoff
-                continue;
-            }
-            
-            return response;
-        } catch (error) {
-            lastError = error;
-            
-            if (i < maxRetries && (
-                error.name === 'AbortError' || 
-                error.message.includes('fetch') || 
-                error.message.includes('NetworkError')
-            )) {
-                console.log(`🔄 Retrying failed request to ${url} (attempt ${i + 2}/${maxRetries + 1})`);
-                await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i))); // Exponential backoff
-                continue;
-            }
-            
-            throw error;
-        }
-    }
-    
-    throw lastError;
-};
 
 // Export for Node.js environments
 if (typeof module !== 'undefined' && module.exports) {

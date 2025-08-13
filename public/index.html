@@ -34,7 +34,7 @@
             margin: 0 auto;
             padding: 0 24px;
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
         }
 
@@ -99,14 +99,6 @@
             color: white;
             font-weight: 600;
             font-size: 14px;
-        }
-
-        .brand-logo {
-            width: 36px;
-            height: 36px;
-            background: url('/logo.png') no-repeat center center;
-            background-size: contain;
-            border-radius: 12px;
         }
 
         .logout-btn {
@@ -337,6 +329,8 @@
 
         .exercise-list {
             margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .exercise-item {
@@ -388,6 +382,32 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 16px;
+        }
+
+        .session-status {
+            margin-bottom: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .session-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: #065f46;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .session-inactive {
+            background: rgba(107, 114, 128, 0.1);
+            color: #374151;
+            border: 1px solid rgba(107, 114, 128, 0.2);
+        }
+
+        .session-timer {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
 
         @keyframes spin {
@@ -445,7 +465,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/index.html" class="nav-brand">
-                <div class="brand-logo"></div>
+                <div class="brand-icon">🏋️</div>
                 FitTrack
             </a>
             
@@ -488,11 +508,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M8 16h4v8H8z" fill="currentColor"/>
-                            <path d="M28 16h4v8h-4z" fill="currentColor"/>
-                            <path d="M12 18h16v4H12z" fill="currentColor"/>
-                        </svg>
+                        🏋️
                     </div>
                 </div>
                 <div class="stat-value" id="totalWorkouts">0</div>
@@ -502,10 +518,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                            <polyline points="12,6 12,12 16,14" stroke="currentColor" stroke-width="2"/>
-                        </svg>
+                        ⏱️
                     </div>
                 </div>
                 <div class="stat-value" id="totalTime">0</div>
@@ -515,9 +528,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" stroke="currentColor" stroke-width="2" fill="currentColor"/>
-                        </svg>
+                        🔥
                     </div>
                 </div>
                 <div class="stat-value" id="thisWeek">0</div>
@@ -527,9 +538,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: white;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" fill="currentColor"/>
-                        </svg>
+                        ⭐
                     </div>
                 </div>
                 <div class="stat-value" id="avgWorkout">0</div>
@@ -541,10 +550,7 @@
             <div class="section-card">
                 <div class="section-header">
                     <div class="section-icon" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white;">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="2"/>
-                        </svg>
+                        📊
                     </div>
                     <h2 class="section-title">Last Workout</h2>
                 </div>
@@ -565,11 +571,19 @@
             <div class="section-card current-workout">
                 <div class="section-header">
                     <div class="section-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" stroke="currentColor" stroke-width="2" fill="currentColor"/>
-                        </svg>
+                        🔥
                     </div>
                     <h2 class="section-title">Current Session</h2>
+                </div>
+                
+                <!-- Session Status Indicator -->
+                <div id="sessionStatus" class="session-status session-inactive">
+                    No active session
+                </div>
+                
+                <!-- Session Timer -->
+                <div id="sessionTimer" class="session-timer" style="display: none;">
+                    00:00:00
                 </div>
                 
                 <div class="exercise-list" id="currentExercises">
@@ -581,26 +595,36 @@
                 
                 <div class="action-buttons">
                     <a href="/excercise.html" class="btn btn-primary">Add Exercise</a>
-                    <button class="btn btn-secondary" id="completeWorkout" onclick="completeWorkout()">Complete</button>
+                    <button class="btn btn-secondary" id="completeWorkout" onclick="completeWorkout()" disabled>Complete</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="/js/api.js"></script>
     <script>
+        let sessionTimer = null;
+        let sessionStartTime = null;
+
+        // Check authentication
         function checkAuth() {
-            const user = JSON.parse(localStorage.getItem('user'));
+            const user = localStorage.getItem('user');
             if (!user) {
                 window.location.href = '/login.html';
                 return null;
             }
-            return user;
+            try {
+                return JSON.parse(user);
+            } catch (e) {
+                console.error('Error parsing user data:', e);
+                window.location.href = '/login.html';
+                return null;
+            }
         }
 
+        // Initialize user display
         function initializeUser(user) {
-            document.getElementById('userName').textContent = user.name || 'User';
-            document.getElementById('userNameWelcome').textContent = user.name || 'User';
+            document.getElementById('userName').textContent = user.name || user.email || 'User';
+            document.getElementById('userNameWelcome').textContent = user.name || user.email || 'User';
             
             const userAvatar = document.getElementById('userAvatar');
             if (user.picture) {
@@ -610,33 +634,59 @@
             }
         }
 
+        // Logout function
         function logout() {
-            localStorage.removeItem('user');
-            localStorage.removeItem('currentWorkoutId');
-            localStorage.removeItem('newWorkoutExercises');
-            localStorage.removeItem('workoutStartTime');
+            localStorage.clear();
             window.location.href = '/login.html';
         }
 
+        // Update welcome message based on time
+        function updateWelcomeMessage() {
+            const hour = new Date().getHours();
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userName = user.name || user.email || 'User';
+            
+            let greeting;
+            if (hour < 12) greeting = 'Good morning';
+            else if (hour < 18) greeting = 'Good afternoon';
+            else greeting = 'Good evening';
+            
+            document.getElementById('welcomeTitle').innerHTML = `${greeting}, <span id="userNameWelcome">${userName}</span>!`;
+        }
+
+        // Load workout statistics
         async function loadWorkoutStats() {
             try {
-                const workouts = await API.getAllWorkouts();
+                console.log('Loading workout stats...');
+                const response = await fetch('/api/workouts');
                 
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const workouts = await response.json();
+                console.log(`Loaded ${workouts.length} workouts`);
+                
+                // Update stats
                 document.getElementById('totalWorkouts').textContent = workouts.length;
                 
+                // Calculate this week's workouts
                 const thisWeekStart = new Date();
                 thisWeekStart.setDate(thisWeekStart.getDate() - 7);
                 const thisWeekWorkouts = workouts.filter(w => new Date(w.day) > thisWeekStart);
                 document.getElementById('thisWeek').textContent = thisWeekWorkouts.length;
                 
+                // Calculate total training time
                 const totalMinutes = workouts.reduce((total, workout) => {
-                    return total + workout.exercises.reduce((sum, ex) => sum + (ex.duration || 0), 0);
+                    return total + (workout.exercises || []).reduce((sum, ex) => sum + (ex.duration || 0), 0);
                 }, 0);
                 document.getElementById('totalTime').textContent = totalMinutes;
                 
+                // Calculate average workout duration
                 const avgTime = workouts.length > 0 ? Math.round(totalMinutes / workouts.length) : 0;
                 document.getElementById('avgWorkout').textContent = avgTime;
                 
+                // Load last workout
                 if (workouts.length > 0) {
                     loadLastWorkout(workouts[0]);
                 } else {
@@ -649,10 +699,11 @@
             }
         }
 
+        // Display last workout information
         function loadLastWorkout(workout) {
             const container = document.getElementById('lastWorkoutInfo');
             
-            if (!workout || !workout.exercises.length) {
+            if (!workout || !workout.exercises || workout.exercises.length === 0) {
                 showEmptyLastWorkout();
                 return;
             }
@@ -681,66 +732,118 @@
             `;
         }
 
+        // Show empty state for last workout
         function showEmptyLastWorkout() {
             const container = document.getElementById('lastWorkoutInfo');
             container.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">
-                        <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-                            <path d="M8 16h4v8H8z" fill="currentColor"/>
-                            <path d="M28 16h4v8h-4z" fill="currentColor"/>
-                            <path d="M12 18h16v4H12z" fill="currentColor"/>
-                        </svg>
-                    </div>
+                    <div class="empty-icon">🏋️</div>
                     <p>No workouts yet. Start your first workout!</p>
                 </div>
             `;
         }
 
+        // Show error state
         function showErrorState() {
             const container = document.getElementById('lastWorkoutInfo');
             container.innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                            <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
-                            <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                    </div>
-                    <p>Error loading workout data. Check your MongoDB connection.</p>
+                    <div class="empty-icon">⚠️</div>
+                    <p>Error loading workout data. Check your connection.</p>
                 </div>
             `;
         }
 
+        // Load current workout session
         function loadCurrentWorkout() {
-            const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
-            const container = document.getElementById('currentExercises');
+            console.log('Loading current workout session...');
             
-            if (exercises.length === 0) {
+            const workoutId = localStorage.getItem('currentWorkoutId');
+            const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
+            const startTime = localStorage.getItem('workoutStartTime');
+            
+            console.log('Current session data:', { workoutId, exercisesCount: exercises.length, startTime });
+            
+            const container = document.getElementById('currentExercises');
+            const statusElement = document.getElementById('sessionStatus');
+            const timerElement = document.getElementById('sessionTimer');
+            const completeButton = document.getElementById('completeWorkout');
+            
+            if (workoutId && exercises.length > 0) {
+                // Active session
+                statusElement.textContent = 'Active Session';
+                statusElement.className = 'session-status session-active';
+                
+                // Show timer
+                if (startTime) {
+                    sessionStartTime = parseInt(startTime);
+                    timerElement.style.display = 'block';
+                    startSessionTimer();
+                }
+                
+                // Enable complete button
+                completeButton.disabled = false;
+                
+                // Display exercises
+                container.innerHTML = exercises.map(ex => {
+                    let details = '';
+                    if (ex.type === 'resistance' || ex.category === 'resistance') {
+                        details = `${ex.weight || 0}kg × ${ex.sets || 0} sets × ${ex.reps || 0} reps (${ex.duration || 0} min)`;
+                    } else if (ex.type === 'cardio' || ex.category === 'cardio') {
+                        details = `${ex.distance || 0}km in ${ex.duration || 0} min`;
+                    } else {
+                        details = `${ex.duration || 0} minutes`;
+                    }
+                    
+                    return `
+                        <div class="exercise-item">
+                            <div class="exercise-name">${ex.name || 'Unnamed Exercise'}</div>
+                            <div class="exercise-details">${details}</div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                // No active session
+                statusElement.textContent = 'No active session';
+                statusElement.className = 'session-status session-inactive';
+                timerElement.style.display = 'none';
+                completeButton.disabled = true;
+                stopSessionTimer();
+                
                 container.innerHTML = `
                     <div class="exercise-item">
                         <div class="exercise-name">No exercises added yet</div>
                         <div class="exercise-details">Start adding exercises to track your progress</div>
                     </div>
                 `;
-                return;
             }
-            
-            container.innerHTML = exercises.map(ex => {
-                const details = ex.type === 'resistance' 
-                    ? `${ex.weight || 0}kg × ${ex.sets || 0} sets × ${ex.reps || 0} reps (${ex.duration || 0} min)`
-                    : `${ex.distance || 0}km in ${ex.duration || 0} min`;
-                
-                return `
-                    <div class="exercise-item">
-                        <div class="exercise-name">${ex.name}</div>
-                        <div class="exercise-details">${details}</div>
-                    </div>
-                `;
-            }).join('');
         }
 
+        // Session timer functions
+        function startSessionTimer() {
+            if (sessionTimer) clearInterval(sessionTimer);
+            
+            sessionTimer = setInterval(() => {
+                if (!sessionStartTime) return;
+                
+                const elapsed = Date.now() - sessionStartTime;
+                const hours = Math.floor(elapsed / 3600000);
+                const minutes = Math.floor((elapsed % 3600000) / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                
+                const timerElement = document.getElementById('sessionTimer');
+                timerElement.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function stopSessionTimer() {
+            if (sessionTimer) {
+                clearInterval(sessionTimer);
+                sessionTimer = null;
+            }
+        }
+
+        // Complete workout function
         async function completeWorkout() {
             const workoutId = localStorage.getItem('currentWorkoutId');
             const exercises = JSON.parse(localStorage.getItem('newWorkoutExercises') || '[]');
@@ -751,16 +854,21 @@
             }
 
             try {
+                console.log('Completing workout:', workoutId);
+                
+                // Clear session data
                 localStorage.removeItem('currentWorkoutId');
                 localStorage.removeItem('newWorkoutExercises');
                 localStorage.removeItem('workoutStartTime');
                 
+                // Update displays
                 await loadWorkoutStats();
                 loadCurrentWorkout();
                 
                 showToast('Workout completed successfully!');
                 
-                localStorage.setItem('workoutUpdated', Date.now());
+                // Notify other pages
+                localStorage.setItem('workoutUpdated', Date.now().toString());
                 
             } catch (error) {
                 console.error('Error completing workout:', error);
@@ -768,6 +876,7 @@
             }
         }
 
+        // Show toast notification
         function showToast(message) {
             const toast = document.createElement('div');
             toast.style.cssText = `
@@ -794,62 +903,86 @@
             }, 3000);
         }
 
-        function updateWelcomeMessage() {
-            const hour = new Date().getHours();
-            const userName = JSON.parse(localStorage.getItem('user'))?.name || 'User';
-            
-            let greeting;
-            if (hour < 12) greeting = 'Good morning';
-            else if (hour < 18) greeting = 'Good afternoon';
-            else greeting = 'Good evening';
-            
-            document.getElementById('welcomeTitle').innerHTML = `${greeting}, <span id="userNameWelcome">${userName}</span>!`;
-        }
-
+        // Listen for storage changes from other tabs/pages
         window.addEventListener('storage', (e) => {
+            console.log('Storage change detected:', e.key);
+            
             if (e.key === 'workoutUpdated') {
+                console.log('Workout updated, refreshing stats...');
                 loadWorkoutStats();
             }
-            if (e.key === 'newWorkoutExercises') {
+            if (e.key === 'newWorkoutExercises' || e.key === 'currentWorkoutId') {
+                console.log('Current workout changed, refreshing session...');
                 loadCurrentWorkout();
             }
         });
 
+        // Auto-refresh current session every 30 seconds
+        setInterval(() => {
+            const workoutId = localStorage.getItem('currentWorkoutId');
+            if (workoutId) {
+                console.log('Auto-refreshing current session...');
+                loadCurrentWorkout();
+            }
+        }, 30000);
+
+        // Initialize page on load
         document.addEventListener('DOMContentLoaded', async () => {
+            console.log('Initializing FitTrack home page...');
+            
             const user = checkAuth();
-            if (user) {
-                initializeUser(user);
-                updateWelcomeMessage();
+            if (!user) return;
+            
+            initializeUser(user);
+            updateWelcomeMessage();
+            
+            // Load data
+            await loadWorkoutStats();
+            loadCurrentWorkout();
+            
+            console.log('Page initialization complete');
+        });
+
+        // Handle page visibility changes
+        document.addEventListener('visibilitychange', async () => {
+            if (!document.hidden) {
+                console.log('Page became visible, refreshing data...');
                 await loadWorkoutStats();
                 loadCurrentWorkout();
+            } else {
+                console.log('Page hidden, stopping timer...');
+                stopSessionTimer();
             }
         });
 
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-            
-            @keyframes slideOut {
-                from {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-                to {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-            }
-        `;
-        document.head.appendChild(style);
+        // Handle beforeunload to stop timer
+        window.addEventListener('beforeunload', () => {
+            stopSessionTimer();
+        });
     </script>
+
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
 </body>
 </html>
