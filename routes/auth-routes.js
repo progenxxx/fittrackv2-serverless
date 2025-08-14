@@ -1,8 +1,21 @@
 const express = require("express");
 const router = express.Router();
+const mongoose = require("mongoose");
 const User = require("../models/User");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+
+function ensureDbConnection(req, res, next) {
+    if (mongoose.connection.readyState !== 1) {
+        return res.status(503).json({
+            error: "Database connection not ready",
+            details: "Please wait a moment and try again",
+            status: "connecting",
+            timestamp: new Date().toISOString()
+        });
+    }
+    next();
+}
 
 const createEmailTransporter = () => {
     if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
@@ -10,7 +23,7 @@ const createEmailTransporter = () => {
         return null;
     }
     
-    return nodemailer.createTransport({
+    return nodemailer.createTransporter({
         host: 'smtp.gmail.com',
         port: 587,
         secure: false,
@@ -94,7 +107,7 @@ const sendVerificationEmail = async (email, code, name) => {
     }
 };
 
-router.post("/api/auth/check-email", async (req, res) => {
+router.post("/api/auth/check-email", ensureDbConnection, async (req, res) => {
     try {
         const { email } = req.body;
         
@@ -122,7 +135,7 @@ router.post("/api/auth/check-email", async (req, res) => {
     }
 });
 
-router.post("/api/auth/signup", async (req, res) => {
+router.post("/api/auth/signup", ensureDbConnection, async (req, res) => {
     try {
         const { email, password, name } = req.body;
         
@@ -289,7 +302,7 @@ router.post("/api/auth/signup", async (req, res) => {
     }
 });
 
-router.post("/api/auth/verify-email", async (req, res) => {
+router.post("/api/auth/verify-email", ensureDbConnection, async (req, res) => {
     try {
         const { userId, verificationCode } = req.body;
         
@@ -368,7 +381,7 @@ router.post("/api/auth/verify-email", async (req, res) => {
     }
 });
 
-router.post("/api/auth/resend-verification", async (req, res) => {
+router.post("/api/auth/resend-verification", ensureDbConnection, async (req, res) => {
     try {
         const { userId } = req.body;
         
@@ -443,7 +456,7 @@ router.post("/api/auth/resend-verification", async (req, res) => {
     }
 });
 
-router.post("/api/auth/login", async (req, res) => {
+router.post("/api/auth/login", ensureDbConnection, async (req, res) => {
     try {
         const { email, password } = req.body;
         
@@ -528,7 +541,7 @@ router.post("/api/auth/login", async (req, res) => {
     }
 });
 
-router.post("/api/auth/google", async (req, res) => {
+router.post("/api/auth/google", ensureDbConnection, async (req, res) => {
     try {
         const { googleId, email, name, picture } = req.body;
         
@@ -617,7 +630,7 @@ router.post("/api/auth/google", async (req, res) => {
     }
 });
 
-router.post("/api/auth/set-password", async (req, res) => {
+router.post("/api/auth/set-password", ensureDbConnection, async (req, res) => {
     try {
         const { userId, password } = req.body;
         
@@ -661,7 +674,7 @@ router.post("/api/auth/set-password", async (req, res) => {
     }
 });
 
-router.post("/api/auth/forgot-password", async (req, res) => {
+router.post("/api/auth/forgot-password", ensureDbConnection, async (req, res) => {
     try {
         const { email } = req.body;
         
@@ -774,7 +787,7 @@ router.post("/api/auth/forgot-password", async (req, res) => {
     }
 });
 
-router.post("/api/auth/reset-password", async (req, res) => {
+router.post("/api/auth/reset-password", ensureDbConnection, async (req, res) => {
     try {
         const { token, newPassword } = req.body;
         
@@ -823,7 +836,7 @@ router.post("/api/auth/reset-password", async (req, res) => {
     }
 });
 
-router.get("/api/auth/verify-reset-token", async (req, res) => {
+router.get("/api/auth/verify-reset-token", ensureDbConnection, async (req, res) => {
     try {
         const { token } = req.query;
         
@@ -861,7 +874,7 @@ router.get("/api/auth/verify-reset-token", async (req, res) => {
     }
 });
 
-router.get("/api/auth/user/:id", async (req, res) => {
+router.get("/api/auth/user/:id", ensureDbConnection, async (req, res) => {
     try {
         const { id } = req.params;
         
@@ -896,7 +909,7 @@ router.get("/api/auth/user/:id", async (req, res) => {
     }
 });
 
-router.get("/api/auth/stats", async (req, res) => {
+router.get("/api/auth/stats", ensureDbConnection, async (req, res) => {
     try {
         const stats = await User.getUserStats();
         res.json(stats);

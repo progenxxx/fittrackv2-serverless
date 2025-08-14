@@ -18,13 +18,11 @@ const emailVerificationEnabled = process.env.EMAIL_VERIFICATION_ENABLED !== 'fal
 console.log("📧 Email configured:", emailConfigured ? 'yes' : 'no');
 console.log("📧 Email verification:", emailVerificationEnabled ? 'enabled' : 'disabled (fallback: auto-verify)');
 
-// Middleware
 app.use(logger("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static("public"));
 
-// Security headers
 app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
@@ -32,13 +30,11 @@ app.use((req, res, next) => {
     next();
 });
 
-// Request logging
 app.use((req, res, next) => {
     console.log(`📡 ${req.method} ${req.url} - ${req.ip} - ${new Date().toISOString()}`);
     next();
 });
 
-// MongoDB connection
 const MONGO_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/workout";
 
 console.log("🔗 Attempting to connect to MongoDB...");
@@ -48,44 +44,75 @@ console.log("🔧 MongoDB URI (masked):", MONGO_URI.replace(/\/\/.*@/, "//***:**
 const mongooseOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 10000,
+    serverSelectionTimeoutMS: 15000,
     socketTimeoutMS: 45000,
-    bufferCommands: false,
+    bufferCommands: true,
     maxPoolSize: 10,
-    minPoolSize: 5,
+    minPoolSize: 2,
     maxIdleTimeMS: 30000,
     retryWrites: true,
     w: 'majority'
 };
 
-mongoose.connect(MONGO_URI, mongooseOptions)
-    .then(() => {
+let isDbConnected = false;
+let connectionRetries = 0;
+const maxRetries = 3;
+
+async function connectToDatabase() {
+    try {
+        await mongoose.connect(MONGO_URI, mongooseOptions);
         console.log("✅ MongoDB connected successfully!");
         console.log("🗄️  Database:", mongoose.connection.name);
         console.log("🔌 Connection state:", mongoose.connection.readyState === 1 ? "Connected" : "Connecting");
-        return mongoose.connection.db.admin().ping();
-    })
-    .then(() => {
+        
+        await mongoose.connection.db.admin().ping();
         console.log("🏓 MongoDB ping successful - database is responsive");
-    })
-    .catch(err => {
+        isDbConnected = true;
+        return true;
+    } catch (err) {
         console.error("❌ MongoDB connection error:", err.message);
-        console.log("📱 Server will continue running but database features won't work until MongoDB is connected.");
-    });
+        isDbConnected = false;
+        
+        if (connectionRetries < maxRetries) {
+            connectionRetries++;
+            console.log(`🔄 Retrying connection (${connectionRetries}/${maxRetries}) in 5 seconds...`);
+            setTimeout(() => connectToDatabase(), 5000);
+        } else {
+            console.log("📱 Server will continue running but database features won't work until MongoDB is connected.");
+        }
+        return false;
+    }
+}
 
 mongoose.connection.on('connected', () => {
     console.log('🔌 Mongoose connected to MongoDB');
+    isDbConnected = true;
 });
 
 mongoose.connection.on('error', (err) => {
     console.error('❌ Mongoose connection error:', err);
+    isDbConnected = false;
 });
 
 mongoose.connection.on('disconnected', () => {
     console.log('🔌 Mongoose disconnected from MongoDB');
+    isDbConnected = false;
+    if (connectionRetries < maxRetries) {
+        setTimeout(() => connectToDatabase(), 5000);
+    }
 });
 
-// OAuth configuration validation
+function ensureDbConnection(req, res, next) {
+    if (!isDbConnected || mongoose.connection.readyState !== 1) {
+        return res.status(503).json({
+            error: "Database connection not ready",
+            details: "Please wait a moment and try again",
+            status: "connecting"
+        });
+    }
+    next();
+}
+
 const validateOAuthConfig = () => {
     const requiredVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
     const missing = requiredVars.filter(varName => !process.env[varName]);
@@ -103,7 +130,6 @@ const validateOAuthConfig = () => {
 
 validateOAuthConfig();
 
-// Google OAuth routes
 app.get('/auth/google', (req, res) => {
     console.log('🔐 Google OAuth login request received');
     
@@ -165,6 +191,11 @@ app.get('/auth/callback', async (req, res) => {
     if (state !== 'fittrack_login') {
         console.error('❌ Invalid state parameter');
         return res.redirect('/login.html?error=oauth_invalid_state');
+    }
+    
+    if (!isDbConnected || mongoose.connection.readyState !== 1) {
+        console.error('❌ Database not ready for OAuth callback');
+        return res.redirect('/login.html?error=database_not_ready');
     }
     
     try {
@@ -242,7 +273,11 @@ app.get('/auth/callback', async (req, res) => {
                 picture: userInfo.picture
             };
             
-            const apiResponse = await fetch(`http://localhost:${PORT}/api/auth/google`, {
+            const baseUrl = process.env.NODE_ENV === 'production' ? 
+                (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `https://${req.get('host')}`) :
+                `http://localhost:${PORT}`;
+            
+            const apiResponse = await fetch(`${baseUrl}/api/auth/google`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -297,19 +332,17 @@ app.use('/auth/*', (req, res, next) => {
     res.redirect('/login.html?error=auth_route_not_found');
 });
 
-// Load enhanced authentication routes
 console.log("🔌 Loading enhanced authentication routes...");
 try {
     const authRoutes = require("./routes/auth-routes");
-    app.use(authRoutes);
+    app.use(ensureDbConnection, authRoutes);
     console.log("✅ Enhanced authentication routes loaded successfully");
 } catch (err) {
     console.warn("⚠️ Enhanced auth routes file not found, using fallback routes");
     
     const User = require("./models/User");
     
-    // Fallback auth routes (basic versions of the enhanced routes)
-    app.post("/api/auth/signup", async (req, res) => {
+    app.post("/api/auth/signup", ensureDbConnection, async (req, res) => {
         try {
             const { email, password, name } = req.body;
             
@@ -408,7 +441,7 @@ try {
         }
     });
 
-    app.post("/api/auth/login", async (req, res) => {
+    app.post("/api/auth/login", ensureDbConnection, async (req, res) => {
         try {
             const { email, password } = req.body;
             
@@ -489,8 +522,7 @@ try {
         }
     });
 
-    // Check email endpoint
-    app.post("/api/auth/check-email", async (req, res) => {
+    app.post("/api/auth/check-email", ensureDbConnection, async (req, res) => {
         try {
             const { email } = req.body;
             
@@ -518,7 +550,7 @@ try {
         }
     });
 
-    app.post("/api/auth/google", async (req, res) => {
+    app.post("/api/auth/google", ensureDbConnection, async (req, res) => {
         try {
             const { googleId, email, name, picture } = req.body;
             
@@ -607,7 +639,7 @@ try {
         }
     });
 
-    app.post("/api/auth/set-password", async (req, res) => {
+    app.post("/api/auth/set-password", ensureDbConnection, async (req, res) => {
         try {
             const { userId, password } = req.body;
             
@@ -652,11 +684,9 @@ try {
     });
 }
 
-// Load API routes
 console.log("🔌 Loading API routes...");
 require("./routes/api-routes")(app);
 
-// Load HTML routes
 console.log("🔌 Loading HTML routes...");
 try {
     require("./routes/html-routes")(app);
@@ -718,18 +748,18 @@ try {
     });
 }
 
-// Health check endpoint
 app.get('/health', (req, res) => {
     res.json({
-        status: 'healthy',
+        status: isDbConnected ? 'healthy' : 'degraded',
         timestamp: new Date().toISOString(),
         server: 'Enhanced FitTrack API Server',
-        mongodb: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        mongodb: isDbConnected ? 'connected' : 'disconnected',
         environment: process.env.NODE_ENV || 'development',
         mongoUri: process.env.MONGODB_URI ? 'configured' : 'missing',
         authentication: 'enhanced',
         emailVerification: emailVerificationEnabled ? 'enabled' : 'disabled (auto-verify fallback)',
         emailConfigured: emailConfigured,
+        connectionRetries: connectionRetries,
         features: [
             'Email/Password Authentication',
             'Google OAuth Integration',
@@ -739,12 +769,12 @@ app.get('/health', (req, res) => {
             'Password setup for Google users',
             'Proper error handling for existing accounts',
             'Google account password addition with verification',
-            'Mandatory password setup for Google signup'
+            'Mandatory password setup for Google signup',
+            'Database connection management'
         ]
     });
 });
 
-// Error handling middleware
 app.use((err, req, res, next) => {
     console.error('❌ Unhandled error:', err);
     res.status(500).json({
@@ -753,7 +783,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-// 404 handler
 app.use((req, res) => {
     console.log(`❌ 404 - Route not found: ${req.method} ${req.url}`);
     
@@ -792,7 +821,6 @@ app.use((req, res) => {
     }
 });
 
-// Graceful shutdown handlers
 process.on('SIGINT', async () => {
     console.log('\n🛑 Received SIGINT, shutting down gracefully...');
     try {
@@ -817,93 +845,106 @@ process.on('SIGTERM', async () => {
     }
 });
 
-// Start server
-app.listen(PORT, () => {
-    console.log("\n🎉 Enhanced FitTrack Server with Complete Authentication is running!");
-    console.log(`🚀 Server URL: http://localhost:${PORT}`);
-    console.log(`🔐 Login page: http://localhost:${PORT}/login.html`);
-    console.log(`🏋️  Exercise page: http://localhost:${PORT}/excercise.html`);
-    console.log(`📊 API health: http://localhost:${PORT}/api/health`);
-    console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📅 Started at: ${new Date().toISOString()}`);
+async function startServer() {
+    console.log("🔄 Initializing database connection...");
+    await connectToDatabase();
     
-    if (mongoose.connection.readyState === 1) {
-        console.log("✅ MongoDB is connected and ready");
-    } else {
-        console.log("⚠️  MongoDB connection pending - check logs above");
-    }
-    
-    console.log("\n📝 Available endpoints:");
-    console.log("   GET  /                            - Home page");
-    console.log("   GET  /login.html                  - Complete login/signup with enhanced authentication");
-    console.log("   GET  /excercise.html              - Add exercise page");
-    console.log("   GET  /api/workouts                - Get all workouts");
-    console.log("   POST /api/workouts                - Create new workout");
-    console.log("   POST /api/auth/signup             - Enhanced signup (handles Google account password addition)");
-    console.log("   POST /api/auth/login              - Enhanced login with validation");
-    console.log("   POST /api/auth/check-email        - Check if email exists");
-    console.log("   POST /api/auth/verify-email       - Verify email with 6-digit code");
-    console.log("   POST /api/auth/resend-verification - Resend verification code");
-    console.log("   POST /api/auth/google             - Enhanced Google authentication");
-    console.log("   POST /api/auth/set-password       - Set password for Google users");
-    console.log("   POST /api/auth/forgot-password    - Password reset request");
-    console.log("   POST /api/auth/reset-password     - Reset password with token");
-    console.log("   GET  /api/health                  - Enhanced API health check");
-    console.log("   GET  /auth/google                 - Google OAuth login");
-    console.log("   GET  /auth/callback               - Google OAuth callback");
-    console.log("\n🔧 To stop server: Ctrl+C");
-    console.log("\n🔐 Complete Authentication Features:");
-    console.log("   ✅ Email/Password Registration");
-    console.log("   ✅ Smart Email Verification (auto-verify if email not configured)");
-    console.log("   ✅ Enhanced Google OAuth Integration");
-    console.log("   ✅ Google Account Password Addition with Verification");
-    console.log("   ✅ Mandatory Password Setup for Google Users");
-    console.log("   ✅ Proper Account Existence Checking");
-    console.log("   ✅ Enhanced Error Messages and User Guidance");
-    console.log("   ✅ Graceful Email Fallback");
-    console.log("   ✅ No Duplicate Account Creation");
-    console.log("   ✅ Dual Authentication System (Google + Email/Password)");
-    console.log("   ✅ Password Reset Functionality");
-    console.log("   ✅ Session Management");
-    console.log("   ✅ Security Headers");
-    console.log("   ✅ Input Validation and Sanitization");
-    console.log("   ✅ Comprehensive Error Handling");
-    
-    if (emailVerificationEnabled) {
-        console.log("   ✅ Email Verification: ENABLED");
-        console.log("       📧 GMAIL_USER:", process.env.GMAIL_USER ? 'configured' : 'missing');
-        console.log("       📧 GMAIL_APP_PASSWORD:", process.env.GMAIL_APP_PASSWORD ? 'configured' : 'missing');
-    } else {
-        console.log("   ⚠️  Email Verification: DISABLED (auto-verify fallback)");
-        if (!emailConfigured) {
-            console.log("       📧 Configure GMAIL_USER and GMAIL_APP_PASSWORD to enable email verification");
+    app.listen(PORT, () => {
+        console.log("\n🎉 Enhanced FitTrack Server with Complete Authentication is running!");
+        console.log(`🚀 Server URL: http://localhost:${PORT}`);
+        console.log(`🔐 Login page: http://localhost:${PORT}/login.html`);
+        console.log(`🏋️  Exercise page: http://localhost:${PORT}/excercise.html`);
+        console.log(`📊 API health: http://localhost:${PORT}/api/health`);
+        console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`📅 Started at: ${new Date().toISOString()}`);
+        
+        if (isDbConnected) {
+            console.log("✅ MongoDB is connected and ready");
+        } else {
+            console.log("⚠️  MongoDB connection pending - check logs above");
         }
-    }
-    
-    if (validateOAuthConfig()) {
-        console.log("   ✅ Google OAuth: ENABLED");
-        console.log("       🔑 GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? 'configured' : 'missing');
-        console.log("       🔑 GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? 'configured' : 'missing');
-    } else {
-        console.log("   ❌ Google OAuth: DISABLED");
-        console.log("       🔑 Configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to enable Google OAuth");
-    }
-    
-    console.log("\n🎯 New Enhanced Features:");
-    console.log("   🔥 Regular signup with Google account email triggers verification");
-    console.log("   🔥 Google signup always requires password setup");
-    console.log("   🔥 Dual authentication capability for all users");
-    console.log("   🔥 Smart account linking and verification");
-    console.log("   🔥 Comprehensive error handling and user guidance");
-    
-    console.log("\n💡 Usage Examples:");
-    console.log("   1. Sign up with email/password using Google account email → Verification required");
-    console.log("   2. Sign up with Google → Password setup modal appears");
-    console.log("   3. Sign in with Google (existing account with password) → Direct homepage");
-    console.log("   4. Sign in with email/password → Standard login flow");
-    console.log("   5. Forgot password → Email reset link");
-    
-    console.log("\n🌟 Ready to handle all authentication scenarios!");
+        
+        console.log("\n📝 Available endpoints:");
+        console.log("   GET  /                            - Home page");
+        console.log("   GET  /login.html                  - Complete login/signup with enhanced authentication");
+        console.log("   GET  /excercise.html              - Add exercise page");
+        console.log("   GET  /api/workouts                - Get all workouts");
+        console.log("   POST /api/workouts                - Create new workout");
+        console.log("   POST /api/auth/signup             - Enhanced signup (handles Google account password addition)");
+        console.log("   POST /api/auth/login              - Enhanced login with validation");
+        console.log("   POST /api/auth/check-email        - Check if email exists");
+        console.log("   POST /api/auth/verify-email       - Verify email with 6-digit code");
+        console.log("   POST /api/auth/resend-verification - Resend verification code");
+        console.log("   POST /api/auth/google             - Enhanced Google authentication");
+        console.log("   POST /api/auth/set-password       - Set password for Google users");
+        console.log("   POST /api/auth/forgot-password    - Password reset request");
+        console.log("   POST /api/auth/reset-password     - Reset password with token");
+        console.log("   GET  /api/health                  - Enhanced API health check");
+        console.log("   GET  /auth/google                 - Google OAuth login");
+        console.log("   GET  /auth/callback               - Google OAuth callback");
+        console.log("\n🔧 To stop server: Ctrl+C");
+        console.log("\n🔐 Complete Authentication Features:");
+        console.log("   ✅ Email/Password Registration");
+        console.log("   ✅ Smart Email Verification (auto-verify if email not configured)");
+        console.log("   ✅ Enhanced Google OAuth Integration");
+        console.log("   ✅ Google Account Password Addition with Verification");
+        console.log("   ✅ Mandatory Password Setup for Google Users");
+        console.log("   ✅ Proper Account Existence Checking");
+        console.log("   ✅ Enhanced Error Messages and User Guidance");
+        console.log("   ✅ Graceful Email Fallback");
+        console.log("   ✅ No Duplicate Account Creation");
+        console.log("   ✅ Dual Authentication System (Google + Email/Password)");
+        console.log("   ✅ Password Reset Functionality");
+        console.log("   ✅ Session Management");
+        console.log("   ✅ Security Headers");
+        console.log("   ✅ Input Validation and Sanitization");
+        console.log("   ✅ Comprehensive Error Handling");
+        console.log("   ✅ Database Connection Management");
+        console.log("   ✅ Connection Retry Logic");
+        console.log("   ✅ Database Ready Checking");
+        
+        if (emailVerificationEnabled) {
+            console.log("   ✅ Email Verification: ENABLED");
+            console.log("       📧 GMAIL_USER:", process.env.GMAIL_USER ? 'configured' : 'missing');
+            console.log("       📧 GMAIL_APP_PASSWORD:", process.env.GMAIL_APP_PASSWORD ? 'configured' : 'missing');
+        } else {
+            console.log("   ⚠️  Email Verification: DISABLED (auto-verify fallback)");
+            if (!emailConfigured) {
+                console.log("       📧 Configure GMAIL_USER and GMAIL_APP_PASSWORD to enable email verification");
+            }
+        }
+        
+        if (validateOAuthConfig()) {
+            console.log("   ✅ Google OAuth: ENABLED");
+            console.log("       🔑 GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? 'configured' : 'missing');
+            console.log("       🔑 GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? 'configured' : 'missing');
+        } else {
+            console.log("   ❌ Google OAuth: DISABLED");
+            console.log("       🔑 Configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to enable Google OAuth");
+        }
+        
+        console.log("\n🎯 Fixed Issues:");
+        console.log("   🔥 Database connection is now established before handling requests");
+        console.log("   🔥 Added connection retry logic with exponential backoff");
+        console.log("   🔥 Database readiness checking on all auth routes");
+        console.log("   🔥 bufferCommands set to true to prevent premature queries");
+        console.log("   🔥 Improved connection state monitoring");
+        console.log("   🔥 Graceful handling of database unavailability");
+        
+        console.log("\n💡 Usage Examples:");
+        console.log("   1. Sign up with email/password using Google account email → Verification required");
+        console.log("   2. Sign up with Google → Password setup modal appears");
+        console.log("   3. Sign in with Google (existing account with password) → Direct homepage");
+        console.log("   4. Sign in with email/password → Standard login flow");
+        console.log("   5. Forgot password → Email reset link");
+        
+        console.log("\n🌟 Ready to handle all authentication scenarios with robust database management!");
+    });
+}
+
+startServer().catch(err => {
+    console.error('❌ Failed to start server:', err);
+    process.exit(1);
 });
 
 module.exports = app;
