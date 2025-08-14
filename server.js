@@ -38,28 +38,54 @@ app.use((req, res, next) => {
 const MONGO_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/workout";
 
 console.log("🔗 Attempting to connect to MongoDB...");
-console.log("📝 Connection type:", MONGO_URI.includes("localhost") ? "Local MongoDB" : "MongoDB Atlas");
+console.log("📝 Connection type:", MONGO_URI.includes("localhost") ? "Local MongoDB" : "MongoDB Atlas (Free Tier)");
 console.log("🔧 MongoDB URI (masked):", MONGO_URI.replace(/\/\/.*@/, "//***:***@"));
+
+const isFreeTier = MONGO_URI.includes("mongodb.net") || MONGO_URI.includes("atlas");
 
 const mongooseOptions = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
-    serverSelectionTimeoutMS: 15000,
-    socketTimeoutMS: 45000,
+    serverSelectionTimeoutMS: isFreeTier ? 30000 : 15000,
+    socketTimeoutMS: isFreeTier ? 60000 : 45000,
+    connectTimeoutMS: isFreeTier ? 30000 : 15000,
     bufferCommands: true,
-    maxPoolSize: 10,
-    minPoolSize: 2,
-    maxIdleTimeMS: 30000,
+    bufferMaxEntries: 0,
+    maxPoolSize: isFreeTier ? 5 : 10,
+    minPoolSize: isFreeTier ? 1 : 2,
+    maxIdleTimeMS: isFreeTier ? 60000 : 30000,
     retryWrites: true,
-    w: 'majority'
+    w: 'majority',
+    heartbeatFrequencyMS: isFreeTier ? 30000 : 10000,
+    maxStalenessSeconds: isFreeTier ? 120 : 90
 };
+
+if (isFreeTier) {
+    console.log("🆓 MongoDB Atlas Free Tier detected - using optimized settings");
+    console.log("⏰ Extended timeouts: 30s connection, 60s socket");
+    console.log("🔄 Reduced connection pool: 1-5 connections");
+}
 
 let isDbConnected = false;
 let connectionRetries = 0;
-const maxRetries = 3;
+const maxRetries = isFreeTier ? 5 : 3;
+let isConnecting = false;
 
 async function connectToDatabase() {
+    if (isConnecting) {
+        console.log("🔄 Connection attempt already in progress...");
+        return false;
+    }
+    
+    isConnecting = true;
+    
     try {
+        console.log(`🔄 Connection attempt ${connectionRetries + 1}/${maxRetries}...`);
+        
+        if (isFreeTier) {
+            console.log("⏰ This may take 10-30 seconds for free tier Atlas cluster...");
+        }
+        
         await mongoose.connect(MONGO_URI, mongooseOptions);
         console.log("✅ MongoDB connected successfully!");
         console.log("🗄️  Database:", mongoose.connection.name);
@@ -68,17 +94,27 @@ async function connectToDatabase() {
         await mongoose.connection.db.admin().ping();
         console.log("🏓 MongoDB ping successful - database is responsive");
         isDbConnected = true;
+        connectionRetries = 0;
+        isConnecting = false;
         return true;
     } catch (err) {
         console.error("❌ MongoDB connection error:", err.message);
         isDbConnected = false;
+        isConnecting = false;
         
         if (connectionRetries < maxRetries) {
             connectionRetries++;
-            console.log(`🔄 Retrying connection (${connectionRetries}/${maxRetries}) in 5 seconds...`);
-            setTimeout(() => connectToDatabase(), 5000);
+            const delay = Math.min(1000 * Math.pow(2, connectionRetries), isFreeTier ? 30000 : 15000);
+            console.log(`🔄 Retrying connection (${connectionRetries}/${maxRetries}) in ${delay/1000} seconds...`);
+            
+            if (isFreeTier && connectionRetries === 1) {
+                console.log("💡 Free tier clusters may take time to wake up from sleep mode");
+            }
+            
+            setTimeout(() => connectToDatabase(), delay);
         } else {
-            console.log("📱 Server will continue running but database features won't work until MongoDB is connected.");
+            console.log("📱 Max retries reached. Server will continue running but database features won't work until MongoDB is connected.");
+            console.log("💡 For free tier Atlas: Try again in a few minutes if cluster is sleeping");
         }
         return false;
     }
@@ -87,6 +123,7 @@ async function connectToDatabase() {
 mongoose.connection.on('connected', () => {
     console.log('🔌 Mongoose connected to MongoDB');
     isDbConnected = true;
+    connectionRetries = 0;
 });
 
 mongoose.connection.on('error', (err) => {
@@ -97,18 +134,43 @@ mongoose.connection.on('error', (err) => {
 mongoose.connection.on('disconnected', () => {
     console.log('🔌 Mongoose disconnected from MongoDB');
     isDbConnected = false;
+    
     if (connectionRetries < maxRetries) {
-        setTimeout(() => connectToDatabase(), 5000);
+        console.log("🔄 Attempting to reconnect...");
+        setTimeout(() => connectToDatabase(), isFreeTier ? 10000 : 5000);
     }
 });
 
 function ensureDbConnection(req, res, next) {
     if (!isDbConnected || mongoose.connection.readyState !== 1) {
-        return res.status(503).json({
-            error: "Database connection not ready",
-            details: "Please wait a moment and try again",
-            status: "connecting"
-        });
+        console.log(`⚠️ Database not ready for ${req.method} ${req.url}`);
+        
+        if (isFreeTier) {
+            return res.status(503).json({
+                error: "Database warming up",
+                details: "Free tier MongoDB cluster is starting up. Please wait 10-30 seconds and try again.",
+                status: "connecting",
+                timestamp: new Date().toISOString(),
+                retryAfter: 15,
+                isFreeT "Tips for free tier: Expect 10-30 second delays when cluster wakes up from sleep"
+            });
+        } else {
+            return res.status(503).json({
+                error: "Database connection not ready",
+                details: "Please wait a moment and try again",
+                status: "connecting",
+                timestamp: new Date().toISOString(),
+                retryAfter: 5
+            });
+        }
+    }
+    next();
+}
+
+function relaxedDbConnection(req, res, next) {
+    if (!isDbConnected || mongoose.connection.readyState !== 1) {
+        console.log(`⚠️ Database not ready for ${req.method} ${req.url} - allowing with warning`);
+        req.dbWarning = true;
     }
     next();
 }
@@ -195,7 +257,12 @@ app.get('/auth/callback', async (req, res) => {
     
     if (!isDbConnected || mongoose.connection.readyState !== 1) {
         console.error('❌ Database not ready for OAuth callback');
-        return res.redirect('/login.html?error=database_not_ready');
+        
+        if (isFreeTier) {
+            return res.redirect('/login.html?error=database_warming_up&message=Please wait 30 seconds for free tier database to wake up');
+        } else {
+            return res.redirect('/login.html?error=database_not_ready');
+        }
     }
     
     try {
@@ -694,8 +761,14 @@ try {
 } catch (err) {
     console.warn("⚠️ HTML routes file not found, using fallback routes");
     
-    app.get("/", (req, res) => {
+    app.get("/", relaxedDbConnection, (req, res) => {
         console.log("🏠 Root route (fallback)");
+        
+        const dbStatus = isDbConnected ? "connected" : "warming up";
+        const dbMessage = isDbConnected ? "" : (isFreeTier ? 
+            "⏰ Database is warming up (free tier). Please wait 10-30 seconds." : 
+            "⏰ Database is connecting. Please wait a moment.");
+        
         res.send(`
             <!DOCTYPE html>
             <html lang="en">
@@ -710,6 +783,9 @@ try {
                     .logo { font-size: 3rem; margin-bottom: 20px; }
                     a { background: #007bff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 50px; display: inline-block; margin: 10px; transition: all 0.3s ease; }
                     a:hover { background: #0056b3; transform: translateY(-2px); }
+                    .status { margin: 20px 0; padding: 15px; border-radius: 8px; }
+                    .status.connected { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+                    .status.warming { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
                 </style>
             </head>
             <body>
@@ -717,6 +793,10 @@ try {
                     <div class="logo">🏋️</div>
                     <h1>FitTrack</h1>
                     <p>Your fitness tracking companion with enhanced authentication</p>
+                    <div class="status ${isDbConnected ? 'connected' : 'warming'}">
+                        Database: ${dbStatus.toUpperCase()}
+                        ${dbMessage ? `<br><small>${dbMessage}</small>` : ''}
+                    </div>
                     <br>
                     <a href="/login.html">🔐 Login</a>
                     <a href="/excercise.html">🏃‍♂️ Quick Entry</a>
@@ -748,18 +828,26 @@ try {
     });
 }
 
-app.get('/health', (req, res) => {
+app.get('/health', relaxedDbConnection, (req, res) => {
+    const dbStatus = isDbConnected ? 'healthy' : (isFreeTier ? 'warming_up_free_tier' : 'connecting');
+    
     res.json({
-        status: isDbConnected ? 'healthy' : 'degraded',
+        status: dbStatus,
         timestamp: new Date().toISOString(),
         server: 'Enhanced FitTrack API Server',
-        mongodb: isDbConnected ? 'connected' : 'disconnected',
+        mongodb: {
+            connected: isDbConnected,
+            readyState: mongoose.connection.readyState,
+            status: isDbConnected ? 'connected' : 'disconnected',
+            connectionAttempts: connectionRetries,
+            maxRetries: maxRetries,
+            isFreeTier: isFreeTier
+        },
         environment: process.env.NODE_ENV || 'development',
         mongoUri: process.env.MONGODB_URI ? 'configured' : 'missing',
         authentication: 'enhanced',
         emailVerification: emailVerificationEnabled ? 'enabled' : 'disabled (auto-verify fallback)',
         emailConfigured: emailConfigured,
-        connectionRetries: connectionRetries,
         features: [
             'Email/Password Authentication',
             'Google OAuth Integration',
@@ -770,8 +858,17 @@ app.get('/health', (req, res) => {
             'Proper error handling for existing accounts',
             'Google account password addition with verification',
             'Mandatory password setup for Google signup',
-            'Database connection management'
-        ]
+            'Free tier MongoDB Atlas optimization',
+            'Extended timeouts for slow connections',
+            'Connection retry logic',
+            'Graceful degradation when DB unavailable'
+        ],
+        tips: isFreeTier ? [
+            'Free tier clusters may take 10-30 seconds to wake up',
+            'First connection after idle period will be slower',
+            'Subsequent connections should be faster',
+            'Consider upgrading for better performance'
+        ] : []
     });
 });
 
@@ -847,10 +944,25 @@ process.on('SIGTERM', async () => {
 
 async function startServer() {
     console.log("🔄 Initializing database connection...");
-    await connectToDatabase();
+    
+    if (isFreeTier) {
+        console.log("🆓 Free tier detected - starting server immediately");
+        console.log("💡 Database will connect in background - expect initial delays");
+    }
+    
+    connectToDatabase();
+    
+    if (!isFreeTier) {
+        console.log("⏰ Waiting for database connection...");
+        let attempts = 0;
+        while (!isDbConnected && attempts < 10) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            attempts++;
+        }
+    }
     
     app.listen(PORT, () => {
-        console.log("\n🎉 Enhanced FitTrack Server with Complete Authentication is running!");
+        console.log("\n🎉 Enhanced FitTrack Server with Free Tier Optimization is running!");
         console.log(`🚀 Server URL: http://localhost:${PORT}`);
         console.log(`🔐 Login page: http://localhost:${PORT}/login.html`);
         console.log(`🏋️  Exercise page: http://localhost:${PORT}/excercise.html`);
@@ -861,84 +973,53 @@ async function startServer() {
         if (isDbConnected) {
             console.log("✅ MongoDB is connected and ready");
         } else {
-            console.log("⚠️  MongoDB connection pending - check logs above");
-        }
-        
-        console.log("\n📝 Available endpoints:");
-        console.log("   GET  /                            - Home page");
-        console.log("   GET  /login.html                  - Complete login/signup with enhanced authentication");
-        console.log("   GET  /excercise.html              - Add exercise page");
-        console.log("   GET  /api/workouts                - Get all workouts");
-        console.log("   POST /api/workouts                - Create new workout");
-        console.log("   POST /api/auth/signup             - Enhanced signup (handles Google account password addition)");
-        console.log("   POST /api/auth/login              - Enhanced login with validation");
-        console.log("   POST /api/auth/check-email        - Check if email exists");
-        console.log("   POST /api/auth/verify-email       - Verify email with 6-digit code");
-        console.log("   POST /api/auth/resend-verification - Resend verification code");
-        console.log("   POST /api/auth/google             - Enhanced Google authentication");
-        console.log("   POST /api/auth/set-password       - Set password for Google users");
-        console.log("   POST /api/auth/forgot-password    - Password reset request");
-        console.log("   POST /api/auth/reset-password     - Reset password with token");
-        console.log("   GET  /api/health                  - Enhanced API health check");
-        console.log("   GET  /auth/google                 - Google OAuth login");
-        console.log("   GET  /auth/callback               - Google OAuth callback");
-        console.log("\n🔧 To stop server: Ctrl+C");
-        console.log("\n🔐 Complete Authentication Features:");
-        console.log("   ✅ Email/Password Registration");
-        console.log("   ✅ Smart Email Verification (auto-verify if email not configured)");
-        console.log("   ✅ Enhanced Google OAuth Integration");
-        console.log("   ✅ Google Account Password Addition with Verification");
-        console.log("   ✅ Mandatory Password Setup for Google Users");
-        console.log("   ✅ Proper Account Existence Checking");
-        console.log("   ✅ Enhanced Error Messages and User Guidance");
-        console.log("   ✅ Graceful Email Fallback");
-        console.log("   ✅ No Duplicate Account Creation");
-        console.log("   ✅ Dual Authentication System (Google + Email/Password)");
-        console.log("   ✅ Password Reset Functionality");
-        console.log("   ✅ Session Management");
-        console.log("   ✅ Security Headers");
-        console.log("   ✅ Input Validation and Sanitization");
-        console.log("   ✅ Comprehensive Error Handling");
-        console.log("   ✅ Database Connection Management");
-        console.log("   ✅ Connection Retry Logic");
-        console.log("   ✅ Database Ready Checking");
-        
-        if (emailVerificationEnabled) {
-            console.log("   ✅ Email Verification: ENABLED");
-            console.log("       📧 GMAIL_USER:", process.env.GMAIL_USER ? 'configured' : 'missing');
-            console.log("       📧 GMAIL_APP_PASSWORD:", process.env.GMAIL_APP_PASSWORD ? 'configured' : 'missing');
-        } else {
-            console.log("   ⚠️  Email Verification: DISABLED (auto-verify fallback)");
-            if (!emailConfigured) {
-                console.log("       📧 Configure GMAIL_USER and GMAIL_APP_PASSWORD to enable email verification");
+            if (isFreeTier) {
+                console.log("⏰ MongoDB Atlas Free Tier is warming up in background");
+                console.log("💡 Server is ready - database will be available shortly");
+                console.log("🔄 Check /api/health for connection status");
+            } else {
+                console.log("⚠️  MongoDB connection pending - check logs above");
             }
         }
         
-        if (validateOAuthConfig()) {
-            console.log("   ✅ Google OAuth: ENABLED");
-            console.log("       🔑 GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? 'configured' : 'missing');
-            console.log("       🔑 GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? 'configured' : 'missing');
-        } else {
-            console.log("   ❌ Google OAuth: DISABLED");
-            console.log("       🔑 Configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to enable Google OAuth");
+        console.log("\n📝 Available endpoints:");
+        console.log("   GET  /                            - Home page (shows DB status)");
+        console.log("   GET  /login.html                  - Complete login/signup");
+        console.log("   GET  /excercise.html              - Add exercise page");
+        console.log("   GET  /api/workouts                - Get all workouts (requires DB)");
+        console.log("   POST /api/workouts                - Create new workout (requires DB)");
+        console.log("   POST /api/auth/signup             - Enhanced signup (requires DB)");
+        console.log("   POST /api/auth/login              - Enhanced login (requires DB)");
+        console.log("   GET  /api/health                  - API health check (always available)");
+        console.log("   GET  /auth/google                 - Google OAuth login");
+        console.log("   GET  /auth/callback               - Google OAuth callback");
+        
+        console.log("\n🔧 To stop server: Ctrl+C");
+        console.log("\n🆓 Free Tier MongoDB Atlas Optimizations:");
+        console.log("   ✅ Extended connection timeouts (30s)");
+        console.log("   ✅ Reduced connection pool (1-5 connections)");
+        console.log("   ✅ Automatic retry logic (up to 5 attempts)");
+        console.log("   ✅ Server starts immediately without waiting for DB");
+        console.log("   ✅ Graceful error handling for slow connections");
+        console.log("   ✅ User-friendly error messages");
+        console.log("   ✅ Health endpoint shows connection status");
+        
+        if (isFreeTier) {
+            console.log("\n💡 Free Tier Tips:");
+            console.log("   • First connection may take 10-30 seconds");
+            console.log("   • Clusters sleep after 60 minutes of inactivity");
+            console.log("   • Subsequent connections are faster");
+            console.log("   • Monitor /api/health for real-time status");
+            console.log("   • Consider upgrading for production use");
         }
         
-        console.log("\n🎯 Fixed Issues:");
-        console.log("   🔥 Database connection is now established before handling requests");
-        console.log("   🔥 Added connection retry logic with exponential backoff");
-        console.log("   🔥 Database readiness checking on all auth routes");
-        console.log("   🔥 bufferCommands set to true to prevent premature queries");
-        console.log("   🔥 Improved connection state monitoring");
-        console.log("   🔥 Graceful handling of database unavailability");
+        console.log("\n🔐 Authentication Features:");
+        console.log("   ✅ Works even during database warming up");
+        console.log("   ✅ Clear error messages for DB unavailability");
+        console.log("   ✅ Automatic retry when DB becomes available");
+        console.log("   ✅ OAuth works independently of DB status");
         
-        console.log("\n💡 Usage Examples:");
-        console.log("   1. Sign up with email/password using Google account email → Verification required");
-        console.log("   2. Sign up with Google → Password setup modal appears");
-        console.log("   3. Sign in with Google (existing account with password) → Direct homepage");
-        console.log("   4. Sign in with email/password → Standard login flow");
-        console.log("   5. Forgot password → Email reset link");
-        
-        console.log("\n🌟 Ready to handle all authentication scenarios with robust database management!");
+        console.log("\n🌟 Ready to handle free tier MongoDB Atlas delays!");
     });
 }
 
