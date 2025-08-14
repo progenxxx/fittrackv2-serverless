@@ -32,7 +32,6 @@ const exerciseSchema = new mongoose.Schema({
         default: 0,
         required: [true, "Duration is required"]
     },
-    
     intensity: {
         type: String,
         enum: ["light", "moderate", "vigorous", "maximum"],
@@ -49,7 +48,6 @@ const exerciseSchema = new mongoose.Schema({
             message: "Perceived exertion must be between 1 and 10"
         }
     },
-    
     equipment: {
         type: String,
         enum: [
@@ -58,7 +56,6 @@ const exerciseSchema = new mongoose.Schema({
         ],
         default: "none"
     },
-    
     muscleGroups: [{
         type: String,
         enum: [
@@ -66,7 +63,6 @@ const exerciseSchema = new mongoose.Schema({
             "quadriceps", "hamstrings", "glutes", "calves", "full_body"
         ]
     }],
-    
     distance: {
         type: Number,
         min: [0, "Distance cannot be negative"],
@@ -86,7 +82,6 @@ const exerciseSchema = new mongoose.Schema({
         type: Number,
         min: [0, "Calories cannot be negative"]
     },
-    
     weight: {
         type: Number,
         min: [0, "Weight cannot be negative"],
@@ -107,7 +102,6 @@ const exerciseSchema = new mongoose.Schema({
         min: [0, "Rest time cannot be negative"],
         default: 60 
     },
-    
     stretchHoldTime: {
         type: Number,
         min: [0, "Hold time cannot be negative"]
@@ -116,7 +110,6 @@ const exerciseSchema = new mongoose.Schema({
         type: String,
         enum: ["poor", "fair", "good", "excellent"]
     },
-    
     notes: {
         type: String,
         maxlength: [500, "Notes cannot exceed 500 characters"],
@@ -138,103 +131,27 @@ const exerciseSchema = new mongoose.Schema({
     timestamps: false
 });
 
-exerciseSchema.pre('save', function(next) {
-    if (!this.category) {
-        const typeToCategory = {
-            'cardio': 'cardio',
-            'low_intensity_cardio': 'cardio',
-            'moderate_intensity_cardio': 'cardio',
-            'high_intensity_cardio': 'cardio',
-            'hiit': 'cardio',
-            
-            'resistance': 'resistance',
-            'bodyweight': 'resistance',
-            'free_weights': 'resistance',
-            'machines': 'resistance',
-            'resistance_bands': 'resistance',
-            'powerlifting': 'resistance',
-            'olympic_lifting': 'resistance',
-            
-            'flexibility': 'flexibility',
-            'static_stretching': 'flexibility',
-            'dynamic_stretching': 'flexibility',
-            'yoga': 'flexibility',
-            'pilates': 'flexibility',
-            
-            'balance': 'balance',
-            'balance_training': 'balance',
-            'functional_movement': 'balance',
-            'tai_chi': 'balance',
-            
-            'sports_specific': 'sports_specific',
-            'plyometrics': 'sports_specific',
-            'agility': 'sports_specific',
-            'endurance': 'sports_specific',
-            'crossfit': 'sports_specific',
-            
-            'recovery': 'recovery',
-            'active_recovery': 'recovery',
-            'mobility_work': 'recovery',
-            'meditation': 'recovery'
-        };
-        
-        this.category = typeToCategory[this.type];
-    }
-    
-    if (this.category === 'cardio') {
-        if (!this.duration || this.duration <= 0) {
-            return next(new Error('Cardio exercises must have a positive duration'));
-        }
-    } else if (this.category === 'resistance') {
-        if (!this.duration || this.duration <= 0) {
-            return next(new Error('Resistance exercises must have a positive duration'));
-        }
-        if (['resistance', 'free_weights', 'machines', 'powerlifting'].includes(this.type)) {
-            if (!this.reps || this.reps <= 0) {
-                return next(new Error('Traditional resistance exercises must have positive reps'));
-            }
-            if (!this.sets || this.sets <= 0) {
-                return next(new Error('Traditional resistance exercises must have positive sets'));
-            }
-        }
-    } else if (this.category === 'flexibility') {
-        if (!this.duration || this.duration <= 0) {
-            return next(new Error('Flexibility exercises must have a positive duration'));
-        }
-    }
-    
-    next();
-});
-
-exerciseSchema.virtual('totalVolume').get(function() {
-    if (this.category === 'resistance' && this.weight && this.reps && this.sets) {
-        return this.weight * this.reps * this.sets;
-    }
-    return 0;
-});
-
-exerciseSchema.virtual('caloriesPerMinute').get(function() {
-    if (this.caloriesBurned && this.duration) {
-        return Math.round((this.caloriesBurned / this.duration) * 100) / 100;
-    }
-    return 0;
-});
-
-exerciseSchema.virtual('pace').get(function() {
-    if (this.category === 'cardio' && this.distance && this.duration) {
-        const paceMinutesPerKm = this.duration / this.distance;
-        const minutes = Math.floor(paceMinutesPerKm);
-        const seconds = Math.round((paceMinutesPerKm - minutes) * 60);
-        return `${minutes}:${seconds.toString().padStart(2, '0')} min/km`;
-    }
-    return null;
-});
-
+// Enhanced workout schema with user association
 const workoutSchema = new mongoose.Schema({
+    // USER ASSOCIATION - THIS IS KEY!
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: [true, "User ID is required"],
+        index: true // Index for faster queries
+    },
+    userEmail: {
+        type: String,
+        required: [true, "User email is required"],
+        lowercase: true,
+        index: true // Additional index for email-based queries
+    },
+    
     day: {
         type: Date,
         required: [true, "Workout date is required"],
-        default: Date.now
+        default: Date.now,
+        index: true // Index for date-based queries
     },
     exercises: {
         type: [exerciseSchema],
@@ -308,6 +225,13 @@ const workoutSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
+// Compound indexes for efficient user-specific queries
+workoutSchema.index({ userId: 1, day: -1 }); // Most common query pattern
+workoutSchema.index({ userEmail: 1, day: -1 }); // Email-based queries
+workoutSchema.index({ userId: 1, workoutType: 1 }); // Filter by user and workout type
+workoutSchema.index({ userId: 1, 'exercises.category': 1 }); // Filter by user and exercise category
+
+// Virtual fields (same as before)
 workoutSchema.virtual('totalDuration').get(function() {
     return this.exercises.reduce((total, exercise) => total + (exercise.duration || 0), 0);
 });
@@ -333,137 +257,18 @@ workoutSchema.virtual('totalDistance').get(function() {
     return this.exercises.reduce((total, exercise) => total + (exercise.distance || 0), 0);
 });
 
-workoutSchema.virtual('categoryBreakdown').get(function() {
-    const breakdown = {};
-    this.exercises.forEach(exercise => {
-        const category = exercise.category || 'other';
-        if (!breakdown[category]) {
-            breakdown[category] = {
-                count: 0,
-                duration: 0,
-                exercises: []
-            };
-        }
-        breakdown[category].count++;
-        breakdown[category].duration += exercise.duration || 0;
-        breakdown[category].exercises.push(exercise.name);
-    });
-    return breakdown;
-});
-
-workoutSchema.virtual('intensityBreakdown').get(function() {
-    const breakdown = {};
-    this.exercises.forEach(exercise => {
-        const intensity = exercise.intensity || 'moderate';
-        if (!breakdown[intensity]) {
-            breakdown[intensity] = {
-                count: 0,
-                duration: 0
-            };
-        }
-        breakdown[intensity].count++;
-        breakdown[intensity].duration += exercise.duration || 0;
-    });
-    return breakdown;
-});
-
-workoutSchema.virtual('averageIntensity').get(function() {
-    if (this.exercises.length === 0) return 'moderate';
-    
-    const intensityScores = {
-        'light': 1,
-        'moderate': 2,
-        'vigorous': 3,
-        'maximum': 4
-    };
-    
-    const totalScore = this.exercises.reduce((sum, exercise) => {
-        return sum + (intensityScores[exercise.intensity] || 2);
-    }, 0);
-    
-    const avgScore = totalScore / this.exercises.length;
-    
-    if (avgScore <= 1.5) return 'light';
-    if (avgScore <= 2.5) return 'moderate';
-    if (avgScore <= 3.5) return 'vigorous';
-    return 'maximum';
-});
-
-workoutSchema.index({ day: -1 });
-workoutSchema.index({ workoutType: 1 });
-workoutSchema.index({ 'exercises.category': 1 });
-workoutSchema.index({ 'exercises.type': 1 });
-workoutSchema.index({ location: 1 });
-workoutSchema.index({ difficulty: 1 });
-
-workoutSchema.pre('save', function(next) {
-    if (!this.workoutType || this.workoutType === 'mixed') {
-        const categories = new Set(this.exercises.map(ex => ex.category));
-        
-        if (categories.size === 1) {
-            const category = Array.from(categories)[0];
-            switch (category) {
-                case 'resistance':
-                    this.workoutType = 'strength';
-                    break;
-                case 'cardio':
-                    this.workoutType = 'cardio';
-                    break;
-                case 'flexibility':
-                    this.workoutType = 'flexibility';
-                    break;
-                case 'recovery':
-                    this.workoutType = 'recovery';
-                    break;
-                case 'sports_specific':
-                    this.workoutType = 'sports';
-                    break;
-                default:
-                    this.workoutType = 'mixed';
-            }
-        } else {
-            this.workoutType = 'mixed';
-        }
-    }
-    
-    if (!this.title) {
-        const date = new Date(this.day).toLocaleDateString();
-        const primaryCategory = this.exercises.length > 0 ? 
-            this.exercises[0].category || 'workout' : 'workout';
-        this.title = `${primaryCategory.charAt(0).toUpperCase() + primaryCategory.slice(1)} - ${date}`;
-    }
-    
-    next();
-});
-
-workoutSchema.methods.addExercise = function(exerciseData) {
-    this.exercises.push(exerciseData);
-    return this.save();
+// Enhanced static methods for user-specific queries
+workoutSchema.statics.findByUser = function(userId) {
+    return this.find({ userId }).sort({ day: -1 });
 };
 
-workoutSchema.methods.getExercisesByCategory = function(category) {
-    return this.exercises.filter(exercise => exercise.category === category);
+workoutSchema.statics.findByUserEmail = function(userEmail) {
+    return this.find({ userEmail: userEmail.toLowerCase() }).sort({ day: -1 });
 };
 
-workoutSchema.methods.getExercisesByType = function(type) {
-    return this.exercises.filter(exercise => exercise.type === type);
-};
-
-workoutSchema.methods.calculateWorkoutStats = function() {
-    return {
-        totalDuration: this.totalDuration,
-        exerciseCount: this.exerciseCount,
-        totalCalories: this.totalCalories,
-        totalVolume: this.totalVolume,
-        totalDistance: this.totalDistance,
-        categoryBreakdown: this.categoryBreakdown,
-        intensityBreakdown: this.intensityBreakdown,
-        averageIntensity: this.averageIntensity
-    };
-};
-
-workoutSchema.statics.findByDateRange = function(startDate, endDate) {
+workoutSchema.statics.findByUserAndDateRange = function(userId, startDate, endDate) {
     return this.find({
+        userId,
         day: {
             $gte: startDate,
             $lte: endDate
@@ -471,20 +276,9 @@ workoutSchema.statics.findByDateRange = function(startDate, endDate) {
     }).sort({ day: -1 });
 };
 
-workoutSchema.statics.findByWorkoutType = function(workoutType) {
-    return this.find({ workoutType }).sort({ day: -1 });
-};
-
-workoutSchema.statics.findByCategory = function(category) {
-    return this.find({ 'exercises.category': category }).sort({ day: -1 });
-};
-
-workoutSchema.statics.findByExerciseType = function(exerciseType) {
-    return this.find({ 'exercises.type': exerciseType }).sort({ day: -1 });
-};
-
-workoutSchema.statics.getWorkoutStatistics = async function() {
+workoutSchema.statics.getUserWorkoutStats = async function(userId) {
     const stats = await this.aggregate([
+        { $match: { userId: new mongoose.Types.ObjectId(userId) } },
         {
             $group: {
                 _id: null,
@@ -517,9 +311,9 @@ workoutSchema.statics.getWorkoutStatistics = async function() {
                                 as: 'exercise',
                                 in: {
                                     $multiply: [
-                                        { $ifNull: ['$exercise.weight', 0] },
-                                        { $ifNull: ['$exercise.reps', 0] },
-                                        { $ifNull: ['$exercise.sets', 0] }
+                                        { $ifNull: ['$$exercise.weight', 0] },
+                                        { $ifNull: ['$$exercise.reps', 0] },
+                                        { $ifNull: ['$$exercise.sets', 0] }
                                     ]
                                 }
                             }
@@ -546,8 +340,9 @@ workoutSchema.statics.getWorkoutStatistics = async function() {
     };
 };
 
-workoutSchema.statics.getCategoryStatistics = async function() {
+workoutSchema.statics.getUserCategoryStats = async function(userId) {
     return await this.aggregate([
+        { $match: { userId: new mongoose.Types.ObjectId(userId) } },
         { $unwind: '$exercises' },
         {
             $group: {
@@ -563,26 +358,48 @@ workoutSchema.statics.getCategoryStatistics = async function() {
     ]);
 };
 
-workoutSchema.statics.getPopularExercises = async function(limit = 10) {
-    return await this.aggregate([
-        { $unwind: '$exercises' },
-        {
-            $group: {
-                _id: {
-                    name: '$exercises.name',
-                    type: '$exercises.type',
-                    category: '$exercises.category'
-                },
-                count: { $sum: 1 },
-                totalDuration: { $sum: '$exercises.duration' },
-                averageDuration: { $avg: '$exercises.duration' },
-                lastPerformed: { $max: '$day' }
+// Pre-save middleware to ensure user data consistency
+workoutSchema.pre('save', async function(next) {
+    // Auto-generate title if not provided
+    if (!this.title) {
+        const date = new Date(this.day).toLocaleDateString();
+        const primaryCategory = this.exercises.length > 0 ? 
+            this.exercises[0].category || 'workout' : 'workout';
+        this.title = `${primaryCategory.charAt(0).toUpperCase() + primaryCategory.slice(1)} - ${date}`;
+    }
+    
+    // Auto-determine workout type if not set
+    if (!this.workoutType || this.workoutType === 'mixed') {
+        const categories = new Set(this.exercises.map(ex => ex.category));
+        
+        if (categories.size === 1) {
+            const category = Array.from(categories)[0];
+            switch (category) {
+                case 'resistance':
+                    this.workoutType = 'strength';
+                    break;
+                case 'cardio':
+                    this.workoutType = 'cardio';
+                    break;
+                case 'flexibility':
+                    this.workoutType = 'flexibility';
+                    break;
+                case 'recovery':
+                    this.workoutType = 'recovery';
+                    break;
+                case 'sports_specific':
+                    this.workoutType = 'sports';
+                    break;
+                default:
+                    this.workoutType = 'mixed';
             }
-        },
-        { $sort: { count: -1 } },
-        { $limit: limit }
-    ]);
-};
+        } else {
+            this.workoutType = 'mixed';
+        }
+    }
+    
+    next();
+});
 
 const Workout = mongoose.model("Workout", workoutSchema);
 

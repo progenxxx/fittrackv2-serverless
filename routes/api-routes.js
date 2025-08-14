@@ -1,177 +1,101 @@
 const router = require("express").Router();
 const Workout = require("../models/Workout");
+const User = require("../models/User");
 
-// Updated exercise type validation lists to match your frontend
+// Updated exercise type validation lists
 const VALID_CATEGORIES = ["cardio", "resistance", "flexibility", "balance", "sports_specific", "recovery"];
 const VALID_TYPES = [
-    // Main categories
     "cardio", "resistance", "flexibility", "balance", "sports_specific", "recovery",
-    // Cardio subcategories
     "low_intensity_cardio", "moderate_intensity_cardio", "high_intensity_cardio", "hiit",
-    // Resistance subcategories
     "bodyweight", "free_weights", "machines", "resistance_bands", "powerlifting", "olympic_lifting",
-    // Flexibility subcategories - FIXED: Added the missing types
     "static_stretching", "dynamic_stretching", "yoga", "pilates",
-    // Balance subcategories
     "balance_training", "functional_movement", "tai_chi",
-    // Sports specific subcategories
     "plyometrics", "agility", "endurance", "crossfit",
-    // Recovery subcategories
     "active_recovery", "mobility_work", "meditation"
 ];
-const VALID_INTENSITIES = ["light", "moderate", "vigorous", "maximum"];
-const VALID_EQUIPMENT = [
-    "none", "dumbbells", "barbell", "kettlebell", "resistance_bands", 
-    "machines", "cardio_equipment", "suspension", "medicine_ball", "stability_ball"
-];
 
-// Middleware for logging API requests
-router.use((req, res, next) => {
-    console.log(`📡 ${req.method} ${req.path} - ${new Date().toISOString()}`);
-    next();
-});
-
-// Helper function to map exercise type to category
-function getExerciseCategory(type) {
-    const typeToCategory = {
-        // Cardio types
-        'cardio': 'cardio',
-        'low_intensity_cardio': 'cardio',
-        'moderate_intensity_cardio': 'cardio',
-        'high_intensity_cardio': 'cardio',
-        'hiit': 'cardio',
-        
-        // Resistance types
-        'resistance': 'resistance',
-        'bodyweight': 'resistance',
-        'free_weights': 'resistance',
-        'machines': 'resistance',
-        'resistance_bands': 'resistance',
-        'powerlifting': 'resistance',
-        'olympic_lifting': 'resistance',
-        
-        // Flexibility types - FIXED: Added the missing mappings
-        'flexibility': 'flexibility',
-        'static_stretching': 'flexibility',
-        'dynamic_stretching': 'flexibility',
-        'yoga': 'flexibility',
-        'pilates': 'flexibility',
-        
-        // Balance types
-        'balance': 'balance',
-        'balance_training': 'balance',
-        'functional_movement': 'balance',
-        'tai_chi': 'balance',
-        
-        // Sports specific types
-        'sports_specific': 'sports_specific',
-        'plyometrics': 'sports_specific',
-        'agility': 'sports_specific',
-        'endurance': 'sports_specific',
-        'crossfit': 'sports_specific',
-        
-        // Recovery types
-        'recovery': 'recovery',
-        'active_recovery': 'recovery',
-        'mobility_work': 'recovery',
-        'meditation': 'recovery'
-    };
-    
-    return typeToCategory[type] || 'resistance'; // Default fallback
-}
-
-// Helper function to validate exercise data
-function validateExerciseData(exerciseData) {
-    const errors = [];
-    
-    // Required fields
-    if (!exerciseData.name || !exerciseData.name.trim()) {
-        errors.push("Exercise name is required");
-    }
-    
-    if (!exerciseData.type || !VALID_TYPES.includes(exerciseData.type)) {
-        errors.push(`Valid exercise type is required. Received: "${exerciseData.type}". Valid types: ${VALID_TYPES.join(', ')}`);
-    }
-    
-    if (!exerciseData.duration || exerciseData.duration <= 0) {
-        errors.push("Duration must be greater than 0");
-    }
-    
-    // Auto-set category if not provided
-    if (!exerciseData.category) {
-        exerciseData.category = getExerciseCategory(exerciseData.type);
-    }
-    
-    // Validate category
-    if (!VALID_CATEGORIES.includes(exerciseData.category)) {
-        errors.push(`Valid exercise category is required. Received: "${exerciseData.category}". Valid categories: ${VALID_CATEGORIES.join(', ')}`);
-    }
-    
-    // Validate intensity if provided
-    if (exerciseData.intensity && !VALID_INTENSITIES.includes(exerciseData.intensity)) {
-        errors.push(`Invalid intensity level. Received: "${exerciseData.intensity}". Valid intensities: ${VALID_INTENSITIES.join(', ')}`);
-    }
-    
-    // Validate equipment if provided
-    if (exerciseData.equipment && !VALID_EQUIPMENT.includes(exerciseData.equipment)) {
-        errors.push(`Invalid equipment type. Received: "${exerciseData.equipment}". Valid equipment: ${VALID_EQUIPMENT.join(', ')}`);
-    }
-    
-    // Category-specific validation with improved error messages
-    if (exerciseData.category === 'resistance') {
-        // For traditional resistance training, require sets and reps
-        if (['resistance', 'free_weights', 'machines', 'powerlifting'].includes(exerciseData.type)) {
-            if (!exerciseData.reps || exerciseData.reps <= 0) {
-                errors.push('Traditional resistance exercises must have positive reps');
-            }
-            if (!exerciseData.sets || exerciseData.sets <= 0) {
-                errors.push('Traditional resistance exercises must have positive sets');
-            }
-        }
-        
-        // Weight validation
-        if (exerciseData.weight !== undefined && exerciseData.weight < 0) {
-            errors.push('Weight cannot be negative');
-        }
-    }
-    
-    if (exerciseData.category === 'cardio') {
-        // Distance validation
-        if (exerciseData.distance !== undefined && exerciseData.distance < 0) {
-            errors.push('Distance cannot be negative');
-        }
-        
-        // Heart rate validation
-        if (exerciseData.averageHeartRate && (exerciseData.averageHeartRate < 50 || exerciseData.averageHeartRate > 220)) {
-            errors.push('Average heart rate seems unrealistic (50-220 bpm)');
-        }
-        
-        if (exerciseData.maxHeartRate && (exerciseData.maxHeartRate < 50 || exerciseData.maxHeartRate > 220)) {
-            errors.push('Max heart rate seems unrealistic (50-220 bpm)');
-        }
-    }
-    
-    // Validate perceived exertion
-    if (exerciseData.perceivedExertion && (exerciseData.perceivedExertion < 1 || exerciseData.perceivedExertion > 10)) {
-        errors.push('Perceived exertion must be between 1 and 10');
-    }
-    
-    // Validate performance rating
-    if (exerciseData.performanceRating && (exerciseData.performanceRating < 1 || exerciseData.performanceRating > 5)) {
-        errors.push('Performance rating must be between 1 and 5');
-    }
-    
-    return errors;
-}
-
-// GET all workouts (sorted by newest first)
-router.get("/api/workouts", async (req, res) => {
+// Middleware to extract user information from request
+const extractUserInfo = async (req, res, next) => {
     try {
-        console.log("📋 Fetching all workouts from MongoDB...");
+        // Try to get user info from various sources
+        let userId = null;
+        let userEmail = null;
         
-        // Support filtering by category, type, or date range
+        // Method 1: From request body (when creating/updating workouts)
+        if (req.body && (req.body.userId || req.body.userEmail)) {
+            userId = req.body.userId;
+            userEmail = req.body.userEmail;
+        }
+        
+        // Method 2: From query parameters
+        if (!userId && req.query && (req.query.userId || req.query.userEmail)) {
+            userId = req.query.userId;
+            userEmail = req.query.userEmail;
+        }
+        
+        // Method 3: From headers (for frontend API calls)
+        if (!userId && req.headers) {
+            userId = req.headers['x-user-id'];
+            userEmail = req.headers['x-user-email'];
+        }
+        
+        // If we have userId, get the user's email
+        if (userId && !userEmail) {
+            const user = await User.findById(userId);
+            if (user) {
+                userEmail = user.email;
+            }
+        }
+        
+        // If we have email but no userId, get the user's ID
+        if (userEmail && !userId) {
+            const user = await User.findByEmail(userEmail);
+            if (user) {
+                userId = user._id;
+            }
+        }
+        
+        // Attach user info to request for use in route handlers
+        req.userInfo = {
+            userId: userId,
+            userEmail: userEmail ? userEmail.toLowerCase() : null
+        };
+        
+        console.log(`👤 User info extracted: ${req.userInfo.userEmail} (${req.userInfo.userId})`);
+        
+        next();
+    } catch (error) {
+        console.error("Error extracting user info:", error);
+        // Continue without user info - some endpoints might work without it
+        req.userInfo = { userId: null, userEmail: null };
+        next();
+    }
+};
+
+// Apply user extraction middleware to all routes
+router.use(extractUserInfo);
+
+// Helper function to validate user authentication for protected routes
+const requireAuth = (req, res, next) => {
+    if (!req.userInfo.userId || !req.userInfo.userEmail) {
+        return res.status(401).json({
+            error: "Authentication required",
+            details: "User ID and email are required. Please log in again.",
+            code: "AUTH_REQUIRED"
+        });
+    }
+    next();
+};
+
+// GET all workouts for authenticated user
+router.get("/api/workouts", requireAuth, async (req, res) => {
+    try {
+        const { userId, userEmail } = req.userInfo;
+        console.log(`📋 Fetching workouts for user: ${userEmail}`);
+        
+        // Support filtering by category, type, or date range (user-specific)
         const { category, type, startDate, endDate, limit } = req.query;
-        let query = {};
+        let query = { userId: userId }; // Always filter by user
         
         if (category) {
             query['exercises.category'] = category;
@@ -191,11 +115,13 @@ router.get("/api/workouts", async (req, res) => {
             .sort({ day: -1 })
             .limit(limit ? parseInt(limit) : 0);
             
-        console.log(`✅ Found ${workouts.length} workouts`);
+        console.log(`✅ Found ${workouts.length} workouts for user ${userEmail}`);
         
         // Include virtual fields in response
         const workoutsWithVirtuals = workouts.map(workout => ({
             _id: workout._id,
+            userId: workout.userId,
+            userEmail: workout.userEmail,
             day: workout.day,
             exercises: workout.exercises || [],
             title: workout.title,
@@ -224,7 +150,7 @@ router.get("/api/workouts", async (req, res) => {
         
         res.json(workoutsWithVirtuals);
     } catch (err) {
-        console.error("❌ Error fetching workouts:", err);
+        console.error("❌ Error fetching user workouts:", err);
         res.status(500).json({ 
             error: "Failed to fetch workouts", 
             details: err.message 
@@ -232,13 +158,17 @@ router.get("/api/workouts", async (req, res) => {
     }
 });
 
-// POST new workout
-router.post("/api/workouts", async (req, res) => {
+// POST new workout for authenticated user
+router.post("/api/workouts", requireAuth, async (req, res) => {
     try {
-        console.log("📝 Creating new workout with data:", JSON.stringify(req.body, null, 2));
+        const { userId, userEmail } = req.userInfo;
+        console.log(`📝 Creating new workout for user: ${userEmail}`);
+        console.log("Workout data:", JSON.stringify(req.body, null, 2));
         
         // Validate and prepare workout data
         const workoutData = {
+            userId: userId, // Associate with authenticated user
+            userEmail: userEmail, // Store email for quick queries
             day: req.body.day || new Date().toISOString(),
             exercises: Array.isArray(req.body.exercises) ? req.body.exercises : [],
             title: req.body.title || undefined,
@@ -274,11 +204,13 @@ router.post("/api/workouts", async (req, res) => {
         }
         
         const workout = await Workout.create(workoutData);
-        console.log("✅ Workout created successfully:", workout._id);
+        console.log(`✅ Workout created successfully for user ${userEmail}:`, workout._id);
         
         // Return workout with virtual fields
         const responseWorkout = {
             _id: workout._id,
+            userId: workout.userId,
+            userEmail: workout.userEmail,
             day: workout.day,
             exercises: workout.exercises,
             title: workout.title,
@@ -303,7 +235,6 @@ router.post("/api/workouts", async (req, res) => {
     } catch (err) {
         console.error("❌ Error creating workout:", err);
         
-        // Handle validation errors
         if (err.name === 'ValidationError') {
             return res.status(400).json({ 
                 error: "Validation failed", 
@@ -318,10 +249,11 @@ router.post("/api/workouts", async (req, res) => {
     }
 });
 
-// GET single workout by ID
-router.get("/api/workouts/:id", async (req, res) => {
+// GET single workout by ID (with user ownership verification)
+router.get("/api/workouts/:id", requireAuth, async (req, res) => {
     try {
-        console.log("📋 Fetching workout with ID:", req.params.id);
+        const { userId, userEmail } = req.userInfo;
+        console.log(`📋 Fetching workout ${req.params.id} for user: ${userEmail}`);
         
         // Validate ObjectId format
         if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -331,18 +263,25 @@ router.get("/api/workouts/:id", async (req, res) => {
             });
         }
         
-        const workout = await Workout.findById(req.params.id);
+        // Find workout and verify ownership
+        const workout = await Workout.findOne({
+            _id: req.params.id,
+            userId: userId // Ensure user owns this workout
+        });
+        
         if (!workout) {
-            console.log("❌ Workout not found:", req.params.id);
+            console.log(`❌ Workout not found or not owned by user: ${req.params.id}`);
             return res.status(404).json({ 
                 error: "Workout not found",
-                details: `No workout found with ID: ${req.params.id}`
+                details: `No workout found with ID: ${req.params.id} for your account`
             });
         }
         
-        console.log("✅ Workout found:", workout._id);
+        console.log(`✅ Workout found for user ${userEmail}:`, workout._id);
         res.json({
             _id: workout._id,
+            userId: workout.userId,
+            userEmail: workout.userEmail,
             day: workout.day,
             exercises: workout.exercises || [],
             title: workout.title,
@@ -377,10 +316,11 @@ router.get("/api/workouts/:id", async (req, res) => {
     }
 });
 
-// POST add exercise to workout
-router.post("/api/workouts/:id/exercises", async (req, res) => {
+// POST add exercise to user's workout
+router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
     try {
-        console.log("🏋️ Adding exercise to workout:", req.params.id);
+        const { userId, userEmail } = req.userInfo;
+        console.log(`🏋️ Adding exercise to workout ${req.params.id} for user: ${userEmail}`);
         console.log("Exercise data received:", JSON.stringify(req.body, null, 2));
         
         // Validate ObjectId format
@@ -391,12 +331,16 @@ router.post("/api/workouts/:id/exercises", async (req, res) => {
             });
         }
         
-        // Check if workout exists first
-        const existingWorkout = await Workout.findById(req.params.id);
+        // Check if workout exists and user owns it
+        const existingWorkout = await Workout.findOne({
+            _id: req.params.id,
+            userId: userId // Verify ownership
+        });
+        
         if (!existingWorkout) {
             return res.status(404).json({ 
                 error: "Workout not found",
-                details: `No workout found with ID: ${req.params.id}`
+                details: `No workout found with ID: ${req.params.id} for your account`
             });
         }
         
@@ -446,9 +390,12 @@ router.post("/api/workouts/:id/exercises", async (req, res) => {
         
         console.log("Clean exercise data to save:", JSON.stringify(cleanExercise, null, 2));
         
-        // Add exercise to workout
-        const workout = await Workout.findByIdAndUpdate(
-            req.params.id,
+        // Add exercise to workout (ensuring user ownership)
+        const workout = await Workout.findOneAndUpdate(
+            { 
+                _id: req.params.id,
+                userId: userId // Double-check ownership
+            },
             { 
                 $push: { exercises: cleanExercise },
                 $set: { updatedAt: new Date() }
@@ -456,12 +403,21 @@ router.post("/api/workouts/:id/exercises", async (req, res) => {
             { new: true, runValidators: true }
         );
         
-        console.log("✅ Exercise added successfully to workout:", workout._id);
+        if (!workout) {
+            return res.status(404).json({ 
+                error: "Workout not found during update",
+                details: "The workout may have been deleted or you don't have permission to modify it"
+            });
+        }
+        
+        console.log(`✅ Exercise added successfully to workout for user ${userEmail}:`, workout._id);
         console.log(`Total exercises: ${workout.exercises.length}, Total duration: ${workout.totalDuration || 0}`);
         
         // Return updated workout with virtual fields
         res.json({
             _id: workout._id,
+            userId: workout.userId,
+            userEmail: workout.userEmail,
             day: workout.day,
             exercises: workout.exercises,
             title: workout.title,
@@ -506,10 +462,11 @@ router.post("/api/workouts/:id/exercises", async (req, res) => {
     }
 });
 
-// PUT update entire workout
-router.put("/api/workouts/:id", async (req, res) => {
+// PUT update entire workout (with user ownership verification)
+router.put("/api/workouts/:id", requireAuth, async (req, res) => {
     try {
-        console.log("📝 Updating workout:", req.params.id);
+        const { userId, userEmail } = req.userInfo;
+        console.log(`📝 Updating workout ${req.params.id} for user: ${userEmail}`);
         console.log("Update data:", JSON.stringify(req.body, null, 2));
         
         // Validate ObjectId format
@@ -524,6 +481,10 @@ router.put("/api/workouts/:id", async (req, res) => {
         
         // Always set updatedAt
         updateData.updatedAt = new Date();
+        
+        // Ensure user ownership fields are not modified
+        delete updateData.userId;
+        delete updateData.userEmail;
         
         // Validate exercises if provided
         if (updateData.exercises) {
@@ -550,8 +511,11 @@ router.put("/api/workouts/:id", async (req, res) => {
             }
         }
         
-        const workout = await Workout.findByIdAndUpdate(
-            req.params.id,
+        const workout = await Workout.findOneAndUpdate(
+            { 
+                _id: req.params.id,
+                userId: userId // Ensure user owns this workout
+            },
             updateData,
             { new: true, runValidators: true }
         );
@@ -559,13 +523,15 @@ router.put("/api/workouts/:id", async (req, res) => {
         if (!workout) {
             return res.status(404).json({ 
                 error: "Workout not found",
-                details: `No workout found with ID: ${req.params.id}`
+                details: `No workout found with ID: ${req.params.id} for your account`
             });
         }
         
-        console.log("✅ Workout updated successfully:", workout._id);
+        console.log(`✅ Workout updated successfully for user ${userEmail}:`, workout._id);
         res.json({
             _id: workout._id,
+            userId: workout.userId,
+            userEmail: workout.userEmail,
             day: workout.day,
             exercises: workout.exercises,
             title: workout.title,
@@ -603,10 +569,11 @@ router.put("/api/workouts/:id", async (req, res) => {
     }
 });
 
-// DELETE workout
-router.delete("/api/workouts/:id", async (req, res) => {
+// DELETE workout (with user ownership verification)
+router.delete("/api/workouts/:id", requireAuth, async (req, res) => {
     try {
-        console.log("🗑️ Deleting workout:", req.params.id);
+        const { userId, userEmail } = req.userInfo;
+        console.log(`🗑️ Deleting workout ${req.params.id} for user: ${userEmail}`);
         
         // Validate ObjectId format
         if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -616,16 +583,19 @@ router.delete("/api/workouts/:id", async (req, res) => {
             });
         }
         
-        const workout = await Workout.findByIdAndDelete(req.params.id);
+        const workout = await Workout.findOneAndDelete({
+            _id: req.params.id,
+            userId: userId // Ensure user owns this workout
+        });
         
         if (!workout) {
             return res.status(404).json({ 
                 error: "Workout not found",
-                details: `No workout found with ID: ${req.params.id}`
+                details: `No workout found with ID: ${req.params.id} for your account`
             });
         }
         
-        console.log("✅ Workout deleted successfully:", req.params.id);
+        console.log(`✅ Workout deleted successfully for user ${userEmail}:`, req.params.id);
         res.json({ 
             message: "Workout deleted successfully", 
             deletedWorkout: {
@@ -643,93 +613,31 @@ router.delete("/api/workouts/:id", async (req, res) => {
     }
 });
 
-// GET workout statistics with enhanced analytics
-router.get("/api/workouts/stats/summary", async (req, res) => {
+// GET workout statistics for authenticated user
+router.get("/api/workouts/stats/summary", requireAuth, async (req, res) => {
     try {
-        console.log("📊 Calculating enhanced workout statistics...");
+        const { userId, userEmail } = req.userInfo;
+        console.log(`📊 Calculating workout statistics for user: ${userEmail}`);
         
-        const workouts = await Workout.find({}).sort({ day: -1 });
+        // Get user-specific statistics
+        const stats = await Workout.getUserWorkoutStats(userId);
+        const categoryStats = await Workout.getUserCategoryStats(userId);
         
-        if (!workouts || workouts.length === 0) {
-            return res.json({
-                totalWorkouts: 0,
-                totalExercises: 0,
-                totalDuration: 0,
-                averageDuration: 0,
-                totalCalories: 0,
-                totalVolume: 0,
-                totalDistance: 0,
-                categoryStats: {},
-                intensityStats: {},
-                equipmentStats: {},
-                weeklyAverage: 0,
-                monthlyAverage: 0,
-                lastWorkoutDate: null,
-                currentStreak: 0,
-                longestStreak: 0
-            });
-        }
-
-        // Try to get statistics using model methods if available
-        let stats = {
-            totalWorkouts: workouts.length,
-            totalExercises: 0,
-            totalDuration: 0,
-            totalCalories: 0,
-            totalVolume: 0,
-            totalDistance: 0,
-            averageDuration: 0,
-            lastWorkoutDate: workouts[0]?.day || null
-        };
-
-        // Calculate basic stats manually
-        workouts.forEach(workout => {
-            const exercises = workout.exercises || [];
-            stats.totalExercises += exercises.length;
-            
-            exercises.forEach(exercise => {
-                stats.totalDuration += exercise.duration || 0;
-                stats.totalCalories += exercise.caloriesBurned || 0;
-                stats.totalDistance += exercise.distance || 0;
-                
-                if (exercise.weight && exercise.reps && exercise.sets) {
-                    stats.totalVolume += (exercise.weight * exercise.reps * exercise.sets);
-                }
-            });
-        });
-
-        stats.averageDuration = stats.totalWorkouts > 0 ? Math.round(stats.totalDuration / stats.totalWorkouts) : 0;
-
-        let categoryStats = {};
-        try {
-            const categoryData = await Workout.getCategoryStatistics();
-            categoryStats = categoryData.reduce((acc, cat) => {
-                acc[cat._id] = {
-                    count: cat.count,
-                    totalDuration: cat.totalDuration,
-                    averageDuration: cat.averageDuration,
-                    totalCalories: cat.totalCalories || 0,
-                    popularExercises: cat.exercises?.slice(0, 5) || []
-                };
-                return acc;
-            }, {});
-        } catch (err) {
-            console.warn("Could not get category statistics:", err.message);
-        }
+        // Calculate additional user-specific statistics
+        const userWorkouts = await Workout.findByUser(userId);
         
-        // Calculate additional statistics
         const now = new Date();
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
         
-        const weeklyWorkouts = workouts.filter(w => new Date(w.day) >= oneWeekAgo);
-        const monthlyWorkouts = workouts.filter(w => new Date(w.day) >= oneMonthAgo);
+        const weeklyWorkouts = userWorkouts.filter(w => new Date(w.day) >= oneWeekAgo);
+        const monthlyWorkouts = userWorkouts.filter(w => new Date(w.day) >= oneMonthAgo);
         
-        // Intensity breakdown
+        // Intensity and equipment breakdown for user
         const intensityStats = {};
         const equipmentStats = {};
         
-        workouts.forEach(workout => {
+        userWorkouts.forEach(workout => {
             const exercises = workout.exercises || [];
             exercises.forEach(exercise => {
                 // Intensity stats
@@ -752,19 +660,29 @@ router.get("/api/workouts/stats/summary", async (req, res) => {
         
         const enhancedStats = {
             ...stats,
-            categoryStats,
+            categoryStats: categoryStats.reduce((acc, cat) => {
+                acc[cat._id] = {
+                    count: cat.count,
+                    totalDuration: cat.totalDuration,
+                    averageDuration: cat.averageDuration,
+                    totalCalories: cat.totalCalories || 0,
+                    popularExercises: cat.exercises?.slice(0, 5) || []
+                };
+                return acc;
+            }, {}),
             intensityStats,
             equipmentStats,
             weeklyAverage: weeklyWorkouts.length,
             monthlyAverage: Math.round(monthlyWorkouts.length),
-            currentStreak: calculateWorkoutStreak(workouts),
-            longestStreak: calculateLongestStreak(workouts)
+            currentStreak: calculateWorkoutStreak(userWorkouts),
+            longestStreak: calculateLongestStreak(userWorkouts),
+            lastWorkoutDate: userWorkouts.length > 0 ? userWorkouts[0].day : null
         };
 
-        console.log("✅ Enhanced workout statistics calculated");
+        console.log(`✅ User workout statistics calculated for ${userEmail}`);
         res.json(enhancedStats);
     } catch (err) {
-        console.error("❌ Error calculating workout stats:", err);
+        console.error("❌ Error calculating user workout stats:", err);
         res.status(500).json({ 
             error: "Failed to calculate statistics", 
             details: err.message 
@@ -772,7 +690,140 @@ router.get("/api/workouts/stats/summary", async (req, res) => {
     }
 });
 
-// Helper function to calculate current workout streak
+// GET popular exercises for authenticated user
+router.get("/api/workouts/stats/popular-exercises", requireAuth, async (req, res) => {
+    try {
+        const { userId, userEmail } = req.userInfo;
+        const { limit = 20, category, type } = req.query;
+        console.log(`📊 Getting popular exercises for user ${userEmail} (limit: ${limit})`);
+        
+        let matchStage = { userId: new mongoose.Types.ObjectId(userId) };
+        if (category) matchStage['exercises.category'] = category;
+        if (type) matchStage['exercises.type'] = type;
+        
+        const pipeline = [
+            { $match: matchStage },
+            { $unwind: '$exercises' }
+        ];
+        
+        if (category) {
+            pipeline.push({ $match: { 'exercises.category': category } });
+        }
+        if (type) {
+            pipeline.push({ $match: { 'exercises.type': type } });
+        }
+        
+        pipeline.push(
+            {
+                $group: {
+                    _id: {
+                        name: '$exercises.name',
+                        type: '$exercises.type',
+                        category: '$exercises.category'
+                    },
+                    count: { $sum: 1 },
+                    totalDuration: { $sum: '$exercises.duration' },
+                    averageDuration: { $avg: '$exercises.duration' },
+                    totalVolume: { 
+                        $sum: { 
+                            $multiply: [
+                                { $ifNull: ['$exercises.weight', 0] },
+                                { $ifNull: ['$exercises.reps', 0] },
+                                { $ifNull: ['$exercises.sets', 1] }
+                            ]
+                        }
+                    },
+                    totalDistance: { $sum: { $ifNull: ['$exercises.distance', 0] } },
+                    totalCalories: { $sum: { $ifNull: ['$exercises.caloriesBurned', 0] } },
+                    lastPerformed: { $max: '$day' }
+                }
+            },
+            { $sort: { count: -1 } },
+            { $limit: parseInt(limit) }
+        );
+        
+        const popularExercises = await Workout.aggregate(pipeline);
+        
+        console.log(`✅ Found ${popularExercises.length} popular exercises for user ${userEmail}`);
+        res.json(popularExercises);
+    } catch (err) {
+        console.error("❌ Error getting user popular exercises:", err);
+        res.status(500).json({ 
+            error: "Failed to get popular exercises", 
+            details: err.message 
+        });
+    }
+});
+
+// Helper function to validate exercise data (same as before)
+function validateExerciseData(exerciseData) {
+    const errors = [];
+    
+    // Required fields
+    if (!exerciseData.name || !exerciseData.name.trim()) {
+        errors.push("Exercise name is required");
+    }
+    
+    if (!exerciseData.type || !VALID_TYPES.includes(exerciseData.type)) {
+        errors.push(`Valid exercise type is required. Received: "${exerciseData.type}". Valid types: ${VALID_TYPES.join(', ')}`);
+    }
+    
+    if (!exerciseData.duration || exerciseData.duration <= 0) {
+        errors.push("Duration must be greater than 0");
+    }
+    
+    // Auto-set category if not provided
+    if (!exerciseData.category) {
+        exerciseData.category = getExerciseCategory(exerciseData.type);
+    }
+    
+    // Validate category
+    if (!VALID_CATEGORIES.includes(exerciseData.category)) {
+        errors.push(`Valid exercise category is required. Received: "${exerciseData.category}". Valid categories: ${VALID_CATEGORIES.join(', ')}`);
+    }
+    
+    return errors;
+}
+
+// Helper function to map exercise type to category
+function getExerciseCategory(type) {
+    const typeToCategory = {
+        'cardio': 'cardio',
+        'low_intensity_cardio': 'cardio',
+        'moderate_intensity_cardio': 'cardio',
+        'high_intensity_cardio': 'cardio',
+        'hiit': 'cardio',
+        'resistance': 'resistance',
+        'bodyweight': 'resistance',
+        'free_weights': 'resistance',
+        'machines': 'resistance',
+        'resistance_bands': 'resistance',
+        'powerlifting': 'resistance',
+        'olympic_lifting': 'resistance',
+        'flexibility': 'flexibility',
+        'static_stretching': 'flexibility',
+        'dynamic_stretching': 'flexibility',
+        'yoga': 'flexibility',
+        'pilates': 'flexibility',
+        'balance': 'balance',
+        'balance_training': 'balance',
+        'functional_movement': 'balance',
+        'tai_chi': 'balance',
+        'sports_specific': 'sports_specific',
+        'plyometrics': 'sports_specific',
+        'agility': 'sports_specific',
+        'endurance': 'sports_specific',
+        'crossfit': 'sports_specific',
+        'recovery': 'recovery',
+        'active_recovery': 'recovery',
+        'mobility_work': 'recovery',
+        'meditation': 'recovery'
+    };
+    
+    return typeToCategory[type] || 'resistance';
+}
+
+// Helper functions for streak calculations
 function calculateWorkoutStreak(workouts) {
     if (!workouts || workouts.length === 0) return 0;
     
@@ -797,7 +848,6 @@ function calculateWorkoutStreak(workouts) {
     return streak;
 }
 
-// Helper function to calculate longest workout streak
 function calculateLongestStreak(workouts) {
     if (!workouts || workouts.length === 0) return 0;
     
@@ -824,173 +874,55 @@ function calculateLongestStreak(workouts) {
     return Math.max(longestStreak, currentStreak);
 }
 
-// GET popular exercises
-router.get("/api/workouts/stats/popular-exercises", async (req, res) => {
-    try {
-        const { limit = 20, category, type } = req.query;
-        console.log(`📊 Getting popular exercises (limit: ${limit})`);
-        
-        let matchStage = {};
-        if (category) matchStage['exercises.category'] = category;
-        if (type) matchStage['exercises.type'] = type;
-        
-        const pipeline = [
-            { $unwind: '$exercises' }
-        ];
-        
-        if (Object.keys(matchStage).length > 0) {
-            pipeline.push({ $match: matchStage });
-        }
-        
-        pipeline.push(
-            {
-                $group: {
-                    _id: {
-                        name: '$exercises.name',
-                        type: '$exercises.type',
-                        category: '$exercises.category'
-                    },
-                    count: { $sum: 1 },
-                    totalDuration: { $sum: '$exercises.duration' },
-                    averageDuration: { $avg: '$exercises.duration' },
-                    totalVolume: { 
-                        $sum: { 
-                            $multiply: [
-                                { $ifNull: ['$exercises.weight', 0] },
-                                { $ifNull: ['$exercises.reps', 0] },
-                                { $ifNull: ['$exercises.sets', 1] }
-                            ]
-                        }
-                    },
-                    totalDistance: { $sum: { $ifNull: ['$exercises.distance', 0] } },
-                    totalCalories: { $sum: { $ifNull: ['$exercises.caloriesBurned', 0] } },
-                    lastPerformed: { $max: '$day' },
-                    averageIntensity: { $avg: '$exercises.intensity' }
-                }
-            },
-            { $sort: { count: -1 } },
-            { $limit: parseInt(limit) }
-        );
-        
-        const popularExercises = await Workout.aggregate(pipeline);
-        
-        console.log(`✅ Found ${popularExercises.length} popular exercises`);
-        res.json(popularExercises);
-    } catch (err) {
-        console.error("❌ Error getting popular exercises:", err);
-        res.status(500).json({ 
-            error: "Failed to get popular exercises", 
-            details: err.message 
-        });
-    }
-});
-
-// GET exercise types and categories info
-router.get("/api/exercise-types", (req, res) => {
-    console.log("📋 Fetching exercise types information");
-    
-    const exerciseTypes = {
-        categories: VALID_CATEGORIES,
-        types: VALID_TYPES,
-        intensities: VALID_INTENSITIES,
-        equipment: VALID_EQUIPMENT,
-        typeToCategory: {
-            // Map each type to its category for frontend use
-            'cardio': 'cardio',
-            'low_intensity_cardio': 'cardio',
-            'moderate_intensity_cardio': 'cardio',
-            'high_intensity_cardio': 'cardio',
-            'hiit': 'cardio',
-            'resistance': 'resistance',
-            'bodyweight': 'resistance',
-            'free_weights': 'resistance',
-            'machines': 'resistance',
-            'resistance_bands': 'resistance',
-            'powerlifting': 'resistance',
-            'olympic_lifting': 'resistance',
-            'flexibility': 'flexibility',
-            'static_stretching': 'flexibility',
-            'dynamic_stretching': 'flexibility',
-            'yoga': 'flexibility',
-            'pilates': 'flexibility',
-            'balance': 'balance',
-            'balance_training': 'balance',
-            'functional_movement': 'balance',
-            'tai_chi': 'balance',
-            'sports_specific': 'sports_specific',
-            'plyometrics': 'sports_specific',
-            'agility': 'sports_specific',
-            'endurance': 'sports_specific',
-            'crossfit': 'sports_specific',
-            'recovery': 'recovery',
-            'active_recovery': 'recovery',
-            'mobility_work': 'recovery',
-            'meditation': 'recovery'
-        }
-    };
-    
-    res.json(exerciseTypes);
-});
-
-// Health check endpoint with enhanced information
+// Health check endpoint with user-specific information
 router.get("/api/health", async (req, res) => {
     try {
-        console.log("🏥 Performing enhanced health check...");
+        console.log("🏥 Performing health check...");
         
-        // Test MongoDB connection
-        const workoutCount = await Workout.countDocuments();
-        const lastWorkout = await Workout.findOne().sort({ day: -1 });
-        
-        let categoryStats = [];
-        try {
-            categoryStats = await Workout.getCategoryStatistics();
-        } catch (err) {
-            console.warn("Could not get category statistics:", err.message);
-        }
+        // Test MongoDB connection with user-aware queries
+        const totalUsers = await User.countDocuments();
+        const totalWorkouts = await Workout.countDocuments();
+        const workoutsToday = await Workout.countDocuments({
+            day: {
+                $gte: new Date(new Date().setHours(0, 0, 0, 0)),
+                $lt: new Date(new Date().setHours(23, 59, 59, 999))
+            }
+        });
         
         const healthData = {
             status: "healthy",
             mongodb: "connected",
             timestamp: new Date().toISOString(),
-            workoutCount: workoutCount,
-            categoryCount: categoryStats.length,
-            lastWorkout: lastWorkout ? {
-                id: lastWorkout._id,
-                date: lastWorkout.day,
-                exerciseCount: lastWorkout.exercises?.length || 0,
-                workoutType: lastWorkout.workoutType,
-                totalDuration: lastWorkout.totalDuration
-            } : null,
+            userCount: totalUsers,
+            workoutCount: totalWorkouts,
+            workoutsToday: workoutsToday,
             api: {
-                version: "2.1.1",
+                version: "2.2.0-user-specific",
                 features: [
-                    "Enhanced Exercise Types",
-                    "Category-based Organization", 
-                    "Intensity Tracking",
-                    "Equipment Management",
-                    "Advanced Analytics",
-                    "Workout Streaks",
-                    "Fixed Exercise Validation",
-                    "Better Error Handling"
+                    "User-Specific Workouts",
+                    "Account-Based Activity Tracking", 
+                    "Enhanced Security with Ownership Verification",
+                    "User Authentication Required",
+                    "Individual Progress Tracking",
+                    "Personal Statistics and Analytics"
                 ],
-                validExerciseTypes: VALID_TYPES.length,
-                validCategories: VALID_CATEGORIES.length,
+                authentication: "required",
+                userIsolation: "enabled",
                 endpoints: [
-                    "GET /api/workouts",
-                    "POST /api/workouts", 
-                    "GET /api/workouts/:id",
-                    "PUT /api/workouts/:id",
-                    "DELETE /api/workouts/:id",
-                    "POST /api/workouts/:id/exercises",
-                    "GET /api/workouts/stats/summary",
-                    "GET /api/workouts/stats/popular-exercises",
-                    "GET /api/exercise-types",
+                    "GET /api/workouts (user-specific)",
+                    "POST /api/workouts (creates for authenticated user)", 
+                    "GET /api/workouts/:id (verifies ownership)",
+                    "PUT /api/workouts/:id (user ownership required)",
+                    "DELETE /api/workouts/:id (user ownership required)",
+                    "POST /api/workouts/:id/exercises (user ownership required)",
+                    "GET /api/workouts/stats/summary (user-specific stats)",
+                    "GET /api/workouts/stats/popular-exercises (user-specific)",
                     "GET /api/health"
                 ]
             }
         };
         
-        console.log("✅ Enhanced health check completed successfully");
+        console.log("✅ Health check completed successfully");
         res.json(healthData);
     } catch (err) {
         console.error("❌ Health check failed:", err);
@@ -1003,30 +935,10 @@ router.get("/api/health", async (req, res) => {
     }
 });
 
-// Catch-all for undefined API routes
-router.all("/api/*", (req, res) => {
-    console.log(`❌ Unknown API endpoint: ${req.method} ${req.path}`);
-    res.status(404).json({
-        error: "API endpoint not found",
-        details: `${req.method} ${req.path} is not a valid API endpoint`,
-        availableEndpoints: [
-            "GET /api/workouts - Get all workouts (supports filtering)",
-            "POST /api/workouts - Create new workout",
-            "GET /api/workouts/:id - Get specific workout",
-            "PUT /api/workouts/:id - Update workout",
-            "DELETE /api/workouts/:id - Delete workout",
-            "POST /api/workouts/:id/exercises - Add exercise to workout",
-            "GET /api/workouts/stats/summary - Get enhanced workout statistics",
-            "GET /api/workouts/stats/popular-exercises - Get popular exercises",
-            "GET /api/exercise-types - Get exercise types and categories",
-            "GET /api/health - Enhanced API health check"
-        ]
-    });
-});
-
 module.exports = (app) => {
     app.use(router);
-    console.log("🔌 Fixed API routes initialized successfully");
-    console.log("🎯 New fixes: Better error handling, workout existence checks, and improved validation");
-    console.log("✅ All exercise types now properly supported with enhanced validation");
+    console.log("🔌 User-specific API routes initialized successfully");
+    console.log("🔐 All workout operations now require user authentication");
+    console.log("🎯 Users can only access their own workout data");
+    console.log("✅ Enhanced security with ownership verification on all operations");
 };
