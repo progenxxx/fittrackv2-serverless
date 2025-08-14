@@ -427,6 +427,10 @@
                 padding: 32px 24px;
             }
         }
+
+        body.menu-open {
+            overflow: hidden;
+        }
     </style>
 </head>
 <body>
@@ -582,9 +586,8 @@
     <div class="modal" id="passwordSetupModal">
         <div class="modal-content">
             <h2 class="modal-title">Set Up Password</h2>
-            <p class="modal-description">
-                For security purposes, please set a password for your Google account. 
-                This will be required for future logins.
+            <p class="modal-description" id="passwordSetupDescription">
+                To complete your Google registration, please create a password. This will allow you to sign in using either Google or email/password.
             </p>
             
             <div class="message" id="passwordModalMessage"></div>
@@ -592,10 +595,14 @@
             <form id="passwordSetupForm" onsubmit="handlePasswordSetup(event)">
                 <div class="input-group">
                     <label class="input-label" for="newPassword">Create Password</label>
-                    <input type="password" id="newPassword" class="input-field" placeholder="Enter a secure password" required minlength="6">
+                    <input type="password" id="newPassword" class="input-field" placeholder="Enter a secure password (6+ characters)" required minlength="6">
                 </div>
                 
                 <button type="submit" class="auth-btn" id="passwordSetupBtn">Set Password & Continue</button>
+                
+                <p style="margin-top: 16px; font-size: 12px; color: #6b7280;">
+                    This password will allow you to sign in with your email address in addition to Google sign-in
+                </p>
             </form>
         </div>
     </div>
@@ -679,6 +686,7 @@
                         indicator.textContent = '❌';
                         indicator.style.color = '#dc2626';
                         document.getElementById('signupEmail').classList.add('error');
+                        document.getElementById('signupEmail').classList.remove('success');
                     } else {
                         indicator.textContent = '✅';
                         indicator.style.color = '#16a34a';
@@ -695,6 +703,7 @@
                         indicator.textContent = '❌';
                         indicator.style.color = '#dc2626';
                         document.getElementById('loginEmail').classList.add('error');
+                        document.getElementById('loginEmail').classList.remove('success');
                     }
                 }
                 
@@ -752,12 +761,25 @@
                     throw new Error(data.details || data.error || 'Signup failed');
                 }
                 
-                if (data.requiresVerification) {
+                if (data.isGoogleAccountUpdate) {
+                    if (data.requiresVerification) {
+                        currentUserId = data.user.id;
+                        showVerificationModal(email);
+                        showMessage('Password added to your Google account! Please verify your email to confirm this change.', 'info');
+                    } else {
+                        showMessage('Password successfully added to your Google account! You can now sign in with email/password.', 'success');
+                        setTimeout(() => {
+                            switchTab('login');
+                            document.getElementById('loginEmail').value = email;
+                            document.getElementById('loginPassword').focus();
+                        }, 2000);
+                    }
+                } else if (data.requiresVerification) {
                     currentUserId = data.user.id;
                     showVerificationModal(email);
                     showMessage('Account created! Please check your email for the verification code.', 'success');
                 } else {
-                    showMessage('Account created successfully! Please sign in.', 'success');
+                    showMessage('Account created successfully! You can now sign in.', 'success');
                     setTimeout(() => {
                         switchTab('login');
                         document.getElementById('loginEmail').value = email;
@@ -1017,6 +1039,15 @@
         function showPasswordSetupModal(userId, googleData) {
             currentUserId = userId;
             pendingGoogleData = googleData;
+            
+            if (googleData && googleData.isNewUser) {
+                document.getElementById('passwordSetupDescription').textContent = 
+                    'Welcome! To complete your Google registration, please create a password. This will allow you to sign in using either Google or email/password.';
+            } else {
+                document.getElementById('passwordSetupDescription').textContent = 
+                    'Please set up a password for your Google account. This will enable you to sign in using either Google or email/password in the future.';
+            }
+            
             document.getElementById('passwordSetupModal').style.display = 'flex';
             document.getElementById('newPassword').focus();
         }
@@ -1058,7 +1089,7 @@
                     throw new Error(data.details || data.error || 'Failed to set password');
                 }
                 
-                showMessage('Password set successfully! Logging you in...', 'success', 'passwordModalMessage');
+                showMessage('Password set successfully! Redirecting...', 'success', 'passwordModalMessage');
                 
                 setTimeout(() => {
                     hidePasswordSetupModal();
@@ -1124,22 +1155,29 @@
                 const data = await apiResponse.json();
                 
                 if (!apiResponse.ok) {
-                    if (data.emailExists && data.shouldRedirectToLogin) {
-                        showMessage('Email already registered with password. Please sign in with your password or link your Google account.', 'warning');
+                    if (data.accountType === 'email') {
+                        showMessage('You have already registered with this email using email/password. Please sign in with your password instead.', 'warning');
                         setTimeout(() => {
                             switchTab('login');
                             document.getElementById('loginEmail').value = googleData.email;
                             document.getElementById('loginPassword').focus();
                         }, 3000);
                         return;
+                    } else if (data.accountType === 'google') {
+                        showMessage('You have already registered with this email using a different Google account. Please use the original Google account.', 'warning');
+                        return;
                     }
                     throw new Error(data.details || data.error || 'Google authentication failed');
                 }
                 
-                if (data.requiresPassword) {
-                    showMessage('Welcome! Please set a password for security.', 'info');
+                if (data.action === 'password_setup') {
+                    if (data.isNewUser) {
+                        showMessage('Welcome! To complete your registration, please set up a password for email/password login.', 'info');
+                    } else {
+                        showMessage('Please set up a password to enable email/password login.', 'info');
+                    }
                     showPasswordSetupModal(data.user.id, data.user);
-                } else {
+                } else if (data.action === 'login_complete') {
                     showMessage(`Welcome back, ${data.user.name}!`, 'success');
                     saveUserAndRedirect(data.user);
                 }

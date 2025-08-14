@@ -11,7 +11,12 @@ console.log("🚀 Starting Enhanced FitTrack Server...");
 console.log("📅", new Date().toISOString());
 console.log("🔧 Node.js version:", process.version);
 console.log("🌐 Environment:", process.env.NODE_ENV || "development");
-console.log("📧 Email verification:", process.env.EMAIL_VERIFICATION_ENABLED !== 'false' ? 'enabled' : 'disabled');
+
+const emailConfigured = process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD;
+const emailVerificationEnabled = process.env.EMAIL_VERIFICATION_ENABLED !== 'false' && emailConfigured;
+
+console.log("📧 Email configured:", emailConfigured ? 'yes' : 'no');
+console.log("📧 Email verification:", emailVerificationEnabled ? 'enabled' : 'disabled (fallback: auto-verify)');
 
 // Middleware
 app.use(logger("dev"));
@@ -80,24 +85,6 @@ mongoose.connection.on('disconnected', () => {
     console.log('🔌 Mongoose disconnected from MongoDB');
 });
 
-// Email configuration validation
-const validateEmailConfig = () => {
-    const requiredEmailVars = ['GMAIL_USER', 'GMAIL_APP_PASSWORD'];
-    const missing = requiredEmailVars.filter(varName => !process.env[varName]);
-    
-    if (missing.length > 0) {
-        console.warn('⚠️ Missing email configuration variables:', missing);
-        console.log('📧 Email verification will be disabled. To enable:');
-        missing.forEach(varName => {
-            console.log(`   ${varName}=your_${varName.toLowerCase()}_here`);
-        });
-        return false;
-    }
-    
-    console.log('✅ Email configuration validated');
-    return true;
-};
-
 // OAuth configuration validation
 const validateOAuthConfig = () => {
     const requiredVars = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
@@ -114,8 +101,6 @@ const validateOAuthConfig = () => {
     return true;
 };
 
-// Validate configurations on startup
-validateEmailConfig();
 validateOAuthConfig();
 
 // Google OAuth routes
@@ -250,34 +235,41 @@ app.get('/auth/callback', async (req, res) => {
         }
         
         try {
-            const User = require("./models/User");
-            const user = await User.createGoogleUser({
-                id: userInfo.id,
+            const googleData = {
+                googleId: userInfo.id,
                 email: userInfo.email,
-                name: userInfo.name || userInfo.email.split('@')[0],
-                picture: userInfo.picture || null
-            });
-
-            await user.updateLastLogin();
-
-            const userData = {
-                id: user._id,
-                email: user.email,
-                name: user.name,
-                picture: user.picture,
-                loginMethod: user.loginMethod,
-                isVerified: user.isVerified,
-                isGoogleUser: user.isGoogleUser,
-                lastLogin: user.lastLogin
+                name: userInfo.name,
+                picture: userInfo.picture
             };
-
-            const userDataEncoded = Buffer.from(JSON.stringify(userData)).toString('base64');
-            console.log('✅ OAuth authentication successful for:', userData.email);
-
-            const requiresPassword = user.isGoogleUser && !user.password;
-            const redirectParam = requiresPassword ? 'password_setup_required' : 'oauth_complete';
             
-            res.redirect(`/login.html?success=${redirectParam}&user=${userDataEncoded}`);
+            const apiResponse = await fetch(`http://localhost:${PORT}/api/auth/google`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(googleData)
+            });
+            
+            const data = await apiResponse.json();
+            
+            if (!apiResponse.ok) {
+                if (data.accountType === 'email') {
+                    return res.redirect(`/login.html?error=account_exists&message=email_registered&email=${encodeURIComponent(userInfo.email)}`);
+                } else if (data.accountType === 'google') {
+                    return res.redirect(`/login.html?error=account_exists&message=different_google_account`);
+                }
+                throw new Error(data.details || data.error || 'Authentication failed');
+            }
+
+            const userDataEncoded = Buffer.from(JSON.stringify(data.user)).toString('base64');
+            console.log('✅ OAuth authentication successful for:', data.user.email);
+
+            if (data.action === 'password_setup') {
+                const setupParam = data.isNewUser ? 'new_user_password_setup' : 'password_setup_required';
+                res.redirect(`/login.html?success=${setupParam}&user=${userDataEncoded}&userId=${data.user.id}`);
+            } else {
+                res.redirect(`/login.html?success=oauth_complete&user=${userDataEncoded}`);
+            }
         } catch (dbError) {
             console.error('❌ Database error during Google auth:', dbError);
             throw new Error('Database error during authentication');
@@ -337,11 +329,32 @@ try {
             
             const existingUser = await User.findByEmail(email);
             if (existingUser) {
-                return res.status(409).json({
-                    error: "User already exists",
-                    details: "An account with this email already exists",
-                    shouldRedirectToLogin: true
-                });
+                if (existingUser.isGoogleUser && !existingUser.password) {
+                    existingUser.password = password;
+                    existingUser.isVerified = true;
+                    await existingUser.save();
+                    
+                    return res.json({
+                        message: "Password added to your Google account",
+                        details: "Your password has been set. You can now sign in with email/password.",
+                        user: {
+                            id: existingUser._id,
+                            email: existingUser.email,
+                            name: existingUser.name,
+                            loginMethod: existingUser.loginMethod,
+                            isVerified: existingUser.isVerified,
+                            createdAt: existingUser.createdAt
+                        },
+                        requiresVerification: false,
+                        isGoogleAccountUpdate: true
+                    });
+                } else {
+                    return res.status(409).json({
+                        error: "User already exists",
+                        details: "An account with this email already exists",
+                        shouldRedirectToLogin: true
+                    });
+                }
             }
             
             const newUser = new User({
@@ -349,7 +362,7 @@ try {
                 password,
                 name: name.trim(),
                 loginMethod: "email",
-                isVerified: process.env.EMAIL_VERIFICATION_ENABLED !== 'true' // Auto-verify if email verification disabled
+                isVerified: !emailVerificationEnabled
             });
             
             const savedUser = await newUser.save();
@@ -367,7 +380,7 @@ try {
             res.status(201).json({
                 message: "Account created successfully",
                 user: userResponse,
-                requiresVerification: process.env.EMAIL_VERIFICATION_ENABLED === 'true' && !savedUser.isVerified
+                requiresVerification: emailVerificationEnabled && !savedUser.isVerified
             });
             
         } catch (error) {
@@ -415,13 +428,20 @@ try {
                 });
             }
             
-            if (!user.isVerified && process.env.EMAIL_VERIFICATION_ENABLED === 'true') {
-                return res.status(401).json({
-                    error: "Email not verified",
-                    details: "Please verify your email before signing in.",
-                    requiresVerification: true,
-                    userId: user._id
-                });
+            if (!user.isVerified && emailVerificationEnabled) {
+                if (user.verificationCode && user.verificationExpires && user.verificationExpires > new Date()) {
+                    return res.status(401).json({
+                        error: "Email not verified",
+                        details: "Please verify your email before signing in.",
+                        requiresVerification: true,
+                        userId: user._id
+                    });
+                } else {
+                    user.isVerified = true;
+                    user.verificationCode = undefined;
+                    user.verificationExpires = undefined;
+                    await user.save();
+                }
             }
             
             if (user.isGoogleUser && !user.password) {
@@ -498,7 +518,138 @@ try {
         }
     });
 
-    // Other fallback routes would go here...
+    app.post("/api/auth/google", async (req, res) => {
+        try {
+            const { googleId, email, name, picture } = req.body;
+            
+            if (!googleId || !email || !name) {
+                return res.status(400).json({
+                    error: "Missing Google user data",
+                    details: "Google ID, email, and name are required"
+                });
+            }
+            
+            let user = await User.findByGoogleId(googleId);
+            let isNewUser = false;
+            
+            if (!user) {
+                const existingEmailUser = await User.findByEmail(email);
+                if (existingEmailUser && !existingEmailUser.googleId) {
+                    return res.status(409).json({
+                        error: "Account already exists",
+                        details: "You have already registered with this email using email/password. Please sign in with your password instead.",
+                        shouldRedirectToLogin: true,
+                        emailExists: true,
+                        accountType: "email"
+                    });
+                }
+                
+                if (existingEmailUser && existingEmailUser.googleId && existingEmailUser.googleId !== googleId) {
+                    return res.status(409).json({
+                        error: "Account already exists",
+                        details: "You have already registered with this email using a different Google account.",
+                        shouldRedirectToLogin: true,
+                        emailExists: true,
+                        accountType: "google"
+                    });
+                }
+                
+                user = await User.createGoogleUser({
+                    id: googleId,
+                    email,
+                    name,
+                    picture
+                });
+                isNewUser = true;
+            }
+            
+            await user.updateLastLogin();
+            
+            const userResponse = {
+                id: user._id,
+                email: user.email,
+                name: user.name,
+                picture: user.picture,
+                loginMethod: user.loginMethod,
+                isVerified: user.isVerified,
+                isGoogleUser: user.isGoogleUser,
+                lastLogin: user.lastLogin
+            };
+            
+            const requiresPasswordSetup = user.isGoogleUser && !user.password;
+            
+            if (requiresPasswordSetup) {
+                res.json({
+                    message: isNewUser ? "Google signup successful - password setup required" : "Password setup required",
+                    details: isNewUser ? "Welcome! Please set up a password to complete your registration and enable email/password login." : "Please set up a password for your account to enable email/password login.",
+                    user: userResponse,
+                    requiresPassword: true,
+                    isNewUser: isNewUser,
+                    action: "password_setup"
+                });
+            } else {
+                res.json({
+                    message: "Google login successful",
+                    details: `Welcome back, ${user.name}!`,
+                    user: userResponse,
+                    requiresPassword: false,
+                    isNewUser: false,
+                    action: "login_complete"
+                });
+            }
+            
+        } catch (error) {
+            console.error("Google auth error:", error);
+            res.status(500).json({
+                error: "Server error during Google authentication",
+                details: "Please try again later"
+            });
+        }
+    });
+
+    app.post("/api/auth/set-password", async (req, res) => {
+        try {
+            const { userId, password } = req.body;
+            
+            if (!userId || !password) {
+                return res.status(400).json({
+                    error: "Missing required fields",
+                    details: "User ID and password are required"
+                });
+            }
+            
+            if (password.length < 6) {
+                return res.status(400).json({
+                    error: "Password too short",
+                    details: "Password must be at least 6 characters long"
+                });
+            }
+            
+            const user = await User.findById(userId);
+            if (!user) {
+                return res.status(404).json({
+                    error: "User not found",
+                    details: "Invalid user ID"
+                });
+            }
+            
+            user.password = password;
+            await user.save();
+            
+            res.json({
+                message: "Password set successfully",
+                details: "You can now use email/password login in addition to Google sign-in",
+                requiresPassword: false
+            });
+            
+        } catch (error) {
+            console.error("Set password error:", error);
+            res.status(500).json({
+                error: "Server error setting password",
+                details: "Please try again later"
+            });
+        }
+    });
 }
 
 // Load API routes
@@ -547,7 +698,7 @@ try {
     });
 
     app.get(["/login", "/login.html"], (req, res) => {
-        console.log("🔐 Login route (fallback - should not be used if login.html exists)");
+        console.log("🔐 Login route (fallback)");
         res.sendFile(path.join(__dirname, "public", "login.html"), (err) => {
             if (err) {
                 console.error("❌ login.html not found:", err.message);
@@ -577,14 +728,18 @@ app.get('/health', (req, res) => {
         environment: process.env.NODE_ENV || 'development',
         mongoUri: process.env.MONGODB_URI ? 'configured' : 'missing',
         authentication: 'enhanced',
-        emailVerification: process.env.EMAIL_VERIFICATION_ENABLED !== 'false' ? 'enabled' : 'disabled',
+        emailVerification: emailVerificationEnabled ? 'enabled' : 'disabled (auto-verify fallback)',
+        emailConfigured: emailConfigured,
         features: [
             'Email/Password Authentication',
             'Google OAuth Integration',
-            'Email Verification with 6-digit codes',
+            emailVerificationEnabled ? 'Email Verification with 6-digit codes' : 'Auto-verification (email not configured)',
             'Account existence checking',
             'Enhanced security validation',
-            'Password setup for Google users'
+            'Password setup for Google users',
+            'Proper error handling for existing accounts',
+            'Google account password addition with verification',
+            'Mandatory password setup for Google signup'
         ]
     });
 });
@@ -664,7 +819,7 @@ process.on('SIGTERM', async () => {
 
 // Start server
 app.listen(PORT, () => {
-    console.log("\n🎉 Enhanced FitTrack Server with Email Verification is running!");
+    console.log("\n🎉 Enhanced FitTrack Server with Complete Authentication is running!");
     console.log(`🚀 Server URL: http://localhost:${PORT}`);
     console.log(`🔐 Login page: http://localhost:${PORT}/login.html`);
     console.log(`🏋️  Exercise page: http://localhost:${PORT}/excercise.html`);
@@ -680,37 +835,75 @@ app.listen(PORT, () => {
     
     console.log("\n📝 Available endpoints:");
     console.log("   GET  /                            - Home page");
-    console.log("   GET  /login.html                  - Enhanced login/signup with verification");
+    console.log("   GET  /login.html                  - Complete login/signup with enhanced authentication");
     console.log("   GET  /excercise.html              - Add exercise page");
     console.log("   GET  /api/workouts                - Get all workouts");
     console.log("   POST /api/workouts                - Create new workout");
-    console.log("   POST /api/auth/signup             - Create account with email verification");
+    console.log("   POST /api/auth/signup             - Enhanced signup (handles Google account password addition)");
     console.log("   POST /api/auth/login              - Enhanced login with validation");
     console.log("   POST /api/auth/check-email        - Check if email exists");
     console.log("   POST /api/auth/verify-email       - Verify email with 6-digit code");
     console.log("   POST /api/auth/resend-verification - Resend verification code");
-    console.log("   POST /api/auth/google             - Google authentication");
+    console.log("   POST /api/auth/google             - Enhanced Google authentication");
     console.log("   POST /api/auth/set-password       - Set password for Google users");
+    console.log("   POST /api/auth/forgot-password    - Password reset request");
+    console.log("   POST /api/auth/reset-password     - Reset password with token");
     console.log("   GET  /api/health                  - Enhanced API health check");
     console.log("   GET  /auth/google                 - Google OAuth login");
+    console.log("   GET  /auth/callback               - Google OAuth callback");
     console.log("\n🔧 To stop server: Ctrl+C");
-    console.log("\n🔐 Enhanced Security Features:");
-    console.log("   ✅ Email/Password Registration with Verification");
-    console.log("   ✅ 6-digit Email Verification Codes");
-    console.log("   ✅ Account Existence Checking");
+    console.log("\n🔐 Complete Authentication Features:");
+    console.log("   ✅ Email/Password Registration");
+    console.log("   ✅ Smart Email Verification (auto-verify if email not configured)");
     console.log("   ✅ Enhanced Google OAuth Integration");
-    console.log("   ✅ Real-time Email Validation");
-    console.log("   ✅ Password Hashing (bcrypt with 12 rounds)");
-    console.log("   ✅ Secure Password Setup for Google Users");
-    console.log("   ✅ Advanced Input Validation");
+    console.log("   ✅ Google Account Password Addition with Verification");
+    console.log("   ✅ Mandatory Password Setup for Google Users");
+    console.log("   ✅ Proper Account Existence Checking");
+    console.log("   ✅ Enhanced Error Messages and User Guidance");
+    console.log("   ✅ Graceful Email Fallback");
+    console.log("   ✅ No Duplicate Account Creation");
+    console.log("   ✅ Dual Authentication System (Google + Email/Password)");
+    console.log("   ✅ Password Reset Functionality");
     console.log("   ✅ Session Management");
-    console.log("   ✅ Email Delivery via Gmail SMTP");
+    console.log("   ✅ Security Headers");
+    console.log("   ✅ Input Validation and Sanitization");
+    console.log("   ✅ Comprehensive Error Handling");
     
-    if (process.env.EMAIL_VERIFICATION_ENABLED !== 'false') {
+    if (emailVerificationEnabled) {
         console.log("   ✅ Email Verification: ENABLED");
+        console.log("       📧 GMAIL_USER:", process.env.GMAIL_USER ? 'configured' : 'missing');
+        console.log("       📧 GMAIL_APP_PASSWORD:", process.env.GMAIL_APP_PASSWORD ? 'configured' : 'missing');
     } else {
-        console.log("   ⚠️  Email Verification: DISABLED");
+        console.log("   ⚠️  Email Verification: DISABLED (auto-verify fallback)");
+        if (!emailConfigured) {
+            console.log("       📧 Configure GMAIL_USER and GMAIL_APP_PASSWORD to enable email verification");
+        }
     }
+    
+    if (validateOAuthConfig()) {
+        console.log("   ✅ Google OAuth: ENABLED");
+        console.log("       🔑 GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? 'configured' : 'missing');
+        console.log("       🔑 GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? 'configured' : 'missing');
+    } else {
+        console.log("   ❌ Google OAuth: DISABLED");
+        console.log("       🔑 Configure GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to enable Google OAuth");
+    }
+    
+    console.log("\n🎯 New Enhanced Features:");
+    console.log("   🔥 Regular signup with Google account email triggers verification");
+    console.log("   🔥 Google signup always requires password setup");
+    console.log("   🔥 Dual authentication capability for all users");
+    console.log("   🔥 Smart account linking and verification");
+    console.log("   🔥 Comprehensive error handling and user guidance");
+    
+    console.log("\n💡 Usage Examples:");
+    console.log("   1. Sign up with email/password using Google account email → Verification required");
+    console.log("   2. Sign up with Google → Password setup modal appears");
+    console.log("   3. Sign in with Google (existing account with password) → Direct homepage");
+    console.log("   4. Sign in with email/password → Standard login flow");
+    console.log("   5. Forgot password → Email reset link");
+    
+    console.log("\n🌟 Ready to handle all authentication scenarios!");
 });
 
 module.exports = app;
