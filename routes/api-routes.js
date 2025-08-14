@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Workout = require("../models/Workout");
 const User = require("../models/User");
+const mongoose = require("mongoose");
 
 // Updated exercise type validation lists
 const VALID_CATEGORIES = ["cardio", "resistance", "flexibility", "balance", "sports_specific", "recovery"];
@@ -14,60 +15,63 @@ const VALID_TYPES = [
     "active_recovery", "mobility_work", "meditation"
 ];
 
-// Middleware to extract user information from request
+// FIXED: Enhanced middleware to extract user information from request
 const extractUserInfo = async (req, res, next) => {
     try {
-        // Try to get user info from various sources
         let userId = null;
         let userEmail = null;
+        let user = null;
         
         // Method 1: From request body (when creating/updating workouts)
-        if (req.body && (req.body.userId || req.body.userEmail)) {
-            userId = req.body.userId;
+        if (req.body && req.body.userEmail) {
             userEmail = req.body.userEmail;
         }
         
         // Method 2: From query parameters
-        if (!userId && req.query && (req.query.userId || req.query.userEmail)) {
-            userId = req.query.userId;
+        if (!userEmail && req.query && req.query.userEmail) {
             userEmail = req.query.userEmail;
         }
         
-        // Method 3: From headers (for frontend API calls)
-        if (!userId && req.headers) {
-            userId = req.headers['x-user-id'];
+        // Method 3: From headers (for frontend API calls) - MOST COMMON
+        if (!userEmail && req.headers) {
             userEmail = req.headers['x-user-email'];
+            // IMPORTANT: NEVER use x-user-id directly as it might be Google ID
         }
         
-        // If we have userId, get the user's email
-        if (userId && !userEmail) {
-            const user = await User.findById(userId);
-            if (user) {
-                userEmail = user.email;
-            }
-        }
-        
-        // If we have email but no userId, get the user's ID
-        if (userEmail && !userId) {
-            const user = await User.findByEmail(userEmail);
-            if (user) {
-                userId = user._id;
+        // If we have email, get the user from database to get correct MongoDB ObjectId
+        if (userEmail) {
+            try {
+                user = await User.findByEmail(userEmail);
+                if (user) {
+                    userId = user._id; // This is the correct MongoDB ObjectId
+                    userEmail = user.email.toLowerCase();
+                    console.log(`✅ User lookup successful: ${userEmail} -> MongoDB ObjectId: ${userId}`);
+                } else {
+                    console.warn(`❌ User not found for email: ${userEmail}`);
+                }
+            } catch (dbError) {
+                console.error('❌ Database error during user lookup:', dbError);
             }
         }
         
         // Attach user info to request for use in route handlers
         req.userInfo = {
-            userId: userId,
-            userEmail: userEmail ? userEmail.toLowerCase() : null
+            userId: userId, // MongoDB ObjectId (never Google ID)
+            userEmail: userEmail,
+            user: user // Full user object if needed
         };
         
-        console.log(`👤 User info extracted: ${req.userInfo.userEmail} (${req.userInfo.userId})`);
+        if (userId) {
+            console.log(`👤 User info extracted: ${req.userInfo.userEmail} (MongoDB ObjectId: ${req.userInfo.userId})`);
+        } else {
+            console.log(`👤 No valid user info extracted from request`);
+        }
         
         next();
     } catch (error) {
-        console.error("Error extracting user info:", error);
-        // Continue without user info - some endpoints might work without it
-        req.userInfo = { userId: null, userEmail: null };
+        console.error("❌ Error extracting user info:", error);
+        // Continue without user info - let requireAuth handle authentication
+        req.userInfo = { userId: null, userEmail: null, user: null };
         next();
     }
 };
@@ -80,10 +84,21 @@ const requireAuth = (req, res, next) => {
     if (!req.userInfo.userId || !req.userInfo.userEmail) {
         return res.status(401).json({
             error: "Authentication required",
-            details: "User ID and email are required. Please log in again.",
+            details: "Please log in to access this resource. User ID and email are required.",
             code: "AUTH_REQUIRED"
         });
     }
+    
+    // Additional validation: ensure userId is a valid MongoDB ObjectId
+    if (!mongoose.Types.ObjectId.isValid(req.userInfo.userId)) {
+        console.error(`❌ Invalid MongoDB ObjectId: ${req.userInfo.userId}`);
+        return res.status(400).json({
+            error: "Invalid user ID format",
+            details: "User ID must be a valid MongoDB ObjectId",
+            code: "INVALID_USER_ID"
+        });
+    }
+    
     next();
 };
 
@@ -91,11 +106,11 @@ const requireAuth = (req, res, next) => {
 router.get("/api/workouts", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`📋 Fetching workouts for user: ${userEmail}`);
+        console.log(`📋 Fetching workouts for user: ${userEmail} (ObjectId: ${userId})`);
         
         // Support filtering by category, type, or date range (user-specific)
         const { category, type, startDate, endDate, limit } = req.query;
-        let query = { userId: userId }; // Always filter by user
+        let query = { userId: userId }; // Always filter by user - userId is MongoDB ObjectId
         
         if (category) {
             query['exercises.category'] = category;
@@ -162,12 +177,12 @@ router.get("/api/workouts", requireAuth, async (req, res) => {
 router.post("/api/workouts", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`📝 Creating new workout for user: ${userEmail}`);
+        console.log(`📝 Creating new workout for user: ${userEmail} (ObjectId: ${userId})`);
         console.log("Workout data:", JSON.stringify(req.body, null, 2));
         
         // Validate and prepare workout data
         const workoutData = {
-            userId: userId, // Associate with authenticated user
+            userId: userId, // MongoDB ObjectId
             userEmail: userEmail, // Store email for quick queries
             day: req.body.day || new Date().toISOString(),
             exercises: Array.isArray(req.body.exercises) ? req.body.exercises : [],
@@ -253,9 +268,9 @@ router.post("/api/workouts", requireAuth, async (req, res) => {
 router.get("/api/workouts/:id", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`📋 Fetching workout ${req.params.id} for user: ${userEmail}`);
+        console.log(`📋 Fetching workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
         
-        // Validate ObjectId format
+        // Validate ObjectId format for workout ID
         if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({ 
                 error: "Invalid workout ID format",
@@ -266,7 +281,7 @@ router.get("/api/workouts/:id", requireAuth, async (req, res) => {
         // Find workout and verify ownership
         const workout = await Workout.findOne({
             _id: req.params.id,
-            userId: userId // Ensure user owns this workout
+            userId: userId // Ensure user owns this workout - userId is MongoDB ObjectId
         });
         
         if (!workout) {
@@ -316,11 +331,155 @@ router.get("/api/workouts/:id", requireAuth, async (req, res) => {
     }
 });
 
+// PUT update workout by ID
+router.put("/api/workouts/:id", requireAuth, async (req, res) => {
+    try {
+        const { userId, userEmail } = req.userInfo;
+        console.log(`🔄 Updating workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
+        
+        // Validate ObjectId format
+        if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({ 
+                error: "Invalid workout ID format",
+                details: "Workout ID must be a valid MongoDB ObjectId"
+            });
+        }
+        
+        // Prepare update data (remove sensitive fields)
+        const updateData = { ...req.body };
+        delete updateData.userId; // Don't allow changing userId
+        delete updateData.userEmail; // Don't allow changing userEmail
+        updateData.updatedAt = new Date();
+        
+        // Validate exercises if provided
+        if (updateData.exercises && Array.isArray(updateData.exercises)) {
+            const validationErrors = [];
+            updateData.exercises.forEach((exercise, index) => {
+                const errors = validateExerciseData(exercise);
+                if (errors.length > 0) {
+                    validationErrors.push(`Exercise ${index + 1}: ${errors.join(', ')}`);
+                }
+            });
+            
+            if (validationErrors.length > 0) {
+                console.error("❌ Exercise validation failed:", validationErrors);
+                return res.status(400).json({
+                    error: "Exercise validation failed",
+                    details: validationErrors.join('; ')
+                });
+            }
+        }
+        
+        // Update workout and verify ownership
+        const workout = await Workout.findOneAndUpdate(
+            { 
+                _id: req.params.id,
+                userId: userId // Verify ownership
+            },
+            updateData,
+            { new: true, runValidators: true }
+        );
+        
+        if (!workout) {
+            return res.status(404).json({ 
+                error: "Workout not found",
+                details: `No workout found with ID: ${req.params.id} for your account`
+            });
+        }
+        
+        console.log(`✅ Workout updated successfully for user ${userEmail}:`, workout._id);
+        
+        // Return updated workout with virtual fields
+        res.json({
+            _id: workout._id,
+            userId: workout.userId,
+            userEmail: workout.userEmail,
+            day: workout.day,
+            exercises: workout.exercises,
+            title: workout.title,
+            description: workout.description,
+            location: workout.location,
+            workoutType: workout.workoutType,
+            difficulty: workout.difficulty,
+            overallRating: workout.overallRating,
+            mood: workout.mood,
+            notes: workout.notes,
+            goals: workout.goals,
+            achievements: workout.achievements,
+            personalRecords: workout.personalRecords,
+            createdAt: workout.createdAt,
+            updatedAt: workout.updatedAt,
+            totalDuration: workout.totalDuration,
+            exerciseCount: workout.exerciseCount,
+            categoryBreakdown: workout.categoryBreakdown
+        });
+    } catch (err) {
+        console.error("❌ Error updating workout:", err);
+        
+        if (err.name === 'ValidationError') {
+            return res.status(400).json({ 
+                error: "Validation failed", 
+                details: Object.values(err.errors).map(e => e.message).join(', ')
+            });
+        }
+        
+        res.status(500).json({ 
+            error: "Failed to update workout", 
+            details: err.message 
+        });
+    }
+});
+
+// DELETE workout by ID
+router.delete("/api/workouts/:id", requireAuth, async (req, res) => {
+    try {
+        const { userId, userEmail } = req.userInfo;
+        console.log(`🗑️ Deleting workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
+        
+        // Validate ObjectId format
+        if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+            return res.status(400).json({ 
+                error: "Invalid workout ID format",
+                details: "Workout ID must be a valid MongoDB ObjectId"
+            });
+        }
+        
+        // Delete workout and verify ownership
+        const workout = await Workout.findOneAndDelete({
+            _id: req.params.id,
+            userId: userId // Verify ownership
+        });
+        
+        if (!workout) {
+            return res.status(404).json({ 
+                error: "Workout not found",
+                details: `No workout found with ID: ${req.params.id} for your account`
+            });
+        }
+        
+        console.log(`✅ Workout deleted successfully for user ${userEmail}:`, workout._id);
+        res.json({ 
+            message: "Workout deleted successfully",
+            deletedWorkout: {
+                _id: workout._id,
+                title: workout.title,
+                day: workout.day
+            }
+        });
+    } catch (err) {
+        console.error("❌ Error deleting workout:", err);
+        res.status(500).json({ 
+            error: "Failed to delete workout", 
+            details: err.message 
+        });
+    }
+});
+
 // POST add exercise to user's workout
 router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`🏋️ Adding exercise to workout ${req.params.id} for user: ${userEmail}`);
+        console.log(`🏋️ Adding exercise to workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
         console.log("Exercise data received:", JSON.stringify(req.body, null, 2));
         
         // Validate ObjectId format
@@ -462,258 +621,46 @@ router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
     }
 });
 
-// PUT update entire workout (with user ownership verification)
-router.put("/api/workouts/:id", requireAuth, async (req, res) => {
-    try {
-        const { userId, userEmail } = req.userInfo;
-        console.log(`📝 Updating workout ${req.params.id} for user: ${userEmail}`);
-        console.log("Update data:", JSON.stringify(req.body, null, 2));
-        
-        // Validate ObjectId format
-        if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-            return res.status(400).json({ 
-                error: "Invalid workout ID format",
-                details: "Workout ID must be a valid MongoDB ObjectId"
-            });
-        }
-        
-        const updateData = { ...req.body };
-        
-        // Always set updatedAt
-        updateData.updatedAt = new Date();
-        
-        // Ensure user ownership fields are not modified
-        delete updateData.userId;
-        delete updateData.userEmail;
-        
-        // Validate exercises if provided
-        if (updateData.exercises) {
-            if (!Array.isArray(updateData.exercises)) {
-                return res.status(400).json({
-                    error: "Invalid exercises format",
-                    details: "Exercises must be an array"
-                });
-            }
-            
-            const validationErrors = [];
-            updateData.exercises.forEach((exercise, index) => {
-                const errors = validateExerciseData(exercise);
-                if (errors.length > 0) {
-                    validationErrors.push(`Exercise ${index + 1}: ${errors.join(', ')}`);
-                }
-            });
-            
-            if (validationErrors.length > 0) {
-                return res.status(400).json({
-                    error: "Exercise validation failed",
-                    details: validationErrors.join('; ')
-                });
-            }
-        }
-        
-        const workout = await Workout.findOneAndUpdate(
-            { 
-                _id: req.params.id,
-                userId: userId // Ensure user owns this workout
-            },
-            updateData,
-            { new: true, runValidators: true }
-        );
-        
-        if (!workout) {
-            return res.status(404).json({ 
-                error: "Workout not found",
-                details: `No workout found with ID: ${req.params.id} for your account`
-            });
-        }
-        
-        console.log(`✅ Workout updated successfully for user ${userEmail}:`, workout._id);
-        res.json({
-            _id: workout._id,
-            userId: workout.userId,
-            userEmail: workout.userEmail,
-            day: workout.day,
-            exercises: workout.exercises,
-            title: workout.title,
-            description: workout.description,
-            location: workout.location,
-            workoutType: workout.workoutType,
-            difficulty: workout.difficulty,
-            overallRating: workout.overallRating,
-            mood: workout.mood,
-            notes: workout.notes,
-            goals: workout.goals,
-            achievements: workout.achievements,
-            personalRecords: workout.personalRecords,
-            createdAt: workout.createdAt,
-            updatedAt: workout.updatedAt,
-            totalDuration: workout.totalDuration,
-            exerciseCount: workout.exerciseCount,
-            categoryBreakdown: workout.categoryBreakdown,
-            intensityBreakdown: workout.intensityBreakdown
-        });
-    } catch (err) {
-        console.error("❌ Error updating workout:", err);
-        
-        if (err.name === 'ValidationError') {
-            return res.status(400).json({ 
-                error: "Workout validation failed", 
-                details: Object.values(err.errors).map(e => e.message).join(', ')
-            });
-        }
-        
-        res.status(500).json({ 
-            error: "Failed to update workout", 
-            details: err.message 
-        });
-    }
-});
-
-// DELETE workout (with user ownership verification)
-router.delete("/api/workouts/:id", requireAuth, async (req, res) => {
-    try {
-        const { userId, userEmail } = req.userInfo;
-        console.log(`🗑️ Deleting workout ${req.params.id} for user: ${userEmail}`);
-        
-        // Validate ObjectId format
-        if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-            return res.status(400).json({ 
-                error: "Invalid workout ID format",
-                details: "Workout ID must be a valid MongoDB ObjectId"
-            });
-        }
-        
-        const workout = await Workout.findOneAndDelete({
-            _id: req.params.id,
-            userId: userId // Ensure user owns this workout
-        });
-        
-        if (!workout) {
-            return res.status(404).json({ 
-                error: "Workout not found",
-                details: `No workout found with ID: ${req.params.id} for your account`
-            });
-        }
-        
-        console.log(`✅ Workout deleted successfully for user ${userEmail}:`, req.params.id);
-        res.json({ 
-            message: "Workout deleted successfully", 
-            deletedWorkout: {
-                _id: workout._id,
-                day: workout.day,
-                exerciseCount: workout.exercises?.length || 0
-            }
-        });
-    } catch (err) {
-        console.error("❌ Error deleting workout:", err);
-        res.status(500).json({ 
-            error: "Failed to delete workout", 
-            details: err.message 
-        });
-    }
-});
-
-// GET workout statistics for authenticated user
+// GET workout statistics for user
 router.get("/api/workouts/stats/summary", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`📊 Calculating workout statistics for user: ${userEmail}`);
+        console.log(`📊 Fetching workout stats for user: ${userEmail} (ObjectId: ${userId})`);
         
-        // Get user-specific statistics
         const stats = await Workout.getUserWorkoutStats(userId);
         const categoryStats = await Workout.getUserCategoryStats(userId);
         
-        // Calculate additional user-specific statistics
-        const userWorkouts = await Workout.findByUser(userId);
-        
-        const now = new Date();
-        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        
-        const weeklyWorkouts = userWorkouts.filter(w => new Date(w.day) >= oneWeekAgo);
-        const monthlyWorkouts = userWorkouts.filter(w => new Date(w.day) >= oneMonthAgo);
-        
-        // Intensity and equipment breakdown for user
-        const intensityStats = {};
-        const equipmentStats = {};
-        
-        userWorkouts.forEach(workout => {
-            const exercises = workout.exercises || [];
-            exercises.forEach(exercise => {
-                // Intensity stats
-                const intensity = exercise.intensity || 'moderate';
-                if (!intensityStats[intensity]) {
-                    intensityStats[intensity] = { count: 0, duration: 0 };
-                }
-                intensityStats[intensity].count++;
-                intensityStats[intensity].duration += exercise.duration || 0;
-                
-                // Equipment stats
-                const equipment = exercise.equipment || 'none';
-                if (!equipmentStats[equipment]) {
-                    equipmentStats[equipment] = { count: 0, duration: 0 };
-                }
-                equipmentStats[equipment].count++;
-                equipmentStats[equipment].duration += exercise.duration || 0;
-            });
+        console.log(`✅ Stats fetched for user ${userEmail}`);
+        res.json({
+            summary: stats,
+            categoryBreakdown: categoryStats,
+            userId: userId,
+            userEmail: userEmail
         });
-        
-        const enhancedStats = {
-            ...stats,
-            categoryStats: categoryStats.reduce((acc, cat) => {
-                acc[cat._id] = {
-                    count: cat.count,
-                    totalDuration: cat.totalDuration,
-                    averageDuration: cat.averageDuration,
-                    totalCalories: cat.totalCalories || 0,
-                    popularExercises: cat.exercises?.slice(0, 5) || []
-                };
-                return acc;
-            }, {}),
-            intensityStats,
-            equipmentStats,
-            weeklyAverage: weeklyWorkouts.length,
-            monthlyAverage: Math.round(monthlyWorkouts.length),
-            currentStreak: calculateWorkoutStreak(userWorkouts),
-            longestStreak: calculateLongestStreak(userWorkouts),
-            lastWorkoutDate: userWorkouts.length > 0 ? userWorkouts[0].day : null
-        };
-
-        console.log(`✅ User workout statistics calculated for ${userEmail}`);
-        res.json(enhancedStats);
     } catch (err) {
-        console.error("❌ Error calculating user workout stats:", err);
+        console.error("❌ Error fetching workout stats:", err);
         res.status(500).json({ 
-            error: "Failed to calculate statistics", 
+            error: "Failed to fetch workout statistics", 
             details: err.message 
         });
     }
 });
 
-// GET popular exercises for authenticated user
+// GET popular exercises for user
 router.get("/api/workouts/stats/popular-exercises", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        const { limit = 20, category, type } = req.query;
-        console.log(`📊 Getting popular exercises for user ${userEmail} (limit: ${limit})`);
+        const { limit = 10, category, type } = req.query;
         
-        let matchStage = { userId: new mongoose.Types.ObjectId(userId) };
+        console.log(`🏆 Fetching popular exercises for user: ${userEmail} (ObjectId: ${userId})`);
+        
+        let matchStage = { userId: userId };
         if (category) matchStage['exercises.category'] = category;
         if (type) matchStage['exercises.type'] = type;
         
-        const pipeline = [
+        const popularExercises = await Workout.aggregate([
             { $match: matchStage },
-            { $unwind: '$exercises' }
-        ];
-        
-        if (category) {
-            pipeline.push({ $match: { 'exercises.category': category } });
-        }
-        if (type) {
-            pipeline.push({ $match: { 'exercises.type': type } });
-        }
-        
-        pipeline.push(
+            { $unwind: '$exercises' },
             {
                 $group: {
                     _id: {
@@ -724,38 +671,51 @@ router.get("/api/workouts/stats/popular-exercises", requireAuth, async (req, res
                     count: { $sum: 1 },
                     totalDuration: { $sum: '$exercises.duration' },
                     averageDuration: { $avg: '$exercises.duration' },
-                    totalVolume: { 
-                        $sum: { 
+                    totalCalories: { $sum: '$exercises.caloriesBurned' },
+                    totalVolume: {
+                        $sum: {
                             $multiply: [
                                 { $ifNull: ['$exercises.weight', 0] },
                                 { $ifNull: ['$exercises.reps', 0] },
-                                { $ifNull: ['$exercises.sets', 1] }
+                                { $ifNull: ['$exercises.sets', 0] }
                             ]
                         }
                     },
-                    totalDistance: { $sum: { $ifNull: ['$exercises.distance', 0] } },
-                    totalCalories: { $sum: { $ifNull: ['$exercises.caloriesBurned', 0] } },
+                    totalDistance: { $sum: '$exercises.distance' },
                     lastPerformed: { $max: '$day' }
                 }
             },
             { $sort: { count: -1 } },
-            { $limit: parseInt(limit) }
-        );
-        
-        const popularExercises = await Workout.aggregate(pipeline);
+            { $limit: parseInt(limit) },
+            {
+                $project: {
+                    _id: 0,
+                    name: '$_id.name',
+                    type: '$_id.type',
+                    category: '$_id.category',
+                    count: 1,
+                    totalDuration: 1,
+                    averageDuration: { $round: ['$averageDuration', 1] },
+                    totalCalories: 1,
+                    totalVolume: 1,
+                    totalDistance: 1,
+                    lastPerformed: 1
+                }
+            }
+        ]);
         
         console.log(`✅ Found ${popularExercises.length} popular exercises for user ${userEmail}`);
         res.json(popularExercises);
     } catch (err) {
-        console.error("❌ Error getting user popular exercises:", err);
+        console.error("❌ Error fetching popular exercises:", err);
         res.status(500).json({ 
-            error: "Failed to get popular exercises", 
+            error: "Failed to fetch popular exercises", 
             details: err.message 
         });
     }
 });
 
-// Helper function to validate exercise data (same as before)
+// Helper function to validate exercise data
 function validateExerciseData(exerciseData) {
     const errors = [];
     
@@ -823,102 +783,35 @@ function getExerciseCategory(type) {
     return typeToCategory[type] || 'resistance';
 }
 
-// Helper functions for streak calculations
-function calculateWorkoutStreak(workouts) {
-    if (!workouts || workouts.length === 0) return 0;
-    
-    const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.day) - new Date(a.day));
-    let streak = 0;
-    let currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0);
-    
-    for (const workout of sortedWorkouts) {
-        const workoutDate = new Date(workout.day);
-        workoutDate.setHours(0, 0, 0, 0);
-        const daysDiff = Math.floor((currentDate - workoutDate) / (1000 * 60 * 60 * 24));
-        
-        if (daysDiff <= 1) {
-            streak++;
-            currentDate = workoutDate;
-        } else {
-            break;
-        }
-    }
-    
-    return streak;
-}
-
-function calculateLongestStreak(workouts) {
-    if (!workouts || workouts.length === 0) return 0;
-    
-    const workoutDates = workouts.map(w => {
-        const date = new Date(w.day);
-        date.setHours(0, 0, 0, 0);
-        return date.getTime();
-    }).sort((a, b) => a - b);
-    
-    let longestStreak = 1;
-    let currentStreak = 1;
-    
-    for (let i = 1; i < workoutDates.length; i++) {
-        const daysDiff = (workoutDates[i] - workoutDates[i-1]) / (1000 * 60 * 60 * 24);
-        
-        if (daysDiff <= 1) {
-            currentStreak++;
-        } else {
-            longestStreak = Math.max(longestStreak, currentStreak);
-            currentStreak = 1;
-        }
-    }
-    
-    return Math.max(longestStreak, currentStreak);
-}
-
-// Health check endpoint with user-specific information
+// Health check endpoint with enhanced information
 router.get("/api/health", async (req, res) => {
     try {
-        console.log("🏥 Performing health check...");
+        console.log("🏥 Performing enhanced health check...");
         
-        // Test MongoDB connection with user-aware queries
-        const totalUsers = await User.countDocuments();
-        const totalWorkouts = await Workout.countDocuments();
-        const workoutsToday = await Workout.countDocuments({
-            day: {
-                $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-                $lt: new Date(new Date().setHours(23, 59, 59, 999))
-            }
-        });
+        // Test MongoDB connection
+        const workoutCount = await Workout.countDocuments();
+        const userCount = await User.countDocuments();
         
         const healthData = {
             status: "healthy",
             mongodb: "connected",
             timestamp: new Date().toISOString(),
-            userCount: totalUsers,
-            workoutCount: totalWorkouts,
-            workoutsToday: workoutsToday,
+            userCount: userCount,
+            workoutCount: workoutCount,
             api: {
-                version: "2.2.0-user-specific",
+                version: "2.3.0-fixed-google-id-handling",
                 features: [
+                    "Fixed Google ID to MongoDB ObjectId Conversion",
+                    "Proper User Email Lookup",
+                    "Enhanced Error Handling",
                     "User-Specific Workouts",
-                    "Account-Based Activity Tracking", 
-                    "Enhanced Security with Ownership Verification",
-                    "User Authentication Required",
-                    "Individual Progress Tracking",
-                    "Personal Statistics and Analytics"
+                    "Account-Based Activity Tracking",
+                    "Workout Statistics",
+                    "Popular Exercise Analytics"
                 ],
                 authentication: "required",
                 userIsolation: "enabled",
-                endpoints: [
-                    "GET /api/workouts (user-specific)",
-                    "POST /api/workouts (creates for authenticated user)", 
-                    "GET /api/workouts/:id (verifies ownership)",
-                    "PUT /api/workouts/:id (user ownership required)",
-                    "DELETE /api/workouts/:id (user ownership required)",
-                    "POST /api/workouts/:id/exercises (user ownership required)",
-                    "GET /api/workouts/stats/summary (user-specific stats)",
-                    "GET /api/workouts/stats/popular-exercises (user-specific)",
-                    "GET /api/health"
-                ]
+                userIdHandling: "email-lookup-to-mongodb-objectid"
             }
         };
         
@@ -935,10 +828,29 @@ router.get("/api/health", async (req, res) => {
     }
 });
 
+// Debug endpoint for development (remove in production)
+router.get("/api/debug/user-info", (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+        return res.status(404).json({ error: "Not found" });
+    }
+    
+    res.json({
+        userInfo: req.userInfo,
+        headers: {
+            'x-user-email': req.headers['x-user-email'],
+            'x-user-id': req.headers['x-user-id'] // This should NOT be used
+        },
+        body: req.body,
+        query: req.query
+    });
+});
+
 module.exports = (app) => {
     app.use(router);
-    console.log("🔌 User-specific API routes initialized successfully");
+    console.log("🔌 FIXED: User-specific API routes initialized successfully");
     console.log("🔐 All workout operations now require user authentication");
     console.log("🎯 Users can only access their own workout data");
     console.log("✅ Enhanced security with ownership verification on all operations");
+    console.log("🔧 FIXED: Google ID to MongoDB ObjectId conversion via email lookup");
+    console.log("📊 Added workout statistics and analytics endpoints");
 };

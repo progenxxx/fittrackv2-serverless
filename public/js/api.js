@@ -17,20 +17,22 @@ const API = {
 
     // Get headers with user authentication
     getAuthHeaders() {
-        const user = this.getCurrentUser();
-        if (!user) {
-            console.warn('No user found for authentication');
-            return {
-                'Content-Type': 'application/json'
-            };
-        }
-        
+    const user = this.getCurrentUser();
+    if (!user) {
+        console.warn('No user found for authentication');
         return {
-            'Content-Type': 'application/json',
-            'X-User-Id': user.id || user._id,
-            'X-User-Email': user.email
+            'Content-Type': 'application/json'
         };
-    },
+    }
+    
+    // FIXED: Only send email for user identification
+    // Backend will look up MongoDB ObjectId by email
+    return {
+        'Content-Type': 'application/json',
+        'X-User-Email': user.email
+        // REMOVED: 'X-User-Id': user.id || user._id  <- This was causing the cast error
+    };
+},
 
     // Enhanced session management
     session: {
