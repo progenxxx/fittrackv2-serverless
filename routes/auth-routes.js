@@ -202,6 +202,7 @@ router.post("/api/auth/signup", async (req, res) => {
                 
                 try {
                     await sendVerificationEmail(email, verificationCode, existingUser.name);
+                    console.log("Verification email resent successfully to:", email);
                 } catch (emailError) {
                     console.error("Failed to send verification email:", emailError);
                 }
