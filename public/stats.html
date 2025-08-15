@@ -17,6 +17,7 @@
             background: #f8fafc;
             color: #1e293b;
             line-height: 1.6;
+            min-height: 100vh;
         }
 
         .navbar {
@@ -48,12 +49,15 @@
             text-decoration: none;
         }
 
-        .brand-logo {
+        .brand-icon {
             width: 36px;
             height: 36px;
-            background: url('/logo.png') no-repeat center center;
-            background-size: contain;
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
         }
 
         .nav-menu {
@@ -114,302 +118,142 @@
             border-color: #cbd5e1;
         }
 
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-            width: 24px;
-            height: 18px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-        }
-
-        .hamburger span {
-            display: block;
-            height: 2px;
-            width: 100%;
-            background: #64748b;
-            border-radius: 2px;
-            transition: all 0.3s ease;
-            transform-origin: center;
-        }
-
-        .hamburger.active span:nth-child(1) {
-            transform: rotate(45deg) translate(5px, 5px);
-        }
-
-        .hamburger.active span:nth-child(2) {
-            opacity: 0;
-            transform: scaleX(0);
-        }
-
-        .hamburger.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(7px, -6px);
-        }
-
-        .mobile-menu-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .mobile-menu-overlay.active {
-            opacity: 1;
-        }
-
-        .mobile-menu {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 80%;
-            max-width: 300px;
-            height: 100%;
-            background: white;
-            z-index: 1000;
-            transition: right 0.3s ease;
-            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-        }
-
-        .mobile-menu.active {
-            right: 0;
-        }
-
-        .mobile-menu-header {
-            padding: 20px;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .mobile-menu-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #64748b;
-            cursor: pointer;
-            padding: 4px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .mobile-menu-close:hover {
-            background: #f1f5f9;
-        }
-
-        .mobile-nav-links {
-            flex: 1;
-            padding: 20px 0;
-        }
-
-        .mobile-nav-link {
-            display: block;
-            padding: 16px 20px;
-            color: #64748b;
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            border-left: 4px solid transparent;
-        }
-
-        .mobile-nav-link:hover,
-        .mobile-nav-link.active {
-            color: #4f46e5;
-            background: #f8fafc;
-            border-left-color: #4f46e5;
-        }
-
-        .mobile-user-section {
-            padding: 20px;
-            border-top: 1px solid #e2e8f0;
-            background: #f8fafc;
-        }
-
-        .mobile-user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .mobile-user-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        .mobile-user-details h3 {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e293b;
-            margin: 0;
-        }
-
-        .mobile-user-details p {
-            font-size: 14px;
-            color: #64748b;
-            margin: 0;
-        }
-
-        .mobile-logout-btn {
-            width: 100%;
-            padding: 12px 16px;
-            background: transparent;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            color: #64748b;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .mobile-logout-btn:hover {
-            background: #f1f5f9;
-            border-color: #cbd5e1;
-        }
-
         .main-container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 32px 24px;
         }
 
         .page-header {
-            text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
         .page-title {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #1e293b;
             margin-bottom: 8px;
         }
 
         .page-subtitle {
             color: #64748b;
-            font-size: 18px;
+            font-size: 16px;
         }
 
-        .stats-overview {
+        .connection-status {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .status-connected {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-loading {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fde68a;
+        }
+
+        .status-error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .retry-btn {
+            background: transparent;
+            border: 1px solid currentColor;
+            color: inherit;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-left: auto;
+        }
+
+        .retry-btn:hover {
+            background: currentColor;
+            color: white;
+        }
+
+        .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 24px;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
         }
 
-        .overview-card {
+        .stat-card {
             background: white;
             border-radius: 20px;
-            padding: 28px;
+            padding: 24px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             border: 1px solid #f1f5f9;
-            position: relative;
-            overflow: hidden;
             transition: all 0.2s ease;
         }
 
-        .overview-card:hover {
+        .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
         }
 
-        .overview-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--accent-color, #4f46e5);
-        }
-
-        .card-header {
+        .stat-header {
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            align-items: flex-start;
             margin-bottom: 16px;
         }
 
-        .card-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--accent-color, #4f46e5);
-            color: white;
+            font-size: 20px;
         }
 
-        .card-trend {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            padding: 4px 8px;
-            border-radius: 12px;
-        }
-
-        .trend-up {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .trend-down {
-            background: #fef2f2;
-            color: #dc2626;
-        }
-
-        .card-value {
+        .stat-value {
             font-size: 32px;
             font-weight: 700;
             color: #1e293b;
             margin-bottom: 4px;
         }
 
-        .card-label {
+        .stat-label {
             color: #64748b;
             font-size: 14px;
             font-weight: 500;
         }
 
-        .card-description {
-            color: #94a3b8;
-            font-size: 13px;
-            margin-top: 8px;
-        }
-
-        .charts-section {
+        .chart-section {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1fr 1fr;
             gap: 32px;
             margin-bottom: 32px;
         }
@@ -422,375 +266,188 @@
             border: 1px solid #f1f5f9;
         }
 
-        .chart-header {
-            margin-bottom: 24px;
-        }
-
         .chart-title {
             font-size: 20px;
             font-weight: 600;
             color: #1e293b;
-            margin-bottom: 4px;
-        }
-
-        .chart-description {
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
-        .progress-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-            margin-bottom: 32px;
-        }
-
-        .progress-card {
-            background: white;
-            border-radius: 20px;
-            padding: 32px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid #f1f5f9;
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .progress-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        .progress-value {
-            font-size: 24px;
-            font-weight: 700;
-            color: #4f46e5;
-        }
-
-        .progress-bar {
-            height: 12px;
-            background: #f1f5f9;
-            border-radius: 8px;
-            overflow: hidden;
-            margin-bottom: 12px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4f46e5, #7c3aed);
-            border-radius: 8px;
-            transition: width 1s ease;
-        }
-
-        .progress-details {
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        .activity-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 32px;
-        }
-
-        .activity-card {
-            background: white;
-            border-radius: 20px;
-            padding: 32px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            border: 1px solid #f1f5f9;
-        }
-
-        .activity-header {
             margin-bottom: 24px;
-        }
-
-        .activity-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 4px;
-        }
-
-        .activity-subtitle {
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        .activity-list {
-            list-style: none;
-        }
-
-        .activity-item {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 16px 0;
-            border-bottom: 1px solid #f1f5f9;
+            gap: 12px;
         }
 
-        .activity-item:last-child {
-            border-bottom: none;
+        .chart-placeholder {
+            height: 300px;
+            background: #f8fafc;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            border: 2px dashed #e2e8f0;
         }
 
-        .activity-icon {
+        .loading-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #64748b;
+        }
+
+        .loading-icon {
             width: 48px;
             height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8fafc;
-        }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-name {
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 2px;
-        }
-
-        .activity-details {
-            color: #64748b;
-            font-size: 13px;
-        }
-
-        .activity-time {
-            color: #94a3b8;
-            font-size: 12px;
-        }
-
-        .insights-card {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
-        }
-
-        .insight-item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            backdrop-filter: blur(10px);
-        }
-
-        .insight-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .insight-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .insight-description {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #4f46e5;
+            margin: 0 auto 16px;
+            border: 4px solid #f1f5f9;
+            border-top: 4px solid #4f46e5;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
+        .error-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: #dc2626;
+        }
+
+        .error-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 16px;
+            background: #fee2e2;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
         .empty-state {
             text-align: center;
-            padding: 3rem;
+            padding: 48px 24px;
             color: #64748b;
         }
 
-        .empty-state h3 {
-            margin-bottom: 0.5rem;
-            font-size: 1.5rem;
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            background: #f1f5f9;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
         }
 
-        .empty-state p {
-            margin-bottom: 1.5rem;
-        }
-
-        .btn-start-workout {
-            background: #4f46e5;
+        .action-btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
             color: white;
-            padding: 0.75rem 1.5rem;
             border: none;
+            padding: 12px 24px;
             border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.2s ease;
             text-decoration: none;
             display: inline-block;
-            transition: background 0.2s;
+            margin-top: 16px;
         }
 
-        .btn-start-workout:hover {
-            background: #4338ca;
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 70, 229, 0.3);
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .skeleton {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
         }
 
-        /* Mobile Responsive Styles */
+        .skeleton-text {
+            height: 16px;
+            margin-bottom: 8px;
+        }
+
+        .skeleton-title {
+            height: 24px;
+            width: 60%;
+            margin-bottom: 16px;
+        }
+
+        .skeleton-stat {
+            height: 40px;
+            width: 80%;
+            margin-bottom: 8px;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .refresh-btn {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            background: #f1f5f9;
+            color: #4f46e5;
+        }
+
+        .refresh-btn.loading {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .refresh-icon {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .refresh-btn.loading .refresh-icon {
+            animation: spin 1s linear infinite;
+        }
+
         @media (max-width: 768px) {
-            .hamburger {
-                display: flex;
+            .chart-section {
+                grid-template-columns: 1fr;
             }
-
-            .nav-menu {
-                display: none;
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
-
-            .nav-user {
-                display: none;
-            }
-
-            .nav-container {
-                padding: 0 16px;
-            }
-
+            
             .main-container {
                 padding: 24px 16px;
-            }
-
-            .page-title {
-                font-size: 28px;
-            }
-
-            .page-subtitle {
-                font-size: 16px;
-            }
-
-            .stats-overview {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 16px;
-            }
-
-            .overview-card {
-                padding: 20px;
-            }
-
-            .card-icon {
-                width: 48px;
-                height: 48px;
-            }
-
-            .card-value {
-                font-size: 24px;
-            }
-
-            .charts-section {
-                grid-template-columns: 1fr;
-                gap: 24px;
-            }
-
-            .chart-card {
-                padding: 24px;
-            }
-
-            .chart-container {
-                height: 250px;
-            }
-
-            .progress-section,
-            .activity-section {
-                grid-template-columns: 1fr;
-                gap: 24px;
-            }
-
-            .progress-card,
-            .activity-card {
-                padding: 24px;
-            }
-
-            .mobile-menu {
-                width: 90%;
             }
         }
 
         @media (max-width: 480px) {
-            .stats-overview {
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
-
-            .overview-card {
-                padding: 16px;
-            }
-
-            .card-value {
-                font-size: 20px;
-            }
-
-            .chart-card,
-            .progress-card,
-            .activity-card {
-                padding: 20px;
-            }
-
-            .activity-item {
-                padding: 12px 0;
-            }
-
-            .activity-icon {
-                width: 40px;
-                height: 40px;
-            }
-
-            .insight-item {
-                padding: 12px;
-            }
         }
 
-        @media (max-width: 320px) {
-            .main-container {
-                padding: 16px 12px;
-            }
-
-            .overview-card,
-            .chart-card,
-            .progress-card,
-            .activity-card {
-                padding: 16px;
-            }
-
-            .card-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-
-            .card-trend {
-                align-self: flex-end;
-            }
+        .brand-logo {
+            width: 36px;
+            height: 36px;
+            background: url('/logo.png') no-repeat center center;
+            background-size: contain;
+            border-radius: 12px;
         }
-
-        body.menu-open {
-            overflow: hidden;
-        }
-
-
     </style>
 </head>
 <body>
@@ -816,286 +473,105 @@
                     </svg>
                 </div>
                 <span id="userName">User</span>
-                <button class="logout-btn" onclick="logout()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="display: inline; margin-right: 4px;">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Logout
-                </button>
+                <button class="logout-btn" onclick="logout()">Logout</button>
             </div>
-
-            <button class="hamburger" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
         </div>
     </nav>
-
-    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
-
-    <div class="mobile-menu" id="mobileMenu">
-        <div class="mobile-menu-header">
-            <a href="/index.html" class="nav-brand">
-                <div class="brand-logo"></div>
-                FitTrack
-            </a>
-            <button class="mobile-menu-close" id="mobileMenuClose">×</button>
-        </div>
-
-        <nav class="mobile-nav-links">
-            <a href="/index.html" class="mobile-nav-link">Home</a>
-            <a href="/stats.html" class="mobile-nav-link active">Analytics</a>
-            <a href="/history.html" class="mobile-nav-link">History</a>
-            <a href="/excercise.html" class="mobile-nav-link">Exercise</a>
-        </nav>
-
-        <div class="mobile-user-section">
-            <div class="mobile-user-info">
-                <div class="mobile-user-avatar" id="mobileUserAvatar">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <div class="mobile-user-details">
-                    <h3 id="mobileUserName">User</h3>
-                    <p>FitTrack Member</p>
-                </div>
-            </div>
-            <button class="mobile-logout-btn" onclick="logout()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <polyline points="16,17 21,12 16,7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Logout
-            </button>
-        </div>
-    </div>
 
     <div class="main-container">
         <div class="page-header">
             <h1 class="page-title">Analytics Dashboard</h1>
-            <p class="page-subtitle">Track your progress and analyze your fitness journey</p>
+            <p class="page-subtitle">Track your fitness progress and insights</p>
         </div>
 
-        <div class="stats-overview">
-            <div class="overview-card" style="--accent-color: #4f46e5;">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M8 16h4v8H8z" fill="currentColor"/>
-                            <path d="M12 12h4v12h-4z" fill="currentColor"/>
-                            <path d="M16 8h4v16h-4z" fill="currentColor"/>
-                        </svg>
+        <div id="connectionStatus" class="connection-status status-loading">
+            <div class="loading-spinner"></div>
+            <span>Connecting to database...</span>
+            <button class="retry-btn" onclick="retryConnection()" style="display: none;">Retry</button>
+        </div>
+
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white;">
+                        🏋️
                     </div>
-                    <div class="card-trend trend-up" id="workoutsTrend" style="display: none;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" stroke="currentColor" stroke-width="2"/>
-                            <polyline points="17,6 23,6 23,12" stroke="currentColor" stroke-width="2"/>
+                    <button class="refresh-btn" onclick="refreshStats()" id="refreshBtn">
+                        <svg class="refresh-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <polyline points="1 20 1 14 7 14"></polyline>
+                            <path d="m3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                         </svg>
-                        +12%
-                    </div>
+                        Refresh
+                    </button>
                 </div>
-                <div class="card-value" id="totalWorkouts">0</div>
-                <div class="card-label">Total Workouts</div>
-                <div class="card-description">Completed sessions</div>
+                <div id="totalWorkoutsValue" class="stat-value">--</div>
+                <div class="stat-label">Total Workouts</div>
             </div>
 
-            <div class="overview-card" style="--accent-color: #059669;">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                            <polyline points="12,6 12,12 16,14" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                    </div>
-                    <div class="card-trend trend-up" id="timeTrend" style="display: none;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" stroke="currentColor" stroke-width="2"/>
-                            <polyline points="17,6 23,6 23,12" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        +8%
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: white;">
+                        ⏱️
                     </div>
                 </div>
-                <div class="card-value" id="totalTime">0</div>
-                <div class="card-label">Training Time</div>
-                <div class="card-description">Minutes spent exercising</div>
+                <div id="totalTimeValue" class="stat-value">--</div>
+                <div class="stat-label">Minutes Trained</div>
             </div>
 
-            <div class="overview-card" style="--accent-color: #dc2626;">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" fill="currentColor"/>
-                        </svg>
-                    </div>
-                    <div class="card-trend trend-up" id="caloriesTrend" style="display: none;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" stroke="currentColor" stroke-width="2"/>
-                            <polyline points="17,6 23,6 23,12" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        +15%
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%); color: white;">
+                        🔥
                     </div>
                 </div>
-                <div class="card-value" id="caloriesBurned">0</div>
-                <div class="card-label">Calories Burned</div>
-                <div class="card-description">Estimated total calories</div>
+                <div id="thisWeekValue" class="stat-value">--</div>
+                <div class="stat-label">This Week</div>
             </div>
 
-            <div class="overview-card" style="--accent-color: #f59e0b;">
-                <div class="card-header">
-                    <div class="card-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="currentColor"/>
-                        </svg>
-                    </div>
-                    <div class="card-trend trend-up" id="streakTrend" style="display: none;">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                            <polyline points="23,6 13.5,15.5 8.5,10.5 1,18" stroke="currentColor" stroke-width="2"/>
-                            <polyline points="17,6 23,6 23,12" stroke="currentColor" stroke-width="2"/>
-                        </svg>
-                        +5 days
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%); color: white;">
+                        ⭐
                     </div>
                 </div>
-                <div class="card-value" id="currentStreak">0</div>
-                <div class="card-label">Current Streak</div>
-                <div class="card-description">Consecutive workout days</div>
+                <div id="avgWorkoutValue" class="stat-value">--</div>
+                <div class="stat-label">Avg Duration</div>
             </div>
         </div>
 
-        <div class="charts-section">
+        <div class="chart-section">
             <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">Workout Duration Trends</h3>
-                    <p class="chart-description">Your workout duration over time</p>
-                </div>
-                <div class="chart-container">
-                    <canvas id="durationChart"></canvas>
+                <h2 class="chart-title">
+                    📊 Workout Frequency
+                </h2>
+                <div id="frequencyChart" class="chart-placeholder">
+                    <div class="loading-state">
+                        <div class="loading-icon"></div>
+                        <p>Loading workout frequency data...</p>
+                    </div>
                 </div>
             </div>
 
             <div class="chart-card">
-                <div class="chart-header">
-                    <h3 class="chart-title">Exercise Distribution</h3>
-                    <p class="chart-description">Breakdown of exercise types</p>
-                </div>
-                <div class="chart-container">
-                    <canvas id="exerciseChart"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <div class="progress-section">
-            <div class="progress-card">
-                <div class="progress-header">
-                    <h3 class="progress-title">Weekly Goal</h3>
-                    <span class="progress-value" id="weeklyProgress">0%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="weeklyProgressBar" style="width: 0%"></div>
-                </div>
-                <p class="progress-details" id="weeklyDetails">0 of 5 workouts completed this week</p>
-            </div>
-
-            <div class="progress-card">
-                <div class="progress-header">
-                    <h3 class="progress-title">Monthly Goal</h3>
-                    <span class="progress-value" id="monthlyProgress">0%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="monthlyProgressBar" style="width: 0%"></div>
-                </div>
-                <p class="progress-details" id="monthlyDetails">0 of 1200 minutes completed this month</p>
-            </div>
-        </div>
-
-        <div class="activity-section">
-            <div class="activity-card">
-                <div class="activity-header">
-                    <h3 class="activity-title">Recent Activity</h3>
-                    <p class="activity-subtitle">Your latest workout sessions</p>
-                </div>
-                <ul class="activity-list" id="recentActivity">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                    </div>
-                </ul>
-            </div>
-
-            <div class="activity-card insights-card">
-                <div class="activity-header">
-                    <h3 class="activity-title">Insights & Tips</h3>
-                    <p class="activity-subtitle">Personalized recommendations</p>
-                </div>
-                <div class="insights-content" id="insights">
-                    <div class="insight-item">
-                        <div class="insight-title">Loading Insights...</div>
-                        <div class="insight-description">Analyzing your workout data to provide personalized recommendations.</div>
+                <h2 class="chart-title">
+                    💪 Exercise Categories
+                </h2>
+                <div id="categoryChart" class="chart-placeholder">
+                    <div class="loading-state">
+                        <div class="loading-icon"></div>
+                        <p>Loading category breakdown...</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        let workouts = [];
-        let charts = {};
-
-        function initializeMobileMenu() {
-            const hamburger = document.getElementById('hamburger');
-            const mobileMenu = document.getElementById('mobileMenu');
-            const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
-            const mobileMenuClose = document.getElementById('mobileMenuClose');
-
-            function openMobileMenu() {
-                hamburger.classList.add('active');
-                mobileMenu.classList.add('active');
-                mobileMenuOverlay.style.display = 'block';
-                mobileMenuOverlay.classList.add('active');
-                document.body.classList.add('menu-open');
-            }
-
-            function closeMobileMenu() {
-                hamburger.classList.remove('active');
-                mobileMenu.classList.remove('active');
-                mobileMenuOverlay.classList.remove('active');
-                document.body.classList.remove('menu-open');
-                
-                setTimeout(() => {
-                    if (!mobileMenuOverlay.classList.contains('active')) {
-                        mobileMenuOverlay.style.display = 'none';
-                    }
-                }, 300);
-            }
-
-            hamburger.addEventListener('click', openMobileMenu);
-            mobileMenuClose.addEventListener('click', closeMobileMenu);
-            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
-
-            const mobileNavLinks = document.querySelectorAll('.mobile-nav-link');
-            mobileNavLinks.forEach(link => {
-                link.addEventListener('click', () => {
-                    setTimeout(closeMobileMenu, 150);
-                });
-            });
-
-            window.addEventListener('resize', () => {
-                if (window.innerWidth > 768) {
-                    closeMobileMenu();
-                }
-            });
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
-                    closeMobileMenu();
-                }
-            });
-        }
+        let retryCount = 0;
+        const maxRetries = 5;
+        let isLoading = false;
+        let connectionCheckInterval;
 
         function checkAuth() {
             const user = localStorage.getItem('user');
@@ -1114,21 +590,13 @@
 
         function initializeUser(user) {
             const userName = user.name || user.email || 'User';
-            
             document.getElementById('userName').textContent = userName;
-            document.getElementById('mobileUserName').textContent = userName;
             
             const userAvatar = document.getElementById('userAvatar');
-            const mobileUserAvatar = document.getElementById('mobileUserAvatar');
-            
             if (user.picture) {
-                const avatarImg = `<img src="${user.picture}" alt="User Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-                userAvatar.innerHTML = avatarImg;
-                mobileUserAvatar.innerHTML = avatarImg;
+                userAvatar.innerHTML = `<img src="${user.picture}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
             } else if (user.name) {
-                const initials = user.name.charAt(0).toUpperCase();
-                userAvatar.innerHTML = initials;
-                mobileUserAvatar.innerHTML = initials;
+                userAvatar.innerHTML = user.name.charAt(0).toUpperCase();
             }
         }
 
@@ -1137,362 +605,431 @@
             window.location.href = '/login.html';
         }
 
-        async function loadWorkoutStats() {
+        function updateConnectionStatus(status, message, showRetry = false) {
+            const statusEl = document.getElementById('connectionStatus');
+            const retryBtn = statusEl.querySelector('.retry-btn');
+            
+            statusEl.className = `connection-status status-${status}`;
+            
+            let icon = '';
+            if (status === 'loading') {
+                icon = '<div class="loading-spinner"></div>';
+            } else if (status === 'connected') {
+                icon = '✅';
+            } else if (status === 'error') {
+                icon = '❌';
+            }
+            
+            statusEl.innerHTML = `
+                ${icon}
+                <span>${message}</span>
+                <button class="retry-btn" onclick="retryConnection()" style="display: ${showRetry ? 'block' : 'none'};">Retry</button>
+            `;
+        }
+
+        async function checkDatabaseConnection() {
             try {
-                console.log('Loading workout stats...');
-                const response = await fetch('/api/workouts');
+                const response = await fetch('/api/health', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    signal: AbortSignal.timeout(10000)
+                });
+                
+                const health = await response.json();
+                
+                if (health.mongodb && health.mongodb.connected) {
+                    updateConnectionStatus('connected', 'Database connected and ready');
+                    return true;
+                } else if (health.status === 'warming_up_free_tier') {
+                    updateConnectionStatus('loading', 'Free tier database warming up... Please wait 10-30 seconds');
+                    return false;
+                } else {
+                    updateConnectionStatus('loading', 'Database connecting...');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Health check failed:', error);
+                updateConnectionStatus('error', 'Database connection failed', true);
+                return false;
+            }
+        }
+
+        async function loadWorkoutStats() {
+            if (isLoading) return;
+            isLoading = true;
+            
+            console.log('Loading workout statistics...');
+            
+            const refreshBtn = document.getElementById('refreshBtn');
+            if (refreshBtn) {
+                refreshBtn.classList.add('loading');
+                refreshBtn.disabled = true;
+            }
+            
+            try {
+                updateConnectionStatus('loading', 'Loading workout data...');
+                
+                const response = await fetch('/api/workouts', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-User-Email': JSON.parse(localStorage.getItem('user')).email
+                    },
+                    signal: AbortSignal.timeout(30000)
+                });
+                
+                if (response.status === 503) {
+                    const errorData = await response.json();
+                    if (errorData.isFreeT || errorData.details.includes('warming up')) {
+                        updateConnectionStatus('loading', 'Free tier database warming up... Auto-retrying in 10 seconds');
+                        setTimeout(() => loadWorkoutStats(), 10000);
+                        return;
+                    } else {
+                        throw new Error(errorData.details || 'Database not ready');
+                    }
+                }
                 
                 if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    const errorText = await response.text();
+                    throw new Error(`HTTP ${response.status}: ${errorText}`);
                 }
                 
-                workouts = await response.json();
+                const workouts = await response.json();
                 console.log(`Loaded ${workouts.length} workouts`);
                 
-                if (workouts.length === 0) {
-                    showEmptyState();
-                    return;
-                }
-
-                updateOverviewStats();
-                initializeCharts();
-                loadRecentActivity();
-                updateProgressBars();
-                generateInsights();
+                updateConnectionStatus('connected', `Database connected - ${workouts.length} workouts loaded`);
+                calculateAndDisplayStats(workouts);
+                retryCount = 0;
                 
             } catch (error) {
                 console.error('Error loading workout stats:', error);
-                showErrorState('You are on a free-tier server, so you may experience a slow connection, but you can still explore by clicking "Start First Workout"');
+                handleLoadError(error);
+            } finally {
+                isLoading = false;
+                if (refreshBtn) {
+                    refreshBtn.classList.remove('loading');
+                    refreshBtn.disabled = false;
+                }
             }
         }
 
-        function showEmptyState() {
-            document.getElementById('recentActivity').innerHTML = `
-                <div class="empty-state">
-                    <h3>No workout data available</h3>
-                    <p>Start tracking your workouts to see analytics and insights here.</p>
-                    <a href="/excercise.html" class="btn-start-workout">Start First Workout</a>
-                </div>
-            `;
+        function handleLoadError(error) {
+            retryCount++;
             
-            document.querySelector('.charts-section').style.display = 'none';
-        }
-
-        function showErrorState(message) {
-            document.getElementById('recentActivity').innerHTML = `
-                <div class="empty-state">
-                    <h3>Unable to load data</h3>
-                    <p>${message}</p>
-                    <a href="/excercise.html" class="btn-start-workout">Start First Workout</a>
-                </div>
-            `;
-        }
-
-        function updateOverviewStats() {
-            const totalWorkouts = workouts.length;
-            const totalTime = workouts.reduce((sum, workout) => 
-                sum + (workout.exercises || []).reduce((exSum, ex) => exSum + (ex.duration || 0), 0), 0
-            );
-            
-            const caloriesBurned = Math.round(totalTime * 5);
-            const streak = calculateStreak();
-            
-            document.getElementById('totalWorkouts').textContent = totalWorkouts;
-            document.getElementById('totalTime').textContent = `${totalTime}m`;
-            document.getElementById('caloriesBurned').textContent = caloriesBurned.toLocaleString();
-            document.getElementById('currentStreak').textContent = streak;
-
-            if (workouts.length > 5) {
-                document.getElementById('workoutsTrend').style.display = 'flex';
-                document.getElementById('timeTrend').style.display = 'flex';
-                document.getElementById('caloriesTrend').style.display = 'flex';
-                document.getElementById('streakTrend').style.display = 'flex';
-            }
-        }
-
-        function calculateStreak() {
-            if (workouts.length === 0) return 0;
-            
-            const sortedWorkouts = [...workouts].sort((a, b) => new Date(b.day) - new Date(a.day));
-            let streak = 0;
-            let currentDate = new Date();
-            currentDate.setHours(0, 0, 0, 0);
-            
-            for (const workout of sortedWorkouts) {
-                const workoutDate = new Date(workout.day);
-                workoutDate.setHours(0, 0, 0, 0);
-                const daysDiff = Math.floor((currentDate - workoutDate) / (1000 * 60 * 60 * 24));
-                
-                if (daysDiff <= 1) {
-                    streak++;
-                    currentDate = workoutDate;
+            if (error.name === 'AbortError') {
+                updateConnectionStatus('error', 'Request timeout - Server may be slow', true);
+            } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                updateConnectionStatus('error', 'Network error - Check your connection', true);
+            } else if (error.message.includes('warming up') || error.message.includes('503')) {
+                updateConnectionStatus('loading', 'Database warming up... Will auto-retry');
+                if (retryCount < maxRetries) {
+                    setTimeout(() => loadWorkoutStats(), 15000);
                 } else {
-                    break;
+                    updateConnectionStatus('error', 'Database taking longer than expected', true);
                 }
+            } else {
+                updateConnectionStatus('error', `Error: ${error.message}`, true);
             }
             
-            return streak;
+            displayErrorStats();
         }
 
-        function initializeCharts() {
-            const recentWorkouts = workouts.slice(0, 10).reverse();
+        function calculateAndDisplayStats(workouts) {
+            const totalWorkouts = workouts.length;
             
-            if (recentWorkouts.length === 0) return;
+            const thisWeekStart = new Date();
+            thisWeekStart.setDate(thisWeekStart.getDate() - 7);
+            const thisWeekWorkouts = workouts.filter(w => new Date(w.day) > thisWeekStart);
+            
+            const totalMinutes = workouts.reduce((total, workout) => {
+                return total + (workout.exercises || []).reduce((sum, ex) => sum + (ex.duration || 0), 0);
+            }, 0);
+            
+            const avgTime = totalWorkouts > 0 ? Math.round(totalMinutes / totalWorkouts) : 0;
+            
+            document.getElementById('totalWorkoutsValue').textContent = totalWorkouts;
+            document.getElementById('totalTimeValue').textContent = totalMinutes;
+            document.getElementById('thisWeekValue').textContent = thisWeekWorkouts.length;
+            document.getElementById('avgWorkoutValue').textContent = `${avgTime}m`;
+            
+            updateCharts(workouts);
+        }
 
-            const durationCtx = document.getElementById('durationChart').getContext('2d');
-            charts.duration = new Chart(durationCtx, {
-                type: 'line',
-                data: {
-                    labels: recentWorkouts.map(w => new Date(w.day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
-                    datasets: [{
-                        label: 'Duration (minutes)',
-                        data: recentWorkouts.map(w => 
-                            (w.exercises || []).reduce((sum, ex) => sum + (ex.duration || 0), 0)
-                        ),
-                        borderColor: '#4f46e5',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4,
-                        pointBackgroundColor: '#4f46e5',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 2,
-                        pointRadius: 6
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: 'rgba(0,0,0,0.05)' },
-                            ticks: { color: '#64748b' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#64748b' }
-                        }
-                    }
-                }
-            });
+        function displayErrorStats() {
+            document.getElementById('totalWorkoutsValue').textContent = '--';
+            document.getElementById('totalTimeValue').textContent = '--';
+            document.getElementById('thisWeekValue').textContent = '--';
+            document.getElementById('avgWorkoutValue').textContent = '--';
+            
+            const frequencyChart = document.getElementById('frequencyChart');
+            const categoryChart = document.getElementById('categoryChart');
+            
+            frequencyChart.innerHTML = `
+                <div class="error-state">
+                    <div class="error-icon">⚠️</div>
+                    <h3>Unable to load data</h3>
+                    <p>Check your connection and try again</p>
+                </div>
+            `;
+            
+            categoryChart.innerHTML = `
+                <div class="error-state">
+                    <div class="error-icon">⚠️</div>
+                    <h3>Unable to load data</h3>
+                    <p>Check your connection and try again</p>
+                </div>
+            `;
+        }
 
-            const exerciseTypes = {};
+        function updateCharts(workouts) {
+            if (workouts.length === 0) {
+                showEmptyCharts();
+                return;
+            }
+            
+            updateFrequencyChart(workouts);
+            updateCategoryChart(workouts);
+        }
+
+        function showEmptyCharts() {
+            const frequencyChart = document.getElementById('frequencyChart');
+            const categoryChart = document.getElementById('categoryChart');
+            
+            frequencyChart.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📊</div>
+                    <h3>No workout data yet</h3>
+                    <p>Start tracking workouts to see your progress</p>
+                    <a href="/excercise.html" class="action-btn">Add First Workout</a>
+                </div>
+            `;
+            
+            categoryChart.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">💪</div>
+                    <h3>No exercise categories</h3>
+                    <p>Add different types of exercises to see breakdown</p>
+                    <a href="/excercise.html" class="action-btn">Start Exercising</a>
+                </div>
+            `;
+        }
+
+        function updateFrequencyChart(workouts) {
+            const last7Days = [];
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                const dayWorkouts = workouts.filter(w => {
+                    const workoutDate = new Date(w.day).toISOString().split('T')[0];
+                    return workoutDate === dateStr;
+                });
+                
+                last7Days.push({
+                    date: date.toLocaleDateString('en-US', { weekday: 'short' }),
+                    count: dayWorkouts.length
+                });
+            }
+            
+            const maxCount = Math.max(...last7Days.map(d => d.count), 1);
+            
+            const frequencyChart = document.getElementById('frequencyChart');
+            frequencyChart.innerHTML = `
+                <div style="display: flex; align-items: end; justify-content: space-between; height: 200px; gap: 8px;">
+                    ${last7Days.map(day => `
+                        <div style="flex: 1; text-align: center;">
+                            <div style="
+                                height: ${(day.count / maxCount) * 160}px;
+                                background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                                border-radius: 4px 4px 0 0;
+                                margin-bottom: 8px;
+                                display: flex;
+                                align-items: end;
+                                justify-content: center;
+                                color: white;
+                                font-weight: 600;
+                                font-size: 12px;
+                                min-height: 20px;
+                            ">
+                                ${day.count > 0 ? day.count : ''}
+                            </div>
+                            <div style="font-size: 12px; color: #64748b; font-weight: 500;">
+                                ${day.date}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function updateCategoryChart(workouts) {
+            const categories = {};
+            
             workouts.forEach(workout => {
-                (workout.exercises || []).forEach(ex => {
-                    const type = ex.type || ex.category || 'other';
-                    exerciseTypes[type] = (exerciseTypes[type] || 0) + 1;
+                (workout.exercises || []).forEach(exercise => {
+                    const category = exercise.category || 'other';
+                    categories[category] = (categories[category] || 0) + 1;
                 });
             });
-
-            const exerciseCtx = document.getElementById('exerciseChart').getContext('2d');
-            charts.exercise = new Chart(exerciseCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(exerciseTypes).map(type => 
-                        type.charAt(0).toUpperCase() + type.slice(1)
-                    ),
-                    datasets: [{
-                        data: Object.values(exerciseTypes),
-                        backgroundColor: ['#4f46e5', '#059669', '#dc2626', '#f59e0b'],
-                        borderWidth: 0,
-                        cutout: '65%'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                usePointStyle: true,
-                                color: '#64748b'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function loadRecentActivity() {
-            const activityList = document.getElementById('recentActivity');
-            const recentWorkouts = workouts.slice(0, 5);
             
-            if (recentWorkouts.length === 0) {
-                activityList.innerHTML = `
+            const categoryEntries = Object.entries(categories);
+            const total = categoryEntries.reduce((sum, [, count]) => sum + count, 0);
+            
+            const colors = {
+                cardio: '#ef4444',
+                resistance: '#4f46e5',
+                flexibility: '#10b981',
+                balance: '#f59e0b',
+                sports_specific: '#8b5cf6',
+                recovery: '#06b6d4',
+                other: '#64748b'
+            };
+            
+            const categoryChart = document.getElementById('categoryChart');
+            
+            if (categoryEntries.length === 0) {
+                categoryChart.innerHTML = `
                     <div class="empty-state">
-                        <p>No recent activity. Start your first workout!</p>
+                        <div class="empty-icon">💪</div>
+                        <h3>No exercise data</h3>
+                        <p>Complete workouts with exercises to see category breakdown</p>
                     </div>
                 `;
                 return;
             }
             
-            activityList.innerHTML = recentWorkouts.map(workout => {
-                const duration = (workout.exercises || []).reduce((sum, ex) => sum + (ex.duration || 0), 0);
-                const exerciseCount = (workout.exercises || []).length;
-                const timeAgo = getTimeAgo(workout.day);
-                
-                return `
-                    <li class="activity-item">
-                        <div class="activity-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                                <path d="M8 16h4v8H8z" fill="currentColor"/>
-                                <path d="M12 12h4v12h-4z" fill="currentColor"/>
-                                <path d="M16 8h4v16h-4z" fill="currentColor"/>
-                            </svg>
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-name">Completed workout</div>
-                            <div class="activity-details">${exerciseCount} exercises • ${duration} minutes</div>
-                        </div>
-                        <div class="activity-time">${timeAgo}</div>
-                    </li>
-                `;
-            }).join('');
-        }
-
-        function getTimeAgo(date) {
-            const now = new Date();
-            const workoutDate = new Date(date);
-            const diffMs = now - workoutDate;
-            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            
-            if (diffDays === 0) return 'Today';
-            if (diffDays === 1) return 'Yesterday';
-            if (diffDays < 7) return `${diffDays} days ago`;
-            return workoutDate.toLocaleDateString();
-        }
-
-        function updateProgressBars() {
-            const thisWeekStart = new Date();
-            thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay());
-            thisWeekStart.setHours(0, 0, 0, 0);
-            
-            const thisWeekWorkouts = workouts.filter(w => new Date(w.day) >= thisWeekStart);
-            const weeklyGoal = 5;
-            const weeklyProgress = Math.min((thisWeekWorkouts.length / weeklyGoal) * 100, 100);
-            
-            document.getElementById('weeklyProgress').textContent = `${Math.round(weeklyProgress)}%`;
-            document.getElementById('weeklyProgressBar').style.width = `${weeklyProgress}%`;
-            document.getElementById('weeklyDetails').textContent = 
-                `${thisWeekWorkouts.length} of ${weeklyGoal} workouts completed this week`;
-
-            const thisMonthStart = new Date();
-            thisMonthStart.setDate(1);
-            thisMonthStart.setHours(0, 0, 0, 0);
-            
-            const thisMonthWorkouts = workouts.filter(w => new Date(w.day) >= thisMonthStart);
-            const thisMonthTime = thisMonthWorkouts.reduce((sum, workout) => 
-                sum + (workout.exercises || []).reduce((exSum, ex) => exSum + (ex.duration || 0), 0), 0
-            );
-            const monthlyGoal = 1200; 
-            const monthlyProgress = Math.min((thisMonthTime / monthlyGoal) * 100, 100);
-            
-            document.getElementById('monthlyProgress').textContent = `${Math.round(monthlyProgress)}%`;
-            document.getElementById('monthlyProgressBar').style.width = `${monthlyProgress}%`;
-            document.getElementById('monthlyDetails').textContent = 
-                `${thisMonthTime} of ${monthlyGoal} minutes completed this month`;
-        }
-
-        function generateInsights() {
-            const insights = [];
-            const avgDuration = workouts.length > 0 ? 
-                workouts.reduce((sum, w) => sum + (w.exercises || []).reduce((s, e) => s + (e.duration || 0), 0), 0) / workouts.length : 0;
-            
-            const streak = calculateStreak();
-            if (streak > 3) {
-                insights.push({
-                    title: "Great Consistency!",
-                    description: `You're on a ${streak}-day workout streak. Keep it up!`
-                });
-            } else if (workouts.length > 5) {
-                insights.push({
-                    title: "Consistency Opportunity",
-                    description: "Try to maintain regular workout intervals for better results."
-                });
-            }
-
-            if (avgDuration > 45) {
-                insights.push({
-                    title: "Excellent Duration",
-                    description: `Your average workout is ${Math.round(avgDuration)} minutes. Great endurance!`
-                });
-            } else if (avgDuration > 0) {
-                insights.push({
-                    title: "Room for Growth",
-                    description: `Consider gradually increasing workout duration from ${Math.round(avgDuration)} minutes.`
-                });
-            }
-
-            const exerciseTypes = new Set();
-            workouts.forEach(w => (w.exercises || []).forEach(e => exerciseTypes.add(e.type || e.category || 'other')));
-            
-            if (exerciseTypes.size > 1) {
-                insights.push({
-                    title: "Great Variety",
-                    description: "You're mixing cardio and resistance training effectively."
-                });
-            } else if (exerciseTypes.size === 1) {
-                const type = Array.from(exerciseTypes)[0];
-                const otherType = type === 'cardio' ? 'resistance training' : 'cardio';
-                insights.push({
-                    title: "Add Variety",
-                    description: `Consider incorporating ${otherType} into your routine.`
-                });
-            }
-
-            if (insights.length === 0) {
-                insights.push(
-                    {
-                        title: "Start Your Journey",
-                        description: "Begin tracking workouts to get personalized insights."
-                    },
-                    {
-                        title: "Consistency is Key",
-                        description: "Regular exercise is more beneficial than intense but sporadic workouts."
-                    }
-                );
-            }
-
-            document.getElementById('insights').innerHTML = insights.map(insight => `
-                <div class="insight-item">
-                    <div class="insight-title">${insight.title}</div>
-                    <div class="insight-description">${insight.description}</div>
+            categoryChart.innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    ${categoryEntries.map(([category, count]) => {
+                        const percentage = Math.round((count / total) * 100);
+                        const color = colors[category] || colors.other;
+                        const displayName = category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        
+                        return `
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="
+                                    width: 12px;
+                                    height: 12px;
+                                    border-radius: 50%;
+                                    background: ${color};
+                                    flex-shrink: 0;
+                                "></div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                        <span style="font-weight: 500; color: #1e293b; font-size: 14px;">${displayName}</span>
+                                        <span style="font-weight: 600; color: #64748b; font-size: 12px;">${percentage}%</span>
+                                    </div>
+                                    <div style="
+                                        width: 100%;
+                                        height: 6px;
+                                        background: #f1f5f9;
+                                        border-radius: 3px;
+                                        overflow: hidden;
+                                    ">
+                                        <div style="
+                                            width: ${percentage}%;
+                                            height: 100%;
+                                            background: ${color};
+                                            border-radius: 3px;
+                                            transition: width 0.5s ease;
+                                        "></div>
+                                    </div>
+                                </div>
+                                <span style="
+                                    font-weight: 600;
+                                    color: #1e293b;
+                                    font-size: 14px;
+                                    min-width: 24px;
+                                    text-align: right;
+                                ">${count}</span>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
-            `).join('');
+            `;
+        }
+
+        function refreshStats() {
+            console.log('Manual refresh triggered');
+            retryCount = 0;
+            loadWorkoutStats();
+        }
+
+        function retryConnection() {
+            console.log('Manual retry triggered');
+            retryCount = 0;
+            loadWorkoutStats();
+        }
+
+        async function startPeriodicCheck() {
+            const isConnected = await checkDatabaseConnection();
+            
+            if (isConnected) {
+                clearInterval(connectionCheckInterval);
+                loadWorkoutStats();
+            } else {
+                connectionCheckInterval = setInterval(async () => {
+                    const connected = await checkDatabaseConnection();
+                    if (connected) {
+                        clearInterval(connectionCheckInterval);
+                        loadWorkoutStats();
+                    }
+                }, 10000);
+            }
         }
 
         window.addEventListener('storage', (e) => {
             if (e.key === 'workoutUpdated') {
+                console.log('Workout updated, refreshing stats...');
                 loadWorkoutStats();
             }
         });
 
-        window.addEventListener('resize', () => {
-            Object.values(charts).forEach(chart => {
-                if (chart) {
-                    chart.resize();
-                }
-            });
+        window.addEventListener('focus', () => {
+            console.log('Page focused, checking connection...');
+            loadWorkoutStats();
         });
 
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                console.log('Auto-refresh stats...');
+                loadWorkoutStats();
+            }
+        }, 60000);
+
         document.addEventListener('DOMContentLoaded', async () => {
-            console.log('Initializing FitTrack analytics page...');
+            console.log('Stats page initializing...');
             
             const user = checkAuth();
             if (!user) return;
             
             initializeUser(user);
-            initializeMobileMenu();
             
-            await loadWorkoutStats();
+            updateConnectionStatus('loading', 'Initializing...');
             
-            console.log('Analytics page initialization complete');
+            setTimeout(() => {
+                startPeriodicCheck();
+            }, 1000);
+        });
+
+        window.addEventListener('beforeunload', () => {
+            if (connectionCheckInterval) {
+                clearInterval(connectionCheckInterval);
+            }
+        });
+
+        window.addEventListener('online', () => {
+            console.log('Network back online, retrying...');
+            retryConnection();
+        });
+
+        window.addEventListener('offline', () => {
+            updateConnectionStatus('error', 'You are offline', false);
         });
     </script>
 </body>

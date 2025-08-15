@@ -55,10 +55,10 @@
             height: 80px;
             margin: 0 auto 24px;
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: url('/logo.png') no-repeat center center;
+            background-size: cover;
             border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: block;
             font-size: 32px;
         }
 
@@ -431,12 +431,14 @@
         body.menu-open {
             overflow: hidden;
         }
+
+
     </style>
 </head>
 <body>
     <div class="auth-container">
         <div class="auth-header">
-            <div class="brand-logo">TEST</div>
+            <div class="brand-logo"></div>
             <h1 class="auth-title">FitTrack</h1>
             <p class="auth-subtitle">Track your fitness journey with precision</p>
         </div>

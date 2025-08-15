@@ -39,7 +39,6 @@ const userSchema = new mongoose.Schema({
     isVerified: {
         type: Boolean,
         default: function() {
-            // Google users are automatically verified
             return this.isGoogleUser;
         }
     },
@@ -72,7 +71,6 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
-    // Account security fields
     loginAttempts: {
         type: Number,
         default: 0
@@ -81,7 +79,6 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
-    // Email verification attempts tracking
     verificationAttempts: {
         type: Number,
         default: 0
@@ -94,19 +91,16 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Indexes for better performance
 userSchema.index({ email: 1 });
 userSchema.index({ googleId: 1 });
 userSchema.index({ createdAt: -1 });
 userSchema.index({ verificationCode: 1 });
 userSchema.index({ verificationExpires: 1 });
 
-// Virtual for checking if account is locked
 userSchema.virtual('isLocked').get(function() {
     return !!(this.lockUntil && this.lockUntil > Date.now());
 });
 
-// Hash password before saving
 userSchema.pre("save", async function(next) {
     if (!this.isModified("password")) return next();
     
@@ -122,7 +116,6 @@ userSchema.pre("save", async function(next) {
     next();
 });
 
-// Compare password method
 userSchema.methods.comparePassword = async function(candidatePassword) {
     if (!this.password) {
         throw new Error("Password not set for this user");
@@ -135,18 +128,14 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
     }
 };
 
-// Update last login method
 userSchema.methods.updateLastLogin = function() {
     this.lastLogin = new Date();
-    // Reset login attempts on successful login
     this.loginAttempts = 0;
     this.lockUntil = undefined;
     return this.save();
 };
 
-// Increment login attempts
 userSchema.methods.incLoginAttempts = function() {
-    // If we have a previous lock that has expired, restart at 1
     if (this.lockUntil && this.lockUntil < Date.now()) {
         return this.update({
             $set: {
@@ -160,9 +149,8 @@ userSchema.methods.incLoginAttempts = function() {
     
     const updates = { $inc: { loginAttempts: 1 } };
     
-    // If we have hit max attempts and it's not locked yet, lock the account
     const maxAttempts = 5;
-    const lockTime = 2 * 60 * 60 * 1000; // 2 hours
+    const lockTime = 2 * 60 * 60 * 1000; 
     
     if (this.loginAttempts + 1 >= maxAttempts && !this.isLocked) {
         updates.$set = { lockUntil: Date.now() + lockTime };
@@ -171,14 +159,12 @@ userSchema.methods.incLoginAttempts = function() {
     return this.update(updates);
 };
 
-// Increment verification attempts
 userSchema.methods.incVerificationAttempts = function() {
     this.verificationAttempts += 1;
     this.lastVerificationAttempt = new Date();
     return this.save();
 };
 
-// Clean JSON output (remove sensitive fields)
 userSchema.methods.toJSON = function() {
     const userObject = this.toObject();
     delete userObject.password;
@@ -194,7 +180,6 @@ userSchema.methods.toJSON = function() {
     return userObject;
 };
 
-// Static methods
 userSchema.statics.findByEmail = function(email) {
     return this.findOne({ email: email.toLowerCase() });
 };
@@ -203,37 +188,33 @@ userSchema.statics.findByGoogleId = function(googleId) {
     return this.findOne({ googleId: googleId });
 };
 
-// Enhanced Google user creation
 userSchema.statics.createGoogleUser = async function(googleProfile) {
     const existingUser = await this.findByEmail(googleProfile.email);
     
     if (existingUser) {
         if (!existingUser.googleId) {
-            // Link Google account to existing email user
             existingUser.googleId = googleProfile.id;
             existingUser.isGoogleUser = true;
             existingUser.picture = googleProfile.picture || existingUser.picture;
-            existingUser.isVerified = true; // Auto-verify when linking Google
+            existingUser.isVerified = true; 
             await existingUser.save();
         }
         return existingUser;
     }
     
-    // Create new Google user (auto-verified)
     const newUser = new this({
         email: googleProfile.email,
         name: googleProfile.name,
         picture: googleProfile.picture,
         googleId: googleProfile.id,
         isGoogleUser: true,
-        isVerified: true, // Google users are auto-verified
+        isVerified: true, 
         loginMethod: "google"
     });
     
     return await newUser.save();
 };
 
-// Get user statistics
 userSchema.statics.getUserStats = async function() {
     const stats = await this.aggregate([
         {
@@ -295,7 +276,6 @@ userSchema.statics.getUserStats = async function() {
     };
 };
 
-// Clean up expired verification codes (can be run as a job)
 userSchema.statics.cleanupExpiredVerifications = async function() {
     const result = await this.updateMany(
         { 
@@ -314,7 +294,6 @@ userSchema.statics.cleanupExpiredVerifications = async function() {
     return result;
 };
 
-// Find users pending verification (for admin purposes)
 userSchema.statics.findPendingVerification = function() {
     return this.find({
         isVerified: false,
@@ -323,7 +302,6 @@ userSchema.statics.findPendingVerification = function() {
     }).select('email name createdAt verificationExpires');
 };
 
-// Validate email format (additional check)
 userSchema.statics.isValidEmail = function(email) {
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
     return emailRegex.test(email);

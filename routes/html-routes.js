@@ -1,28 +1,25 @@
 const path = require("path");
 
 module.exports = function(app) {
-    console.log("🌐 Setting up HTML routes...");
+    console.log("Setting up HTML routes...");
 
-    // Serve static files from public directory
-    console.log("📁 Static files served from:", path.join(__dirname, "..", "public"));
+    console.log("Static files served from:", path.join(__dirname, "..", "public"));
 
-    // Root route - redirect to login or serve index
     app.get("/", (req, res) => {
-        console.log("🏠 Root route accessed");
+        console.log("Root route accessed");
         res.sendFile(path.join(__dirname, "..", "public", "index.html"), (err) => {
             if (err) {
-                console.log("ℹ️ index.html not found, redirecting to login");
+                console.log("index.html not found, redirecting to login");
                 res.redirect("/login.html");
             }
         });
     });
 
-    // Login page
     app.get("/login", (req, res) => {
-        console.log("🔐 Login route (without .html) accessed");
+        console.log("Login route (without .html) accessed");
         res.sendFile(path.join(__dirname, "..", "public", "login.html"), (err) => {
             if (err) {
-                console.error("❌ login.html not found:", err.message);
+                console.error("login.html not found:", err.message);
                 res.status(404).send(`
                     <!DOCTYPE html>
                     <html>
@@ -41,7 +38,7 @@ module.exports = function(app) {
                     </head>
                     <body>
                         <div class="container">
-                            <h1>🏋️ FitTrack</h1>
+                            <h1>FitTrack</h1>
                             <div class="error">
                                 <h2>Login page not found</h2>
                                 <p>The login.html file is missing from the public directory.</p>
@@ -50,7 +47,7 @@ module.exports = function(app) {
                                 <h3>Quick Setup</h3>
                                 <p>Create a login.html file in your public directory with Google OAuth integration.</p>
                                 <button onclick="window.location.href='/auth/google'">
-                                    🔐 Login with Google
+                                    Login with Google
                                 </button>
                             </div>
                             <p><a href="/api/health">Check API Status</a></p>
@@ -62,13 +59,11 @@ module.exports = function(app) {
         });
     });
 
-    // Login page with .html extension
     app.get("/login.html", (req, res) => {
-        console.log("🔐 Login.html route accessed");
+        console.log("Login.html route accessed");
         res.sendFile(path.join(__dirname, "..", "public", "login.html"), (err) => {
             if (err) {
-                console.error("❌ login.html not found:", err.message);
-                // Serve a basic login page if the file doesn't exist
+                console.error("login.html not found:", err.message);
                 res.send(`
                     <!DOCTYPE html>
                     <html lang="en">
@@ -158,14 +153,14 @@ module.exports = function(app) {
                     </head>
                     <body>
                         <div class="login-container">
-                            <div class="logo">🏋️</div>
+                            <div class="logo"></div>
                             <h1>FitTrack</h1>
                             <p class="subtitle">Track your fitness journey</p>
                             
                             <div id="messages"></div>
                             
                             <a href="/auth/google" class="google-btn">
-                                <span>🔐</span>
+                                <span></span>
                                 Login with Google
                             </a>
                             
@@ -224,50 +219,46 @@ module.exports = function(app) {
         });
     });
 
-    // Exercise page
     app.get("/exercise", (req, res) => {
-        console.log("🏋️ Exercise route (without .html) accessed");
+        console.log("Exercise route (without .html) accessed");
         res.sendFile(path.join(__dirname, "..", "public", "excercise.html"), (err) => {
             if (err) {
-                console.error("❌ excercise.html not found:", err.message);
+                console.error("excercise.html not found:", err.message);
                 res.status(404).send("Exercise page not found. Please create excercise.html in the public directory.");
             }
         });
     });
 
     app.get("/excercise.html", (req, res) => {
-        console.log("🏋️ excercise.html route accessed");
+        console.log("excercise.html route accessed");
         res.sendFile(path.join(__dirname, "..", "public", "excercise.html"), (err) => {
             if (err) {
-                console.error("❌ excercise.html not found:", err.message);
+                console.error("excercise.html not found:", err.message);
                 res.status(404).send("Exercise page not found. Please create excercise.html in the public directory.");
             }
         });
     });
 
-    // Dashboard/Stats page
     app.get(["/dashboard", "/dashboard.html"], (req, res) => {
-        console.log("📊 Dashboard route accessed");
+        console.log("Dashboard route accessed");
         res.sendFile(path.join(__dirname, "..", "public", "dashboard.html"), (err) => {
             if (err) {
-                console.log("ℹ️ dashboard.html not found, redirecting to exercise page");
+                console.log("dashboard.html not found, redirecting to exercise page");
                 res.redirect("/excercise.html");
             }
         });
     });
 
-    // Workouts page
     app.get(["/workouts", "/workouts.html"], (req, res) => {
-        console.log("📋 Workouts route accessed");
+        console.log("Workouts route accessed");
         res.sendFile(path.join(__dirname, "..", "public", "workouts.html"), (err) => {
             if (err) {
-                console.log("ℹ️ workouts.html not found, redirecting to exercise page");
+                console.log("workouts.html not found, redirecting to exercise page");
                 res.redirect("/excercise.html");
             }
         });
     });
 
-    // 404 page
     app.get("/404.html", (req, res) => {
         res.status(404).sendFile(path.join(__dirname, "..", "public", "404.html"), (err) => {
             if (err) {
@@ -303,8 +294,8 @@ module.exports = function(app) {
         });
     });
 
-    console.log("✅ HTML routes initialized");
-    console.log("🌐 Available HTML routes:");
+    console.log("HTML routes initialized");
+    console.log("Available HTML routes:");
     console.log("   GET  /              - Home page (redirects to login if no index.html)");
     console.log("   GET  /login         - Login page (without extension)");
     console.log("   GET  /login.html    - Login page (with extension)");

@@ -131,27 +131,25 @@ const exerciseSchema = new mongoose.Schema({
     timestamps: false
 });
 
-// Enhanced workout schema with user association
 const workoutSchema = new mongoose.Schema({
-    // USER ASSOCIATION - THIS IS KEY!
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: [true, "User ID is required"],
-        index: true // Index for faster queries
+        index: true 
     },
     userEmail: {
         type: String,
         required: [true, "User email is required"],
         lowercase: true,
-        index: true // Additional index for email-based queries
+        index: true 
     },
     
     day: {
         type: Date,
         required: [true, "Workout date is required"],
         default: Date.now,
-        index: true // Index for date-based queries
+        index: true 
     },
     exercises: {
         type: [exerciseSchema],
@@ -204,7 +202,6 @@ const workoutSchema = new mongoose.Schema({
         trim: true
     },
     
-    // Goals and achievements
     goals: [{
         type: String,
         maxlength: [200, "Goal cannot exceed 200 characters"]
@@ -225,13 +222,11 @@ const workoutSchema = new mongoose.Schema({
     toObject: { virtuals: true }
 });
 
-// Compound indexes for efficient user-specific queries
-workoutSchema.index({ userId: 1, day: -1 }); // Most common query pattern
-workoutSchema.index({ userEmail: 1, day: -1 }); // Email-based queries
-workoutSchema.index({ userId: 1, workoutType: 1 }); // Filter by user and workout type
-workoutSchema.index({ userId: 1, 'exercises.category': 1 }); // Filter by user and exercise category
+workoutSchema.index({ userId: 1, day: -1 }); 
+workoutSchema.index({ userEmail: 1, day: -1 }); 
+workoutSchema.index({ userId: 1, workoutType: 1 }); 
+workoutSchema.index({ userId: 1, 'exercises.category': 1 }); 
 
-// Virtual fields (same as before)
 workoutSchema.virtual('totalDuration').get(function() {
     return this.exercises.reduce((total, exercise) => total + (exercise.duration || 0), 0);
 });
@@ -257,7 +252,6 @@ workoutSchema.virtual('totalDistance').get(function() {
     return this.exercises.reduce((total, exercise) => total + (exercise.distance || 0), 0);
 });
 
-// Enhanced static methods for user-specific queries
 workoutSchema.statics.findByUser = function(userId) {
     return this.find({ userId }).sort({ day: -1 });
 };
@@ -358,9 +352,7 @@ workoutSchema.statics.getUserCategoryStats = async function(userId) {
     ]);
 };
 
-// Pre-save middleware to ensure user data consistency
 workoutSchema.pre('save', async function(next) {
-    // Auto-generate title if not provided
     if (!this.title) {
         const date = new Date(this.day).toLocaleDateString();
         const primaryCategory = this.exercises.length > 0 ? 
@@ -368,7 +360,6 @@ workoutSchema.pre('save', async function(next) {
         this.title = `${primaryCategory.charAt(0).toUpperCase() + primaryCategory.slice(1)} - ${date}`;
     }
     
-    // Auto-determine workout type if not set
     if (!this.workoutType || this.workoutType === 'mixed') {
         const categories = new Set(this.exercises.map(ex => ex.category));
         

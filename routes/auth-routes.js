@@ -23,7 +23,7 @@ const createEmailTransporter = () => {
         return null;
     }
     
-    return nodemailer.createTransporter({
+    return nodemailer.createTransport({
         host: 'smtp.gmail.com',
         port: 587,
         secure: false,
@@ -747,7 +747,7 @@ router.post("/api/auth/forgot-password", ensureDbConnection, async (req, res) =>
                                 <p>We received a request to reset your password for your FitTrack account.</p>
                                 
                                 <p>Click the button below to reset your password:</p>
-                                <div style="text-align: center;">
+                                <div style="text-align: center; color:white">
                                     <a href="${resetUrl}" class="button">Reset Password</a>
                                 </div>
                                 

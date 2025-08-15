@@ -3,7 +3,6 @@ const Workout = require("../models/Workout");
 const User = require("../models/User");
 const mongoose = require("mongoose");
 
-// Updated exercise type validation lists
 const VALID_CATEGORIES = ["cardio", "resistance", "flexibility", "balance", "sports_specific", "recovery"];
 const VALID_TYPES = [
     "cardio", "resistance", "flexibility", "balance", "sports_specific", "recovery",
@@ -15,71 +14,61 @@ const VALID_TYPES = [
     "active_recovery", "mobility_work", "meditation"
 ];
 
-// FIXED: Enhanced middleware to extract user information from request
 const extractUserInfo = async (req, res, next) => {
     try {
         let userId = null;
         let userEmail = null;
         let user = null;
         
-        // Method 1: From request body (when creating/updating workouts)
         if (req.body && req.body.userEmail) {
             userEmail = req.body.userEmail;
         }
         
-        // Method 2: From query parameters
         if (!userEmail && req.query && req.query.userEmail) {
             userEmail = req.query.userEmail;
         }
         
-        // Method 3: From headers (for frontend API calls) - MOST COMMON
         if (!userEmail && req.headers) {
             userEmail = req.headers['x-user-email'];
-            // IMPORTANT: NEVER use x-user-id directly as it might be Google ID
         }
         
-        // If we have email, get the user from database to get correct MongoDB ObjectId
         if (userEmail) {
             try {
                 user = await User.findByEmail(userEmail);
                 if (user) {
-                    userId = user._id; // This is the correct MongoDB ObjectId
+                    userId = user._id; 
                     userEmail = user.email.toLowerCase();
-                    console.log(`✅ User lookup successful: ${userEmail} -> MongoDB ObjectId: ${userId}`);
+                    console.log(`User lookup successful: ${userEmail} -> MongoDB ObjectId: ${userId}`);
                 } else {
-                    console.warn(`❌ User not found for email: ${userEmail}`);
+                    console.warn(`User not found for email: ${userEmail}`);
                 }
             } catch (dbError) {
-                console.error('❌ Database error during user lookup:', dbError);
+                console.error('Database error during user lookup:', dbError);
             }
         }
         
-        // Attach user info to request for use in route handlers
         req.userInfo = {
-            userId: userId, // MongoDB ObjectId (never Google ID)
+            userId: userId, 
             userEmail: userEmail,
-            user: user // Full user object if needed
+            user: user 
         };
         
         if (userId) {
-            console.log(`👤 User info extracted: ${req.userInfo.userEmail} (MongoDB ObjectId: ${req.userInfo.userId})`);
+            console.log(`User info extracted: ${req.userInfo.userEmail} (MongoDB ObjectId: ${req.userInfo.userId})`);
         } else {
-            console.log(`👤 No valid user info extracted from request`);
+            console.log(`No valid user info extracted from request`);
         }
         
         next();
     } catch (error) {
-        console.error("❌ Error extracting user info:", error);
-        // Continue without user info - let requireAuth handle authentication
+        console.error("Error extracting user info:", error);
         req.userInfo = { userId: null, userEmail: null, user: null };
         next();
     }
 };
 
-// Apply user extraction middleware to all routes
 router.use(extractUserInfo);
 
-// Helper function to validate user authentication for protected routes
 const requireAuth = (req, res, next) => {
     if (!req.userInfo.userId || !req.userInfo.userEmail) {
         return res.status(401).json({
@@ -89,9 +78,8 @@ const requireAuth = (req, res, next) => {
         });
     }
     
-    // Additional validation: ensure userId is a valid MongoDB ObjectId
     if (!mongoose.Types.ObjectId.isValid(req.userInfo.userId)) {
-        console.error(`❌ Invalid MongoDB ObjectId: ${req.userInfo.userId}`);
+        console.error(`Invalid MongoDB ObjectId: ${req.userInfo.userId}`);
         return res.status(400).json({
             error: "Invalid user ID format",
             details: "User ID must be a valid MongoDB ObjectId",
@@ -102,15 +90,13 @@ const requireAuth = (req, res, next) => {
     next();
 };
 
-// GET all workouts for authenticated user
 router.get("/api/workouts", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`📋 Fetching workouts for user: ${userEmail} (ObjectId: ${userId})`);
+        console.log(`Fetching workouts for user: ${userEmail} (ObjectId: ${userId})`);
         
-        // Support filtering by category, type, or date range (user-specific)
         const { category, type, startDate, endDate, limit } = req.query;
-        let query = { userId: userId }; // Always filter by user - userId is MongoDB ObjectId
+        let query = { userId: userId }; 
         
         if (category) {
             query['exercises.category'] = category;
@@ -130,9 +116,8 @@ router.get("/api/workouts", requireAuth, async (req, res) => {
             .sort({ day: -1 })
             .limit(limit ? parseInt(limit) : 0);
             
-        console.log(`✅ Found ${workouts.length} workouts for user ${userEmail}`);
+        console.log(`Found ${workouts.length} workouts for user ${userEmail}`);
         
-        // Include virtual fields in response
         const workoutsWithVirtuals = workouts.map(workout => ({
             _id: workout._id,
             userId: workout.userId,
@@ -152,7 +137,7 @@ router.get("/api/workouts", requireAuth, async (req, res) => {
             personalRecords: workout.personalRecords,
             createdAt: workout.createdAt,
             updatedAt: workout.updatedAt,
-            // Virtual fields
+
             totalDuration: workout.totalDuration,
             exerciseCount: workout.exerciseCount,
             totalCalories: workout.totalCalories,
@@ -165,7 +150,7 @@ router.get("/api/workouts", requireAuth, async (req, res) => {
         
         res.json(workoutsWithVirtuals);
     } catch (err) {
-        console.error("❌ Error fetching user workouts:", err);
+        console.error("Error fetching user workouts:", err);
         res.status(500).json({ 
             error: "Failed to fetch workouts", 
             details: err.message 
@@ -173,17 +158,15 @@ router.get("/api/workouts", requireAuth, async (req, res) => {
     }
 });
 
-// POST new workout for authenticated user
 router.post("/api/workouts", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`📝 Creating new workout for user: ${userEmail} (ObjectId: ${userId})`);
+        console.log(`Creating new workout for user: ${userEmail} (ObjectId: ${userId})`);
         console.log("Workout data:", JSON.stringify(req.body, null, 2));
         
-        // Validate and prepare workout data
         const workoutData = {
-            userId: userId, // MongoDB ObjectId
-            userEmail: userEmail, // Store email for quick queries
+            userId: userId, 
+            userEmail: userEmail, 
             day: req.body.day || new Date().toISOString(),
             exercises: Array.isArray(req.body.exercises) ? req.body.exercises : [],
             title: req.body.title || undefined,
@@ -199,7 +182,6 @@ router.post("/api/workouts", requireAuth, async (req, res) => {
             personalRecords: req.body.personalRecords || []
         };
         
-        // Validate exercises if provided
         if (workoutData.exercises.length > 0) {
             const validationErrors = [];
             workoutData.exercises.forEach((exercise, index) => {
@@ -210,7 +192,7 @@ router.post("/api/workouts", requireAuth, async (req, res) => {
             });
             
             if (validationErrors.length > 0) {
-                console.error("❌ Workout validation failed:", validationErrors);
+                console.error("Workout validation failed:", validationErrors);
                 return res.status(400).json({
                     error: "Exercise validation failed",
                     details: validationErrors.join('; ')
@@ -219,9 +201,8 @@ router.post("/api/workouts", requireAuth, async (req, res) => {
         }
         
         const workout = await Workout.create(workoutData);
-        console.log(`✅ Workout created successfully for user ${userEmail}:`, workout._id);
+        console.log(`Workout created successfully for user ${userEmail}:`, workout._id);
         
-        // Return workout with virtual fields
         const responseWorkout = {
             _id: workout._id,
             userId: workout.userId,
@@ -248,7 +229,7 @@ router.post("/api/workouts", requireAuth, async (req, res) => {
         
         res.status(201).json(responseWorkout);
     } catch (err) {
-        console.error("❌ Error creating workout:", err);
+        console.error("Error creating workout:", err);
         
         if (err.name === 'ValidationError') {
             return res.status(400).json({ 
@@ -264,13 +245,11 @@ router.post("/api/workouts", requireAuth, async (req, res) => {
     }
 });
 
-// GET single workout by ID (with user ownership verification)
 router.get("/api/workouts/:id", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`📋 Fetching workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
+        console.log(`Fetching workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
         
-        // Validate ObjectId format for workout ID
         if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({ 
                 error: "Invalid workout ID format",
@@ -278,21 +257,20 @@ router.get("/api/workouts/:id", requireAuth, async (req, res) => {
             });
         }
         
-        // Find workout and verify ownership
         const workout = await Workout.findOne({
             _id: req.params.id,
-            userId: userId // Ensure user owns this workout - userId is MongoDB ObjectId
+            userId: userId 
         });
         
         if (!workout) {
-            console.log(`❌ Workout not found or not owned by user: ${req.params.id}`);
+            console.log(`Workout not found or not owned by user: ${req.params.id}`);
             return res.status(404).json({ 
                 error: "Workout not found",
                 details: `No workout found with ID: ${req.params.id} for your account`
             });
         }
         
-        console.log(`✅ Workout found for user ${userEmail}:`, workout._id);
+        console.log(`Workout found for user ${userEmail}:`, workout._id);
         res.json({
             _id: workout._id,
             userId: workout.userId,
@@ -312,7 +290,7 @@ router.get("/api/workouts/:id", requireAuth, async (req, res) => {
             personalRecords: workout.personalRecords,
             createdAt: workout.createdAt,
             updatedAt: workout.updatedAt,
-            // Virtual fields
+            
             totalDuration: workout.totalDuration,
             exerciseCount: workout.exerciseCount,
             totalCalories: workout.totalCalories,
@@ -323,7 +301,7 @@ router.get("/api/workouts/:id", requireAuth, async (req, res) => {
             averageIntensity: workout.averageIntensity
         });
     } catch (err) {
-        console.error("❌ Error fetching workout:", err);
+        console.error("Error fetching workout:", err);
         res.status(500).json({ 
             error: "Server error while fetching workout", 
             details: err.message 
@@ -331,13 +309,11 @@ router.get("/api/workouts/:id", requireAuth, async (req, res) => {
     }
 });
 
-// PUT update workout by ID
 router.put("/api/workouts/:id", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`🔄 Updating workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
+        console.log(`Updating workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
         
-        // Validate ObjectId format
         if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({ 
                 error: "Invalid workout ID format",
@@ -345,13 +321,11 @@ router.put("/api/workouts/:id", requireAuth, async (req, res) => {
             });
         }
         
-        // Prepare update data (remove sensitive fields)
         const updateData = { ...req.body };
-        delete updateData.userId; // Don't allow changing userId
-        delete updateData.userEmail; // Don't allow changing userEmail
+        delete updateData.userId; 
+        delete updateData.userEmail; 
         updateData.updatedAt = new Date();
         
-        // Validate exercises if provided
         if (updateData.exercises && Array.isArray(updateData.exercises)) {
             const validationErrors = [];
             updateData.exercises.forEach((exercise, index) => {
@@ -362,7 +336,7 @@ router.put("/api/workouts/:id", requireAuth, async (req, res) => {
             });
             
             if (validationErrors.length > 0) {
-                console.error("❌ Exercise validation failed:", validationErrors);
+                console.error("Exercise validation failed:", validationErrors);
                 return res.status(400).json({
                     error: "Exercise validation failed",
                     details: validationErrors.join('; ')
@@ -370,11 +344,10 @@ router.put("/api/workouts/:id", requireAuth, async (req, res) => {
             }
         }
         
-        // Update workout and verify ownership
         const workout = await Workout.findOneAndUpdate(
             { 
                 _id: req.params.id,
-                userId: userId // Verify ownership
+                userId: userId 
             },
             updateData,
             { new: true, runValidators: true }
@@ -387,9 +360,8 @@ router.put("/api/workouts/:id", requireAuth, async (req, res) => {
             });
         }
         
-        console.log(`✅ Workout updated successfully for user ${userEmail}:`, workout._id);
+        console.log(`Workout updated successfully for user ${userEmail}:`, workout._id);
         
-        // Return updated workout with virtual fields
         res.json({
             _id: workout._id,
             userId: workout.userId,
@@ -414,7 +386,7 @@ router.put("/api/workouts/:id", requireAuth, async (req, res) => {
             categoryBreakdown: workout.categoryBreakdown
         });
     } catch (err) {
-        console.error("❌ Error updating workout:", err);
+        console.error("Error updating workout:", err);
         
         if (err.name === 'ValidationError') {
             return res.status(400).json({ 
@@ -430,13 +402,11 @@ router.put("/api/workouts/:id", requireAuth, async (req, res) => {
     }
 });
 
-// DELETE workout by ID
 router.delete("/api/workouts/:id", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`🗑️ Deleting workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
+        console.log(`Deleting workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
         
-        // Validate ObjectId format
         if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({ 
                 error: "Invalid workout ID format",
@@ -444,10 +414,9 @@ router.delete("/api/workouts/:id", requireAuth, async (req, res) => {
             });
         }
         
-        // Delete workout and verify ownership
         const workout = await Workout.findOneAndDelete({
             _id: req.params.id,
-            userId: userId // Verify ownership
+            userId: userId 
         });
         
         if (!workout) {
@@ -457,7 +426,7 @@ router.delete("/api/workouts/:id", requireAuth, async (req, res) => {
             });
         }
         
-        console.log(`✅ Workout deleted successfully for user ${userEmail}:`, workout._id);
+        console.log(`Workout deleted successfully for user ${userEmail}:`, workout._id);
         res.json({ 
             message: "Workout deleted successfully",
             deletedWorkout: {
@@ -467,7 +436,7 @@ router.delete("/api/workouts/:id", requireAuth, async (req, res) => {
             }
         });
     } catch (err) {
-        console.error("❌ Error deleting workout:", err);
+        console.error("Error deleting workout:", err);
         res.status(500).json({ 
             error: "Failed to delete workout", 
             details: err.message 
@@ -475,14 +444,12 @@ router.delete("/api/workouts/:id", requireAuth, async (req, res) => {
     }
 });
 
-// POST add exercise to user's workout
 router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`🏋️ Adding exercise to workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
+        console.log(`Adding exercise to workout ${req.params.id} for user: ${userEmail} (ObjectId: ${userId})`);
         console.log("Exercise data received:", JSON.stringify(req.body, null, 2));
         
-        // Validate ObjectId format
         if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
             return res.status(400).json({ 
                 error: "Invalid workout ID format",
@@ -490,10 +457,9 @@ router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
             });
         }
         
-        // Check if workout exists and user owns it
         const existingWorkout = await Workout.findOne({
             _id: req.params.id,
-            userId: userId // Verify ownership
+            userId: userId 
         });
         
         if (!existingWorkout) {
@@ -503,7 +469,6 @@ router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
             });
         }
         
-        // Validate exercise data
         const exerciseData = { ...req.body };
         console.log("Validating exercise data:", exerciseData);
         
@@ -518,7 +483,6 @@ router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
             });
         }
         
-        // Clean and prepare exercise data
         const cleanExercise = {
             name: exerciseData.name.trim(),
             type: exerciseData.type,
@@ -531,7 +495,6 @@ router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
             performanceRating: exerciseData.performanceRating ? parseInt(exerciseData.performanceRating) : undefined
         };
         
-        // Add category-specific fields
         if (exerciseData.category === 'cardio') {
             if (exerciseData.distance !== undefined) cleanExercise.distance = parseFloat(exerciseData.distance);
             if (exerciseData.caloriesBurned) cleanExercise.caloriesBurned = parseInt(exerciseData.caloriesBurned);
@@ -549,11 +512,10 @@ router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
         
         console.log("Clean exercise data to save:", JSON.stringify(cleanExercise, null, 2));
         
-        // Add exercise to workout (ensuring user ownership)
         const workout = await Workout.findOneAndUpdate(
             { 
                 _id: req.params.id,
-                userId: userId // Double-check ownership
+                userId: userId 
             },
             { 
                 $push: { exercises: cleanExercise },
@@ -569,10 +531,9 @@ router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
             });
         }
         
-        console.log(`✅ Exercise added successfully to workout for user ${userEmail}:`, workout._id);
+        console.log(`Exercise added successfully to workout for user ${userEmail}:`, workout._id);
         console.log(`Total exercises: ${workout.exercises.length}, Total duration: ${workout.totalDuration || 0}`);
         
-        // Return updated workout with virtual fields
         res.json({
             _id: workout._id,
             userId: workout.userId,
@@ -598,7 +559,7 @@ router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
             intensityBreakdown: workout.intensityBreakdown
         });
     } catch (err) {
-        console.error("❌ Error adding exercise:", err);
+        console.error("Error adding exercise:", err);
         
         if (err.name === 'ValidationError') {
             return res.status(400).json({ 
@@ -621,16 +582,15 @@ router.post("/api/workouts/:id/exercises", requireAuth, async (req, res) => {
     }
 });
 
-// GET workout statistics for user
 router.get("/api/workouts/stats/summary", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
-        console.log(`📊 Fetching workout stats for user: ${userEmail} (ObjectId: ${userId})`);
+        console.log(`Fetching workout stats for user: ${userEmail} (ObjectId: ${userId})`);
         
         const stats = await Workout.getUserWorkoutStats(userId);
         const categoryStats = await Workout.getUserCategoryStats(userId);
         
-        console.log(`✅ Stats fetched for user ${userEmail}`);
+        console.log(`Stats fetched for user ${userEmail}`);
         res.json({
             summary: stats,
             categoryBreakdown: categoryStats,
@@ -638,7 +598,7 @@ router.get("/api/workouts/stats/summary", requireAuth, async (req, res) => {
             userEmail: userEmail
         });
     } catch (err) {
-        console.error("❌ Error fetching workout stats:", err);
+        console.error("Error fetching workout stats:", err);
         res.status(500).json({ 
             error: "Failed to fetch workout statistics", 
             details: err.message 
@@ -646,13 +606,12 @@ router.get("/api/workouts/stats/summary", requireAuth, async (req, res) => {
     }
 });
 
-// GET popular exercises for user
 router.get("/api/workouts/stats/popular-exercises", requireAuth, async (req, res) => {
     try {
         const { userId, userEmail } = req.userInfo;
         const { limit = 10, category, type } = req.query;
         
-        console.log(`🏆 Fetching popular exercises for user: ${userEmail} (ObjectId: ${userId})`);
+        console.log(`Fetching popular exercises for user: ${userEmail} (ObjectId: ${userId})`);
         
         let matchStage = { userId: userId };
         if (category) matchStage['exercises.category'] = category;
@@ -704,10 +663,10 @@ router.get("/api/workouts/stats/popular-exercises", requireAuth, async (req, res
             }
         ]);
         
-        console.log(`✅ Found ${popularExercises.length} popular exercises for user ${userEmail}`);
+        console.log(`Found ${popularExercises.length} popular exercises for user ${userEmail}`);
         res.json(popularExercises);
     } catch (err) {
-        console.error("❌ Error fetching popular exercises:", err);
+        console.error("Error fetching popular exercises:", err);
         res.status(500).json({ 
             error: "Failed to fetch popular exercises", 
             details: err.message 
@@ -715,11 +674,9 @@ router.get("/api/workouts/stats/popular-exercises", requireAuth, async (req, res
     }
 });
 
-// Helper function to validate exercise data
 function validateExerciseData(exerciseData) {
     const errors = [];
     
-    // Required fields
     if (!exerciseData.name || !exerciseData.name.trim()) {
         errors.push("Exercise name is required");
     }
@@ -732,12 +689,10 @@ function validateExerciseData(exerciseData) {
         errors.push("Duration must be greater than 0");
     }
     
-    // Auto-set category if not provided
     if (!exerciseData.category) {
         exerciseData.category = getExerciseCategory(exerciseData.type);
     }
     
-    // Validate category
     if (!VALID_CATEGORIES.includes(exerciseData.category)) {
         errors.push(`Valid exercise category is required. Received: "${exerciseData.category}". Valid categories: ${VALID_CATEGORIES.join(', ')}`);
     }
@@ -745,7 +700,6 @@ function validateExerciseData(exerciseData) {
     return errors;
 }
 
-// Helper function to map exercise type to category
 function getExerciseCategory(type) {
     const typeToCategory = {
         'cardio': 'cardio',
@@ -783,12 +737,10 @@ function getExerciseCategory(type) {
     return typeToCategory[type] || 'resistance';
 }
 
-// Health check endpoint with enhanced information
 router.get("/api/health", async (req, res) => {
     try {
-        console.log("🏥 Performing enhanced health check...");
-        
-        // Test MongoDB connection
+        console.log("Performing enhanced health check...");
+    
         const workoutCount = await Workout.countDocuments();
         const userCount = await User.countDocuments();
         
@@ -815,10 +767,10 @@ router.get("/api/health", async (req, res) => {
             }
         };
         
-        console.log("✅ Health check completed successfully");
+        console.log("Health check completed successfully");
         res.json(healthData);
     } catch (err) {
-        console.error("❌ Health check failed:", err);
+        console.error("Health check failed:", err);
         res.status(500).json({
             status: "unhealthy",
             mongodb: "disconnected",
@@ -828,7 +780,6 @@ router.get("/api/health", async (req, res) => {
     }
 });
 
-// Debug endpoint for development (remove in production)
 router.get("/api/debug/user-info", (req, res) => {
     if (process.env.NODE_ENV === 'production') {
         return res.status(404).json({ error: "Not found" });
@@ -838,7 +789,7 @@ router.get("/api/debug/user-info", (req, res) => {
         userInfo: req.userInfo,
         headers: {
             'x-user-email': req.headers['x-user-email'],
-            'x-user-id': req.headers['x-user-id'] // This should NOT be used
+            'x-user-id': req.headers['x-user-id'] 
         },
         body: req.body,
         query: req.query
@@ -847,10 +798,10 @@ router.get("/api/debug/user-info", (req, res) => {
 
 module.exports = (app) => {
     app.use(router);
-    console.log("🔌 FIXED: User-specific API routes initialized successfully");
-    console.log("🔐 All workout operations now require user authentication");
-    console.log("🎯 Users can only access their own workout data");
-    console.log("✅ Enhanced security with ownership verification on all operations");
-    console.log("🔧 FIXED: Google ID to MongoDB ObjectId conversion via email lookup");
-    console.log("📊 Added workout statistics and analytics endpoints");
+    console.log("FIXED: User-specific API routes initialized successfully");
+    console.log("All workout operations now require user authentication");
+    console.log("Users can only access their own workout data");
+    console.log("Enhanced security with ownership verification on all operations");
+    console.log("FIXED: Google ID to MongoDB ObjectId conversion via email lookup");
+    console.log("Added workout statistics and analytics endpoints");
 };
